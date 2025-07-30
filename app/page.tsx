@@ -172,8 +172,7 @@ export default function FoxBuiltWebsite() {
             from_name: formData.name,
             from_email: formData.email,
             phone: formData.phone,
-            message: formData.message,
-            to_email: 'khabefox@gmail.com'
+            message: formData.message
           })
           
           console.log('Email sent successfully:', response)
