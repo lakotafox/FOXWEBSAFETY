@@ -7,6 +7,64 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { getProducts, saveProducts, defaultProducts } from "@/lib/products-data"
 
+// DVD Bouncing emoji component
+const BouncingEmoji = ({ emoji, delay = 0 }: { emoji: string; delay?: number }) => {
+  const [position, setPosition] = useState({ x: 50, y: 50 })
+  const [velocity, setVelocity] = useState({ x: 0.3, y: 0.3 })
+  const [isInitialized, setIsInitialized] = useState(false)
+
+  useEffect(() => {
+    // Initialize with random values after mount to avoid hydration issues
+    setPosition({ x: Math.random() * 80, y: Math.random() * 80 })
+    setVelocity({ 
+      x: (Math.random() - 0.5) * 0.5, 
+      y: (Math.random() - 0.5) * 0.5 
+    })
+    setIsInitialized(true)
+  }, [])
+
+  useEffect(() => {
+    if (!isInitialized) return
+
+    const interval = setInterval(() => {
+      setPosition(prev => {
+        let newX = prev.x + velocity.x
+        let newY = prev.y + velocity.y
+        let newVelX = velocity.x
+        let newVelY = velocity.y
+
+        // Bounce off edges
+        if (newX <= 0 || newX >= 90) {
+          newVelX = -velocity.x
+          newX = newX <= 0 ? 0 : 90
+        }
+        if (newY <= 0 || newY >= 90) {
+          newVelY = -velocity.y
+          newY = newY <= 0 ? 0 : 90
+        }
+
+        setVelocity({ x: newVelX, y: newVelY })
+        return { x: newX, y: newY }
+      })
+    }, 50)
+
+    return () => clearInterval(interval)
+  }, [velocity, isInitialized])
+
+  return (
+    <div 
+      className="absolute text-6xl transition-all duration-50"
+      style={{ 
+        left: `${position.x}%`, 
+        top: `${position.y}%`,
+        animationDelay: `${delay}s`
+      }}
+    >
+      {emoji}
+    </div>
+  )
+}
+
 export default function AdminEditor() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [password, setPassword] = useState("")
@@ -17,9 +75,12 @@ export default function AdminEditor() {
   const [featuredProducts, setFeaturedProducts] = useState(getProducts())
   const [editingId, setEditingId] = useState<number | null>(null)
   const [saveMessage, setSaveMessage] = useState("")
-  const [isEditMode, setIsEditMode] = useState(false)
+  const [isEditMode, setIsEditMode] = useState(true)
   const [showGalleryEditor, setShowGalleryEditor] = useState(false)
   const [showPasswordScreen, setShowPasswordScreen] = useState(false)
+  const [showVersionModal, setShowVersionModal] = useState(false)
+  const [versionAction, setVersionAction] = useState<'save' | 'load' | 'delete'>('save')
+  const [showPublishConfirm, setShowPublishConfirm] = useState(false)
 
   // Gallery images
   const defaultGalleryImages = [
@@ -31,13 +92,16 @@ export default function AdminEditor() {
     "/images/reception tan.jpg",
   ]
   const [galleryImages, setGalleryImages] = useState(defaultGalleryImages)
+  const [pendingGalleryImages, setPendingGalleryImages] = useState(defaultGalleryImages)
   
-  // Load saved gallery images on mount
+  // Load saved data on mount
   useEffect(() => {
     const savedGallery = localStorage.getItem('foxbuilt-gallery')
     if (savedGallery) {
       try {
-        setGalleryImages(JSON.parse(savedGallery))
+        const images = JSON.parse(savedGallery)
+        setGalleryImages(images)
+        setPendingGalleryImages(images)
       } catch (e) {
         console.error('Error loading gallery images:', e)
       }
@@ -59,14 +123,14 @@ export default function AdminEditor() {
       setCurrentSlide((prev) => (prev + 1) % galleryImages.length)
     }, 4000)
     return () => clearInterval(timer)
-  }, [galleryImages.length])
+  }, [pendingGalleryImages.length])
 
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % galleryImages.length)
+    setCurrentSlide((prev) => (prev + 1) % pendingGalleryImages.length)
   }
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + galleryImages.length) % galleryImages.length)
+    setCurrentSlide((prev) => (prev - 1 + pendingGalleryImages.length) % pendingGalleryImages.length)
   }
 
   // Authentication
@@ -74,6 +138,8 @@ export default function AdminEditor() {
     e.preventDefault()
     if (password === "foxbuilt2025") {
       setIsAuthenticated(true)
+    } else if (password === "goof") {
+      window.location.href = '/games'
     } else {
       alert("Incorrect password")
     }
@@ -102,9 +168,9 @@ export default function AdminEditor() {
   const handleGalleryImageUpload = (index: number, file: File) => {
     const reader = new FileReader()
     reader.onload = (e) => {
-      const newImages = [...galleryImages]
+      const newImages = [...pendingGalleryImages]
       newImages[index] = e.target?.result as string
-      setGalleryImages(newImages)
+      setPendingGalleryImages(newImages)
     }
     reader.readAsDataURL(file)
   }
@@ -114,8 +180,10 @@ export default function AdminEditor() {
     saveProducts(featuredProducts)
     // Save gallery images
     if (typeof window !== 'undefined') {
-      localStorage.setItem('foxbuilt-gallery', JSON.stringify(galleryImages))
+      localStorage.setItem('foxbuilt-gallery', JSON.stringify(pendingGalleryImages))
     }
+    // Update the displayed gallery images to match pending
+    setGalleryImages(pendingGalleryImages)
     setSaveMessage("✅ Changes saved successfully! The website has been updated.")
     
     // Trigger storage event for main page
@@ -123,7 +191,57 @@ export default function AdminEditor() {
     
     setTimeout(() => {
       setSaveMessage("")
-    }, 3000)
+      setShowPublishConfirm(true)
+    }, 2000)
+  }
+
+  // Save to version slot
+  const saveToVersion = (version: string) => {
+    const versionData = {
+      products: featuredProducts,
+      gallery: pendingGalleryImages,
+      savedAt: new Date().toISOString()
+    }
+    localStorage.setItem(`foxbuilt-version-${version}`, JSON.stringify(versionData))
+    setSaveMessage(`✅ Saved to ${version}!`)
+    setShowVersionModal(false)
+    setTimeout(() => setSaveMessage(""), 3000)
+  }
+
+  // Load from version slot
+  const loadFromVersion = (version: string) => {
+    const versionData = localStorage.getItem(`foxbuilt-version-${version}`)
+    if (versionData) {
+      const parsed = JSON.parse(versionData)
+      setFeaturedProducts(parsed.products)
+      setGalleryImages(parsed.gallery)
+      setPendingGalleryImages(parsed.gallery)
+      saveProducts(parsed.products)
+      localStorage.setItem('foxbuilt-gallery', JSON.stringify(parsed.gallery))
+      setSaveMessage(`🔄 Loaded ${version}!`)
+      setShowVersionModal(false)
+      
+      // Trigger storage event for main page
+      window.dispatchEvent(new Event('storage'))
+      
+      setTimeout(() => setSaveMessage(""), 3000)
+    } else {
+      alert(`No saved data found for ${version}`)
+    }
+  }
+
+  // Check if version has saved data
+  const hasVersionData = (version: string): boolean => {
+    return !!localStorage.getItem(`foxbuilt-version-${version}`)
+  }
+
+  // Delete version
+  const deleteVersion = (version: string) => {
+    if (confirm(`Are you sure you want to delete ${version}? This cannot be undone.`)) {
+      localStorage.removeItem(`foxbuilt-version-${version}`)
+      setSaveMessage(`🗑️ Deleted ${version}!`)
+      setTimeout(() => setSaveMessage(""), 3000)
+    }
   }
 
   // Revert to V1.0
@@ -132,7 +250,9 @@ export default function AdminEditor() {
       setFeaturedProducts(defaultProducts)
       saveProducts(defaultProducts)
       setGalleryImages(defaultGalleryImages)
+      setPendingGalleryImages(defaultGalleryImages)
       localStorage.setItem('foxbuilt-gallery', JSON.stringify(defaultGalleryImages))
+      
       setSaveMessage("🔄 Reverted to V1.0! All products and gallery reset to original.")
       
       // Trigger storage event for main page
@@ -155,18 +275,18 @@ export default function AdminEditor() {
           onKeyDown={() => setShowPasswordScreen(true)}
           tabIndex={0}
         >
-          {/* Animated floating elements */}
-          <div className="absolute inset-0">
-            <div className="absolute top-10 left-10 text-6xl animate-bounce">🎃</div>
-            <div className="absolute top-20 right-20 text-5xl animate-pulse">🇺🇸</div>
-            <div className="absolute bottom-20 left-20 text-6xl animate-bounce" style={{ animationDelay: '1s' }}>🎃</div>
-            <div className="absolute bottom-10 right-10 text-5xl animate-pulse" style={{ animationDelay: '0.5s' }}>🇺🇸</div>
-            <div className="absolute top-1/2 left-10 text-4xl animate-bounce" style={{ animationDelay: '1.5s' }}>🔨</div>
-            <div className="absolute top-1/2 right-10 text-4xl animate-pulse" style={{ animationDelay: '2s' }}>🛠️</div>
+          {/* DVD Bouncing emojis */}
+          <div className="absolute inset-0 overflow-hidden">
+            <BouncingEmoji emoji="🎃" delay={0} />
+            <BouncingEmoji emoji="🇺🇸" delay={0.5} />
+            <BouncingEmoji emoji="🎃" delay={1} />
+            <BouncingEmoji emoji="🇺🇸" delay={1.5} />
+            <BouncingEmoji emoji="🔨" delay={2} />
+            <BouncingEmoji emoji="🛠️" delay={2.5} />
             
             {/* Floating text message */}
             <div className="absolute top-3/4 right-1/4 text-white/80 font-bold text-lg animate-pulse" style={{ animationDelay: '1s' }}>
-              🇺🇸 May your business prosper 🇺🇸
+              🇺🇸 May Your Business Prosper! 🇺🇸
             </div>
           </div>
           
@@ -183,14 +303,14 @@ export default function AdminEditor() {
     // Password screen
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-800 via-slate-900 to-zinc-900 flex items-center justify-center p-4 relative overflow-hidden">
-        {/* Animated background elements */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-10 left-10 text-6xl animate-bounce">🎃</div>
-          <div className="absolute top-20 right-20 text-5xl animate-pulse">🇺🇸</div>
-          <div className="absolute bottom-20 left-20 text-6xl animate-bounce" style={{ animationDelay: '1s' }}>🎃</div>
-          <div className="absolute bottom-10 right-10 text-5xl animate-pulse" style={{ animationDelay: '0.5s' }}>🇺🇸</div>
-          <div className="absolute top-1/2 left-10 text-4xl animate-bounce" style={{ animationDelay: '1.5s' }}>🔨</div>
-          <div className="absolute top-1/2 right-10 text-4xl animate-pulse" style={{ animationDelay: '2s' }}>🛠️</div>
+        {/* DVD Bouncing emojis (faded) */}
+        <div className="absolute inset-0 opacity-10 overflow-hidden">
+          <BouncingEmoji emoji="🎃" delay={0} />
+          <BouncingEmoji emoji="🇺🇸" delay={0.5} />
+          <BouncingEmoji emoji="🎃" delay={1} />
+          <BouncingEmoji emoji="🇺🇸" delay={1.5} />
+          <BouncingEmoji emoji="🔨" delay={2} />
+          <BouncingEmoji emoji="🛠️" delay={2.5} />
         </div>
         
         <Card className="max-w-2xl w-full bg-white/95 backdrop-blur shadow-2xl border-4 border-red-600">
@@ -255,12 +375,15 @@ export default function AdminEditor() {
           </div>
           <div className="flex gap-2">
             <Button
-              onClick={() => setIsEditMode(!isEditMode)}
+              onClick={() => {
+                setVersionAction('load')
+                setShowVersionModal(true)
+              }}
               variant="outline"
               size="sm"
-              className="bg-white text-green-600 hover:bg-gray-100"
+              className="bg-white text-blue-600 hover:bg-gray-100"
             >
-              {isEditMode ? "Preview Mode" : "Edit Mode"}
+              Versions
             </Button>
             <Button
               onClick={revertToV1}
@@ -276,7 +399,18 @@ export default function AdminEditor() {
               className="bg-white text-green-600 hover:bg-gray-100"
             >
               <Save className="w-4 h-4 mr-1" />
-              Save All Changes
+              Publish
+            </Button>
+            <Button
+              onClick={() => {
+                setVersionAction('save')
+                setShowVersionModal(true)
+              }}
+              size="sm"
+              className="bg-white text-purple-600 hover:bg-gray-100"
+            >
+              <Save className="w-4 h-4 mr-1" />
+              New Build
             </Button>
           </div>
         </div>
@@ -406,7 +540,7 @@ export default function AdminEditor() {
                 </div>
               )}
               <div className="relative h-96 md:h-[600px] overflow-hidden border-8 border-slate-700">
-                {galleryImages.map((image, index) => (
+                {pendingGalleryImages.map((image, index) => (
                   <div
                     key={index}
                     className={`absolute inset-0 transition-opacity duration-1000 ${
@@ -432,7 +566,7 @@ export default function AdminEditor() {
               </button>
 
               <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-3">
-                {galleryImages.map((_, index) => (
+                {pendingGalleryImages.map((_, index) => (
                   <button
                     key={index}
                     onClick={() => setCurrentSlide(index)}
@@ -636,8 +770,155 @@ export default function AdminEditor() {
           </div>
         </section>
 
-        {/* Rest of the site content - About, Contact, Footer */}
-        {/* These sections remain the same as the main site */}
+        {/* About Us Section */}
+        <section id="about" className="py-20 bg-zinc-100">
+          <div className="container mx-auto px-4">
+            <h2 className="text-5xl font-black text-center text-slate-900 mb-16 tracking-tight">
+              AMERICAN <span className="text-red-600">GRIT</span>
+            </h2>
+
+            <div className="max-w-5xl mx-auto">
+              {/* Kyle Fox Story */}
+              <div className="bg-slate-800 text-white border-8 border-slate-700 p-10 mb-16">
+                <div className="flex flex-col md:flex-row items-center gap-10">
+                  <div className="relative w-56 h-56 border-8 border-red-600 flex-shrink-0">
+                    <Image src="/images/kyle-fox-profile.webp" alt="Kyle Fox - Founder" fill className="object-cover" />
+                  </div>
+                  <div>
+                    <h3 className="text-3xl font-black text-white mb-6 tracking-wide">KYLE FOX - FOUNDER</h3>
+                    <blockquote className="text-xl text-zinc-300 italic mb-6 font-bold">
+                      "You need a desk? I actually know a great guy, He deserves your business" That's our marketing.
+                    </blockquote>
+                    <p className="text-zinc-300 leading-relaxed text-lg font-semibold">
+                      Started with nothing but a van, a dream, and American determination. Built this company from the
+                      ground up with sweat, steel, and satisfaction guaranteed. We don't just sell furniture - we build
+                      the foundation of American business, one workspace at a time.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Visit Our Showroom CTA */}
+              <div className="bg-gradient-to-r from-red-600 to-blue-600 text-white border-8 border-slate-700 p-10 text-center">
+                <h3 className="text-3xl font-black mb-6 tracking-wide">WANT TO SEE IT IN PERSON?</h3>
+                <p className="text-xl mb-8 font-bold">
+                  Visit our showroom at 420 W Commerce Dr Building LL, Pleasant Grove, UT 84062. Coffee's hot, snacks are
+                  free, and the furniture is built to last.
+                </p>
+                <Button
+                  className="bg-white text-slate-900 hover:bg-zinc-200 font-black text-lg px-8 py-4 border-4 border-slate-900"
+                  onClick={() => setShowAddress(!showAddress)}
+                >
+                  {showAddress ? "HIDE ADDRESS" : "VISIT SHOWROOM"}
+                </Button>
+
+                {showAddress && (
+                  <div className="mt-8 bg-white/10 border-4 border-white p-6 text-center">
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-center space-x-4">
+                        <MapPin className="w-6 h-6 text-white" />
+                        <div>
+                          <p className="text-xl font-bold">420 W Commerce Dr Building LL</p>
+                          <p className="text-xl font-bold">Pleasant Grove, UT 84062</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-center space-x-4">
+                        <Phone className="w-6 h-6 text-white" />
+                        <span className="text-xl font-bold">{textContent.phoneNumber}</span>
+                      </div>
+                      <div className="text-lg font-bold text-zinc-200">
+                        <p>Monday–Friday: 10:00am–5:00pm</p>
+                        <p>Saturday–Sunday: By Appointment</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Contact Section */}
+        <section id="contact" className="py-20 bg-slate-900 text-white">
+          <div className="container mx-auto px-4">
+            <h2 className="text-5xl font-black text-center mb-16 tracking-tight">
+              GET IN <span className="text-red-500">TOUCH</span>
+            </h2>
+
+            <div className="grid md:grid-cols-2 gap-16 max-w-5xl mx-auto">
+              <div>
+                <h3 className="text-3xl font-black mb-8 tracking-wide">CONTACT INFO</h3>
+                <div className="space-y-6">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-12 h-12 bg-red-600 flex items-center justify-center">
+                      <Phone className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-zinc-400 font-semibold">CALL US</p>
+                      <p className="text-xl font-black">(801) 899-9406</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-4">
+                    <div className="w-12 h-12 bg-blue-600 flex items-center justify-center">
+                      <Mail className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-zinc-400 font-semibold">EMAIL US</p>
+                      <p className="text-xl font-black">info@foxbuilt.com</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-4">
+                    <div className="w-12 h-12 bg-green-600 flex items-center justify-center">
+                      <MapPin className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-zinc-400 font-semibold">VISIT US</p>
+                      <p className="text-lg font-black">420 W Commerce Dr Building LL</p>
+                      <p className="text-lg font-black">Pleasant Grove, UT 84062</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-3xl font-black mb-8 tracking-wide">SEND A MESSAGE</h3>
+                <form className="space-y-6">
+                  <input
+                    type="text"
+                    placeholder="Your Name"
+                    className="w-full px-6 py-4 bg-slate-800 border-2 border-slate-700 text-white placeholder-zinc-400 font-bold"
+                  />
+                  <input
+                    type="email"
+                    placeholder="Your Email"
+                    className="w-full px-6 py-4 bg-slate-800 border-2 border-slate-700 text-white placeholder-zinc-400 font-bold"
+                  />
+                  <textarea
+                    placeholder="Your Message"
+                    rows={4}
+                    className="w-full px-6 py-4 bg-slate-800 border-2 border-slate-700 text-white placeholder-zinc-400 font-bold"
+                  />
+                  <Button className="w-full bg-red-600 hover:bg-red-700 text-white font-black text-lg py-4 border-4 border-red-500">
+                    SEND MESSAGE
+                  </Button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Footer */}
+        <footer className="bg-black py-10 text-center text-white">
+          <div className="container mx-auto px-4">
+            <div className="flex items-center justify-center space-x-2 mb-4">
+              <span className="text-4xl">🇺🇸</span>
+              <span className="font-black text-xl tracking-widest">PROUDLY AMERICAN</span>
+              <span className="text-4xl">🇺🇸</span>
+            </div>
+            <p className="text-zinc-400 font-semibold">© 2024 FoxBuilt. All rights reserved.</p>
+            <p className="text-zinc-500 text-sm mt-2">Built strong. Built right. Built to last.</p>
+          </div>
+        </footer>
       </div>
 
       {/* Gallery Editor Modal */}
@@ -656,7 +937,7 @@ export default function AdminEditor() {
             </div>
             
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {galleryImages.map((image, index) => (
+              {pendingGalleryImages.map((image, index) => (
                 <div key={index} className="space-y-2">
                   <label className="block text-sm font-medium">
                     Image {index + 1}
@@ -692,7 +973,11 @@ export default function AdminEditor() {
             
             <div className="mt-6 flex justify-end gap-2">
               <Button
-                onClick={() => setShowGalleryEditor(false)}
+                onClick={() => {
+                  // Reset pending gallery images to current saved state
+                  setPendingGalleryImages(galleryImages)
+                  setShowGalleryEditor(false)
+                }}
                 variant="outline"
               >
                 Cancel
@@ -700,11 +985,131 @@ export default function AdminEditor() {
               <Button
                 onClick={() => {
                   setShowGalleryEditor(false)
-                  saveAllChanges()
+                  // Gallery changes are now staged in pendingGalleryImages
+                  // They will be published when user clicks Publish button
                 }}
                 className="bg-green-600 hover:bg-green-700"
               >
-                Save Gallery Changes
+                Done
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Version Management Modal */}
+      {showVersionModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-[70] flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold">
+                {versionAction === 'save' ? 'Save Build Version' : versionAction === 'load' ? 'Load Build Version' : 'Delete Build Version'}
+              </h2>
+              <Button
+                onClick={() => setShowVersionModal(false)}
+                variant="outline"
+                size="sm"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-3">
+              {['V2.0', 'V3.0', 'V4.0', 'V5.0', 'V6.0', 'V7.0', 'V8.0', 'V9.0'].map((version) => {
+                const hasData = hasVersionData(version)
+                const versionInfo = hasData ? JSON.parse(localStorage.getItem(`foxbuilt-version-${version}`) || '{}') : null
+                
+                return (
+                  <Button
+                    key={version}
+                    onClick={() => {
+                      if (versionAction === 'save') {
+                        if (hasData && !confirm(`${version} already has saved data. Overwrite?`)) {
+                          return
+                        }
+                        saveToVersion(version)
+                      } else if (versionAction === 'load') {
+                        loadFromVersion(version)
+                      } else if (versionAction === 'delete') {
+                        if (hasData) {
+                          deleteVersion(version)
+                          // Force re-render by closing and reopening modal
+                          setShowVersionModal(false)
+                          setTimeout(() => {
+                            setShowVersionModal(true)
+                            setVersionAction('delete')
+                          }, 100)
+                        }
+                      }
+                    }}
+                    variant={hasData ? "default" : "outline"}
+                    className={`h-20 flex flex-col items-center justify-center ${
+                      hasData 
+                        ? versionAction === 'save' 
+                          ? 'bg-amber-500 hover:bg-amber-600 text-white' 
+                          : versionAction === 'load'
+                            ? 'bg-green-600 hover:bg-green-700 text-white'
+                            : 'bg-red-600 hover:bg-red-700 text-white'
+                        : 'bg-gray-100 hover:bg-gray-200'
+                    }`}
+                  >
+                    <span className="font-bold text-lg">{version}</span>
+                    {hasData && versionInfo?.savedAt && (
+                      <span className="text-xs opacity-80">
+                        {new Date(versionInfo.savedAt).toLocaleDateString()}
+                      </span>
+                    )}
+                    {!hasData && (
+                      <span className="text-xs opacity-60">Empty Slot</span>
+                    )}
+                  </Button>
+                )
+              })}
+            </div>
+            
+            <div className="mt-6 flex justify-between items-center">
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => setVersionAction(versionAction === 'delete' ? 'load' : 'delete')}
+                  variant="outline"
+                  size="sm"
+                  className={versionAction === 'delete' ? 'text-red-600 border-red-600' : ''}
+                >
+                  {versionAction === 'delete' ? 'Back to Load' : 'Delete Mode'}
+                </Button>
+              </div>
+              <Button
+                onClick={() => setShowVersionModal(false)}
+                variant="outline"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Publish Confirmation Modal */}
+      {showPublishConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-[70] flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-sm w-full p-6">
+            <h2 className="text-xl font-bold text-center mb-4">
+              Going back to main site?
+            </h2>
+            
+            <div className="flex justify-center gap-4">
+              <Button
+                onClick={() => window.location.href = '/'}
+                className="bg-green-600 hover:bg-green-700 text-white px-8"
+              >
+                Yes
+              </Button>
+              <Button
+                onClick={() => setShowPublishConfirm(false)}
+                variant="outline"
+                className="px-8"
+              >
+                No
               </Button>
             </div>
           </div>
