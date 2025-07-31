@@ -1,0 +1,101 @@
+export const defaultProducts = {
+  new: [
+    {
+      id: 1,
+      title: "Classic Laminate Series - Silver Birch",
+      image: "/images/desk grey L showroom.jpg",
+      price: "Price coming soon",
+      description: "Website is a work in progress - prices and products coming soon!",
+      features: ["Silver Square Handles", "Metal connections", "Core removable locks"],
+    },
+    {
+      id: 2,
+      title: "Elements Laminate Series",
+      image: "/images/small desk.jpg",
+      price: "Price coming soon",
+      description: "Website is a work in progress - prices and products coming soon!",
+      features: ["Greenguard Certified", "Heavy duty steel frame", "Coordinates with Classic storage"],
+    },
+    {
+      id: 3,
+      title: "Signature Collection",
+      image: "/images/Showroomwglassboard.jpg",
+      price: "Price coming soon",
+      description: "Website is a work in progress - prices and products coming soon!",
+      features: ["Wood VA Legs available", "Metal VA Legs available", "Modern design"],
+    },
+  ],
+  battleTested: [
+    {
+      id: 4,
+      title: "Palmer House Conference Tables",
+      image: "/images/tanconf.jpg",
+      price: "Price coming soon",
+      description: "Website is a work in progress - prices and products coming soon!",
+      features: ["Brushed Steel Base", "Standard grommet", "Multiple sizes available"],
+    },
+    {
+      id: 5,
+      title: "Height Adjustable Desks",
+      image: "/images/showfacinggarage.jpg",
+      price: "Price coming soon",
+      description: "Website is a work in progress - prices and products coming soon!",
+      features: ["3-stage legs", "Memory handset", "265 lb weight rating"],
+    },
+    {
+      id: 6,
+      title: "Encore Collection",
+      image: "/images/conference-room.jpg",
+      price: "Price coming soon",
+      description: "Website is a work in progress - prices and products coming soon!",
+      features: ["Beveled steel frame", "Greenguard Certified", "Works with Elements storage"],
+    },
+  ],
+  seating: [
+    {
+      id: 7,
+      title: "Konfurb Seating Collection",
+      image: "/images/reception-area.jpg",
+      price: "Price coming soon",
+      description: "Website is a work in progress - prices and products coming soon!",
+      features: ["Award-winning design", "Ergonomic features", "Multiple series available"],
+    },
+    {
+      id: 8,
+      title: "Storage Solutions",
+      image: "/images/showroom-1.jpg",
+      price: "Price coming soon",
+      description: "Website is a work in progress - prices and products coming soon!",
+      features: ["Ball bearing slides", "Locking options", "Multiple finishes"],
+    },
+    {
+      id: 9,
+      title: "Reception Seating",
+      image: "/images/reception tan.jpg",
+      price: "Price coming soon",
+      description: "Website is a work in progress - prices and products coming soon!",
+      features: ["Anti-microbial vinyl", "Designer fabrics", "Modular options"],
+    },
+  ],
+}
+
+export function getProducts() {
+  if (typeof window !== 'undefined') {
+    const saved = localStorage.getItem('foxbuilt-products')
+    if (saved) {
+      try {
+        return JSON.parse(saved)
+      } catch (e) {
+        console.error('Error parsing saved products:', e)
+        return defaultProducts
+      }
+    }
+  }
+  return defaultProducts
+}
+
+export function saveProducts(products: any) {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('foxbuilt-products', JSON.stringify(products))
+  }
+}

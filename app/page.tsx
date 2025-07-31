@@ -6,12 +6,14 @@ import { ChevronLeft, ChevronRight, Phone, Mail, MapPin, FileText, Menu, X } fro
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import { getProducts, defaultProducts } from "@/lib/products-data"
 
 export default function FoxBuiltWebsite() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [currentSlide, setCurrentSlide] = useState(0)
   const [featuredCategory, setFeaturedCategory] = useState("new")
   const [showAddress, setShowAddress] = useState(false)
+  const [featuredProducts, setFeaturedProducts] = useState(defaultProducts)
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -21,7 +23,7 @@ export default function FoxBuiltWebsite() {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Gallery images
-  const galleryImages = [
+  const defaultGalleryImages = [
     "/images/showroom-1.jpg",
     "/images/showroom-2.jpg",
     "/images/Showroomwglassboard.jpg",
@@ -29,88 +31,39 @@ export default function FoxBuiltWebsite() {
     "/images/tanconf.jpg",
     "/images/reception tan.jpg",
   ]
+  const [galleryImages, setGalleryImages] = useState(defaultGalleryImages)
 
-  // Featured products - 3 from each category
-  const featuredProducts = {
-    new: [
-      {
-        id: 1,
-        title: "Classic Laminate Series - Silver Birch",
-        image: "/images/desk grey L showroom.jpg",
-        price: "Price coming soon",
-        description: "Website is a work in progress - prices and products coming soon!",
-        features: ["Silver Square Handles", "Metal connections", "Core removable locks"],
-      },
-      {
-        id: 2,
-        title: "Elements Laminate Series",
-        image: "/images/small desk.jpg",
-        price: "Price coming soon",
-        description: "Website is a work in progress - prices and products coming soon!",
-        features: ["Greenguard Certified", "Heavy duty steel frame", "Coordinates with Classic storage"],
-      },
-      {
-        id: 3,
-        title: "Signature Collection",
-        image: "/images/Showroomwglassboard.jpg",
-        price: "Price coming soon",
-        description: "Website is a work in progress - prices and products coming soon!",
-        features: ["Wood VA Legs available", "Metal VA Legs available", "Modern design"],
-      },
-    ],
-    battleTested: [
-      {
-        id: 4,
-        title: "Palmer House Conference Tables",
-        image: "/images/tanconf.jpg",
-        price: "Price coming soon",
-        description: "Website is a work in progress - prices and products coming soon!",
-        features: ["Brushed Steel Base", "Standard grommet", "Multiple sizes available"],
-      },
-      {
-        id: 5,
-        title: "Height Adjustable Desks",
-        image: "/images/showfacinggarage.jpg",
-        price: "Price coming soon",
-        description: "Website is a work in progress - prices and products coming soon!",
-        features: ["3-stage legs", "Memory handset", "265 lb weight rating"],
-      },
-      {
-        id: 6,
-        title: "Encore Collection",
-        image: "/images/conference-room.jpg",
-        price: "Price coming soon",
-        description: "Website is a work in progress - prices and products coming soon!",
-        features: ["Beveled steel frame", "Greenguard Certified", "Works with Elements storage"],
-      },
-    ],
-    seating: [
-      {
-        id: 7,
-        title: "Konfurb Seating Collection",
-        image: "/images/reception-area.jpg",
-        price: "Price coming soon",
-        description: "Website is a work in progress - prices and products coming soon!",
-        features: ["Award-winning design", "Ergonomic features", "Multiple series available"],
-      },
-      {
-        id: 8,
-        title: "Storage Solutions",
-        image: "/images/showroom-1.jpg",
-        price: "Price coming soon",
-        description: "Website is a work in progress - prices and products coming soon!",
-        features: ["Ball bearing slides", "Locking options", "Multiple finishes"],
-      },
-      {
-        id: 9,
-        title: "Reception Seating",
-        image: "/images/reception tan.jpg",
-        price: "Price coming soon",
-        description: "Website is a work in progress - prices and products coming soon!",
-        features: ["Anti-microbial vinyl", "Designer fabrics", "Modular options"],
-      },
-    ],
-  }
+  // Load products from localStorage on mount
+  useEffect(() => {
+    setFeaturedProducts(getProducts())
+    
+    // Load gallery images
+    const savedGallery = localStorage.getItem('foxbuilt-gallery')
+    if (savedGallery) {
+      try {
+        setGalleryImages(JSON.parse(savedGallery))
+      } catch (e) {
+        console.error('Error loading gallery images:', e)
+      }
+    }
+    
+    // Listen for storage changes from admin page
+    const handleStorageChange = () => {
+      setFeaturedProducts(getProducts())
+      // Also reload gallery images
+      const savedGallery = localStorage.getItem('foxbuilt-gallery')
+      if (savedGallery) {
+        try {
+          setGalleryImages(JSON.parse(savedGallery))
+        } catch (e) {
+          console.error('Error loading gallery images:', e)
+        }
+      }
+    }
+    
+    window.addEventListener('storage', handleStorageChange)
+    return () => window.removeEventListener('storage', handleStorageChange)
+  }, [])
 
   // Handle scroll effect for header
   useEffect(() => {
