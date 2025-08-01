@@ -99,48 +99,17 @@ export default function AdminEditor() {
   
   // Load saved data on mount
   useEffect(() => {
-    // First try to load draft from GitHub
-    const loadDraft = async () => {
+    // Load from localStorage only - no automatic draft loading
+    const savedGallery = localStorage.getItem('foxbuilt-gallery')
+    if (savedGallery) {
       try {
-        const response = await fetch('/draft.json', {
-          cache: 'no-cache'
-        })
-        if (response.ok) {
-          const draft = await response.json()
-          // Check if draft is newer than 24 hours
-          const draftAge = new Date().getTime() - new Date(draft.savedAt).getTime()
-          const hoursSinceDraft = draftAge / (1000 * 60 * 60)
-          
-          if (hoursSinceDraft < 24) {
-            if (confirm(`Found a draft from ${new Date(draft.savedAt).toLocaleString()}. Load it?`)) {
-              setFeaturedProducts(draft.products)
-              setGalleryImages(draft.gallery)
-              setPendingGalleryImages(draft.gallery)
-              setSaveMessage("✅ Draft loaded successfully!")
-              setTimeout(() => setSaveMessage(""), 3000)
-              return // Don't load from localStorage if we loaded draft
-            }
-          }
-        }
+        const images = JSON.parse(savedGallery)
+        setGalleryImages(images)
+        setPendingGalleryImages(images)
       } catch (e) {
-        // Don't log 404 errors - it's normal if no draft exists
-        console.log('No draft found - you have nothing staged to save')
-      }
-      
-      // If no draft or user declined, load from localStorage as fallback
-      const savedGallery = localStorage.getItem('foxbuilt-gallery')
-      if (savedGallery) {
-        try {
-          const images = JSON.parse(savedGallery)
-          setGalleryImages(images)
-          setPendingGalleryImages(images)
-        } catch (e) {
-          console.error('Error loading gallery images:', e)
-        }
+        console.error('Error loading gallery images:', e)
       }
     }
-    
-    loadDraft()
   }, [])
 
   // Handle scroll effect for header
@@ -710,19 +679,19 @@ export default function AdminEditor() {
               <Button
                 onClick={saveDraft}
                 size="sm"
-              className="bg-white text-blue-600 hover:bg-blue-100"
-            >
-              <Save className="w-4 h-4 mr-1" />
-              💾 Save Draft
-            </Button>
-            <Button
-              onClick={saveAllChanges}
-              size="sm"
-              className="bg-white text-green-600 hover:bg-green-100"
-            >
-              <Save className="w-4 h-4 mr-1" />
-              🚀 Publish Live
-            </Button>
+                className="bg-blue-600 text-white hover:bg-blue-700 font-bold"
+              >
+                <Save className="w-4 h-4 mr-1" />
+                💾 Save Draft
+              </Button>
+              <Button
+                onClick={saveAllChanges}
+                size="sm"
+                className="bg-green-600 text-white hover:bg-green-700 font-bold"
+              >
+                <Save className="w-4 h-4 mr-1" />
+                🚀 Publish Live
+              </Button>
           </div>
         </div>
       </div>
@@ -1435,7 +1404,7 @@ export default function AdminEditor() {
               <Button
                 onClick={() => setShowPublishConfirm(false)}
                 variant="outline"
-                className="px-8"
+                className="px-8 border-gray-600 text-gray-800 hover:bg-gray-100 font-bold"
               >
                 No
               </Button>
