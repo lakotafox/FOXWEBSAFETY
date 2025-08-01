@@ -247,14 +247,11 @@ export default function AdminEditor() {
     
     // Add to queue
     setUploadQueue(queue => [...queue, { type: 'product', file, category, productId }])
-    showMessage(`📸 Image queued for upload (${uploadQueue.length + 1} in queue)`, 2000)
   }
   
   // Process product image upload
   const processProductImageUpload = async (category: string, productId: number, file: File) => {
     setActiveUploads(count => count + 1)
-    // Show loading state
-    showMessage("📸 Uploading image to GitHub...", 30000) // 30 seconds for upload
     
     // Create immediate preview
     const previewUrl = URL.createObjectURL(file)
@@ -320,7 +317,6 @@ export default function AdminEditor() {
           // Don't update the product image - keep showing the blob URL
           // The GitHub path will be used when publishing
           
-          showMessage("✅ Image uploaded successfully!", 2000)
           setActiveUploads(count => count - 1)
         } else {
           const error = await response.json()
@@ -356,13 +352,11 @@ export default function AdminEditor() {
     
     // Add to queue
     setUploadQueue(queue => [...queue, { type: 'gallery', file, index }])
-    showMessage(`📸 Gallery image queued for upload (${uploadQueue.length + 1} in queue)`, 2000)
   }
   
   // Process gallery image upload
   const processGalleryImageUpload = async (index: number, file: File) => {
     setActiveUploads(count => count + 1)
-    showMessage("📸 Uploading gallery image to GitHub...", 30000) // 30 seconds for upload
     
     // Get the preview URL from pendingGalleryImages
     const previewUrl = pendingGalleryImages[index]
@@ -437,7 +431,6 @@ export default function AdminEditor() {
         // Store the URL mapping in localStorage too
         localStorage.setItem('foxbuilt-url-map', JSON.stringify(newUrlMap))
         
-        showMessage("✅ Gallery image uploaded!", 2000)
         setActiveUploads(count => count - 1)
       }
       
@@ -476,12 +469,6 @@ export default function AdminEditor() {
 
   // Save all changes (publish live)
   const saveAllChanges = async () => {
-    // Check if uploads are still in progress
-    if (activeUploads > 0 || uploadQueue.length > 0) {
-      showMessage(`⏳ Please wait! ${activeUploads} uploads in progress, ${uploadQueue.length} in queue`, 3000)
-      return
-    }
-    
     showMessage("🚀 Publishing live site...", 30000) // 30 seconds for publish
     
     try {
@@ -698,6 +685,40 @@ export default function AdminEditor() {
 
   return (
     <div className="min-h-screen bg-zinc-100">
+      {/* Loading Overlay */}
+      {(activeUploads > 0 || uploadQueue.length > 0) && (
+        <div className="fixed inset-0 bg-black/80 z-[100] flex items-center justify-center pointer-events-auto" style={{ pointerEvents: 'all' }}>
+          <div className="bg-white rounded-lg p-8 text-center max-w-sm">
+            <div className="mb-6">
+              {/* Spinning Chrome/Fox logo */}
+              <div className="relative w-32 h-32 mx-auto animate-spin">
+                <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-red-500 via-yellow-500 to-green-500"></div>
+                <div className="absolute inset-2 rounded-full bg-gradient-to-tr from-green-500 via-blue-500 to-red-500"></div>
+                <div className="absolute inset-4 rounded-full bg-white"></div>
+                <div className="absolute inset-6 rounded-full bg-blue-500"></div>
+              </div>
+            </div>
+            <h2 className="text-2xl font-black text-slate-900 mb-2">
+              UPLOADING IMAGES
+            </h2>
+            <p className="text-lg font-bold text-slate-700 mb-4">
+              Please wait, this may take a moment...
+            </p>
+            <div className="bg-slate-100 rounded-lg p-4">
+              <p className="font-bold text-slate-800">
+                📤 {activeUploads} uploading
+              </p>
+              <p className="font-bold text-slate-800">
+                ⏳ {uploadQueue.length} in queue
+              </p>
+            </div>
+            <p className="mt-4 text-sm text-slate-600 font-semibold">
+              Don't close this tab!
+            </p>
+          </div>
+        </div>
+      )}
+      
       {/* Admin Controls Bar */}
       <div className="bg-green-600 text-white p-2">
         <div className="container mx-auto">
@@ -705,11 +726,6 @@ export default function AdminEditor() {
             <div className="flex items-center gap-2">
               <Edit2 className="w-5 h-5" />
               <span className="font-bold text-sm sm:text-base">ADMIN EDIT MODE</span>
-              {(activeUploads > 0 || uploadQueue.length > 0) && (
-                <span className="ml-4 bg-yellow-500 text-black px-3 py-1 rounded-full text-sm font-bold animate-pulse">
-                  📤 {activeUploads} uploading, {uploadQueue.length} queued
-                </span>
-              )}
             </div>
             <div className="flex gap-2 flex-wrap justify-center">
               <Button
