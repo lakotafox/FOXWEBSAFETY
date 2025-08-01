@@ -946,7 +946,14 @@ export default function AdminEditor() {
                   }`}
                 >
                   <div className="relative h-56 group">
-                    <Image src={product.image || "/placeholder.svg"} alt={product.title} fill className="object-cover" />
+                    <Image 
+                      src={product.image || "/placeholder.svg"} 
+                      alt={product.title} 
+                      fill 
+                      className="object-cover"
+                      unoptimized
+                      key={product.image}
+                    />
                     {isEditMode && (
                       <label className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer flex items-center justify-center">
                         <div className="text-white text-center">
@@ -1414,7 +1421,7 @@ export default function AdminEditor() {
       {showPublishConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-[70] flex items-center justify-center p-4">
           <div className="bg-white rounded-lg max-w-sm w-full p-6">
-            <h2 className="text-xl font-bold text-center mb-4">
+            <h2 className="text-2xl font-black text-center mb-4 text-slate-900">
               Going back to main site?
             </h2>
             
