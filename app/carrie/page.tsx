@@ -201,7 +201,7 @@ export default function AdminEditor() {
       // Set this in Netlify: Site settings → Environment variables
       // Name: NEXT_PUBLIC_GITHUB_TOKEN
       // Value: your GitHub token (get from https://github.com/settings/tokens/new)
-      const GITHUB_TOKEN = process.env.NEXT_PUBLIC_GITHUB_TOKEN || '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'
+      const GITHUB_TOKEN = process.env.NEXT_PUBLIC_GITHUB_TOKEN || 'SET_IN_NETLIFY_ENV'
       const OWNER = 'khabefox'
       const REPO = 'foxbuilt-websiteFOX'
       
@@ -275,7 +275,7 @@ export default function AdminEditor() {
       // Set this in Netlify: Site settings → Environment variables
       // Name: NEXT_PUBLIC_GITHUB_TOKEN
       // Value: your GitHub token (get from https://github.com/settings/tokens/new)
-      const GITHUB_TOKEN = process.env.NEXT_PUBLIC_GITHUB_TOKEN || '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'
+      const GITHUB_TOKEN = process.env.NEXT_PUBLIC_GITHUB_TOKEN || 'SET_IN_NETLIFY_ENV'
       const OWNER = 'khabefox'
       const REPO = 'foxbuilt-websiteFOX'
       
@@ -325,14 +325,10 @@ export default function AdminEditor() {
         
         // Update gallery with new image path
         const newImages = [...pendingGalleryImages]
-          newImages[index] = `/images/${fileName}`
-          setPendingGalleryImages(newImages)
-          setSaveMessage("✅ Gallery image uploaded!")
-          setTimeout(() => setSaveMessage(""), 2000)
-        } else {
-          setSaveMessage("❌ Error uploading gallery image")
-          setTimeout(() => setSaveMessage(""), 3000)
-        }
+        newImages[index] = `/images/${fileName}`
+        setPendingGalleryImages(newImages)
+        setSaveMessage("✅ Gallery image uploaded!")
+        setTimeout(() => setSaveMessage(""), 2000)
       }
     } catch (error) {
       console.error('Gallery upload error:', error)
@@ -350,7 +346,7 @@ export default function AdminEditor() {
       // Set this in Netlify: Site settings → Environment variables
       // Name: NEXT_PUBLIC_GITHUB_TOKEN
       // Value: your GitHub token (get from https://github.com/settings/tokens/new)
-      const GITHUB_TOKEN = process.env.NEXT_PUBLIC_GITHUB_TOKEN || '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'
+      const GITHUB_TOKEN = process.env.NEXT_PUBLIC_GITHUB_TOKEN || 'SET_IN_NETLIFY_ENV'
       const OWNER = 'khabefox'
       const REPO = 'foxbuilt-websiteFOX'
       const PATH = 'public/draft.json'
@@ -432,7 +428,7 @@ export default function AdminEditor() {
       // Set this in Netlify: Site settings → Environment variables
       // Name: NEXT_PUBLIC_GITHUB_TOKEN
       // Value: your GitHub token (get from https://github.com/settings/tokens/new)
-      const GITHUB_TOKEN = process.env.NEXT_PUBLIC_GITHUB_TOKEN || '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'
+      const GITHUB_TOKEN = process.env.NEXT_PUBLIC_GITHUB_TOKEN || 'SET_IN_NETLIFY_ENV'
       const OWNER = 'khabefox'
       const REPO = 'foxbuilt-websiteFOX'
       const PATH = 'public/content.json'
