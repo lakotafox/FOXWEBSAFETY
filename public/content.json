@@ -3,8 +3,8 @@
     "new": [
       {
         "id": 1,
-        "title": "Classic Laminate Series - Silver Birch",
-        "image": "/images/desk grey L showroom.jpg",
+        "title": "Classic Laminate Series - Silver Birchoiwefh",
+        "image": "/images/product-1-1754072603588.jpg",
         "price": "Price coming soon",
         "description": "Website is a work in progress - prices and products coming soon!",
         "features": [
@@ -15,26 +15,26 @@
       },
       {
         "id": 2,
-        "title": "Elements Laminate Series",
+        "title": "Elements Laminate Seriesoiwehf",
         "image": "/images/small desk.jpg",
-        "price": "Price coming soon",
+        "price": "Price comingoiawfhoeif soon",
         "description": "Website is a work in progress - prices and products coming soon!",
         "features": [
-          "Greenguard Certified",
-          "Heavy duty steel frame",
-          "Coordinates with Classic storage"
+          "jaowifhjowf",
+          "Heavy duty steel frasadjhfoiwhfoiwme",
+          "Coordinates withoiwahfoiwfe Classic storage"
         ]
       },
       {
         "id": 3,
-        "title": "Signature Collection",
+        "title": "Signature Collectionwouiefhowe",
         "image": "/images/Showroomwglassboard.jpg",
-        "price": "Price coming soon",
-        "description": "Website is a work in progress - prices and products coming soon!",
+        "price": "Price foweijfocoming soon",
+        "description": "Website is aoweifhwefohi work in progress - prices and products coming soon!",
         "features": [
-          "Wood VA Legs available",
-          "Metal VA Legs available",
-          "Modern design"
+          "Wood VA Lowiefhegs available",
+          "Metal VA Loiwefhegs available",
+          "Modewofeihrn design"
         ]
       }
     ],
@@ -92,7 +92,7 @@
       {
         "id": 8,
         "title": "Storage Solutions",
-        "image": "/images/showroom-1.jpg",
+        "image": "/images/product-8-1754072615773.jpg",
         "price": "Price coming soon",
         "description": "Website is a work in progress - prices and products coming soon!",
         "features": [
@@ -117,12 +117,12 @@
   },
   "gallery": [
     "/images/gallery-0-1754070936755.jpg",
-    "/images/showroom-2.jpg",
-    "/images/Showroomwglassboard.jpg",
-    "/images/showfacinggarage.jpg",
-    "/images/tanconf.jpg",
-    "/images/reception tan.jpg"
+    "/images/gallery-1-1754072454438.jpg",
+    "/images/gallery-2-1754072475726.jpg",
+    "/images/gallery-3-1754072510493.jpg",
+    "/images/gallery-4-1754072535596.jpg",
+    "/images/gallery-5-1754072547073.jpg"
   ],
-  "lastUpdated": "2025-08-01T18:18:59.276Z",
+  "lastUpdated": "2025-08-01T18:24:11.786Z",
   "updatedBy": "Kyle"
 }
