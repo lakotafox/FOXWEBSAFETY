@@ -213,24 +213,30 @@ export default function AdminEditor() {
   // Manage loading overlay with 4-second minimum
   useEffect(() => {
     const shouldShowOverlay = activeUploads > 0 || uploadQueue.length > 0
+    debugLog(`Overlay check: activeUploads=${activeUploads}, queueLength=${uploadQueue.length}, shouldShow=${shouldShowOverlay}, currentlyShowing=${showLoadingOverlay}`)
     
     if (shouldShowOverlay && !showLoadingOverlay) {
       // Start showing overlay
+      debugLog('Starting loading overlay')
       setShowLoadingOverlay(true)
       setLoadingStartTime(Date.now())
     } else if (!shouldShowOverlay && showLoadingOverlay && loadingStartTime) {
       // Check if 4 seconds have passed
       const elapsed = Date.now() - loadingStartTime
       const remaining = 4000 - elapsed
+      debugLog(`Upload complete. Elapsed: ${elapsed}ms, Remaining for 4s minimum: ${remaining}ms`)
       
       if (remaining > 0) {
         // Wait for remaining time
+        debugLog(`Waiting ${remaining}ms before hiding overlay`)
         setTimeout(() => {
+          debugLog('Hiding overlay after 4s minimum')
           setShowLoadingOverlay(false)
           setLoadingStartTime(null)
         }, remaining)
       } else {
         // 4 seconds have passed, hide immediately
+        debugLog('Hiding overlay immediately (4s already passed)')
         setShowLoadingOverlay(false)
         setLoadingStartTime(null)
       }
@@ -498,6 +504,7 @@ export default function AdminEditor() {
         // Store the URL mapping in localStorage too
         localStorage.setItem('foxbuilt-url-map', JSON.stringify(newUrlMap))
         
+        debugLog('✅ Upload successful!')
         clearTimeout(uploadTimeout)
         setActiveUploads(count => count - 1)
         } catch (uploadError) {
