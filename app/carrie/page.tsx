@@ -96,7 +96,7 @@ export default function AdminEditor() {
   const [pendingGalleryImages, setPendingGalleryImages] = useState(defaultGalleryImages)
   
   // Upload queue management
-  const [uploadQueue, setUploadQueue] = useState<Array<{type: 'product' | 'gallery', file: File, category?: string, productId?: number, index?: number}>>([])
+  const [uploadQueue, setUploadQueue] = useState<Array<{type: 'product' | 'gallery', file: File, category?: string, productId?: number, index?: number, fileName?: string}>>([])
   const [isUploading, setIsUploading] = useState(false)
   const [activeUploads, setActiveUploads] = useState(0)
   const [showLoadingOverlay, setShowLoadingOverlay] = useState(false)
@@ -133,31 +133,15 @@ export default function AdminEditor() {
   
   // Helper function to get displayable image URL
   const getImageUrl = (imagePath: string) => {
-    debugLog(`getImageUrl called with: ${imagePath}`)
     if (!imagePath) return "/placeholder.svg"
     
-    // If it's a blob URL, check if we have a mapping to the real URL
-    if (imagePath.startsWith('blob:')) {
-      const urlMap = JSON.parse(localStorage.getItem('foxbuilt-url-map') || '{}')
-      const mappedPath = urlMap[imagePath]
-      debugLog(`URL map contains: ${Object.keys(urlMap).length} entries`)
-      if (mappedPath) {
-        debugLog(`Mapped blob URL to: ${mappedPath}`)
-        // Skip preview on mobile, go straight to GitHub URL
-        const githubUrl = `https://raw.githubusercontent.com/lakotafox/FOXSITE/main/public${mappedPath}`
-        debugLog(`Using GitHub URL: ${githubUrl}`)
-        return githubUrl
-      }
-      // If no mapping, return blob URL
-      debugLog(`No mapping found for blob URL`)
-      return imagePath
+    // Check localStorage for preview first
+    const previews = JSON.parse(localStorage.getItem('foxbuilt-image-previews') || '{}')
+    if (previews[imagePath]) {
+      return previews[imagePath]
     }
     
-    // Check localStorage for preview
-    const previews = JSON.parse(localStorage.getItem('foxbuilt-image-previews') || '{}')
-    if (previews[imagePath]) return previews[imagePath]
-    
-    // For any /images/ path, always use GitHub raw URL
+    // For any /images/ path, use GitHub raw URL
     if (imagePath.startsWith('/images/')) {
       return `https://raw.githubusercontent.com/lakotafox/FOXSITE/main/public${imagePath}`
     }
@@ -240,9 +224,9 @@ export default function AdminEditor() {
       setUploadQueue(queue => queue.slice(1))
       
       if (nextUpload.type === 'product') {
-        processProductImageUpload(nextUpload.category!, nextUpload.productId!, nextUpload.file)
+        processProductImageUpload(nextUpload.category!, nextUpload.productId!, nextUpload.file, nextUpload.fileName!)
       } else {
-        processGalleryImageUpload(nextUpload.index!, nextUpload.file)
+        processGalleryImageUpload(nextUpload.index!, nextUpload.file, nextUpload.fileName!)
       }
     }
   }, [uploadQueue, activeUploads])
@@ -320,16 +304,29 @@ export default function AdminEditor() {
 
   // Add image to upload queue
   const handleImageUpload = (category: string, productId: number, file: File) => {
-    // Create immediate preview
-    const previewUrl = URL.createObjectURL(file)
-    updateProduct(category, productId, 'image', previewUrl)
+    // Generate the filename immediately
+    const timestamp = Date.now()
+    const fileName = `product-${productId}-${timestamp}.jpg`
+    const githubPath = `/images/${fileName}`
     
-    // Add to queue
-    setUploadQueue(queue => [...queue, { type: 'product', file, category, productId }])
+    // Update to use GitHub path immediately
+    updateProduct(category, productId, 'image', githubPath)
+    
+    // Store the file data as base64 for preview
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const previews = JSON.parse(localStorage.getItem('foxbuilt-image-previews') || '{}')
+      previews[githubPath] = e.target?.result
+      localStorage.setItem('foxbuilt-image-previews', JSON.stringify(previews))
+    }
+    reader.readAsDataURL(file)
+    
+    // Add to queue with the filename
+    setUploadQueue(queue => [...queue, { type: 'product', file, category, productId, fileName }])
   }
   
   // Process product image upload
-  const processProductImageUpload = async (category: string, productId: number, file: File) => {
+  const processProductImageUpload = async (category: string, productId: number, file: File, fileName: string) => {
     setActiveUploads(count => count + 1)
     
     // Set a timeout to prevent infinite loading
@@ -338,10 +335,6 @@ export default function AdminEditor() {
       showMessage("❌ Upload timeout - please try again", 5000)
       setActiveUploads(count => count - 1)
     }, 30000) // 30 second timeout
-    
-    // Create immediate preview
-    const previewUrl = URL.createObjectURL(file)
-    updateProduct(category, productId, 'image', previewUrl)
     
     try {
       // GitHub API configuration
@@ -353,9 +346,7 @@ export default function AdminEditor() {
       const OWNER = 'lakotafox'
       const REPO = 'FOXSITE'
       
-      // Generate unique filename
-      const timestamp = Date.now()
-      const fileName = `product-${productId}-${timestamp}.jpg`
+      // Use the pre-generated filename
       const PATH = `public/images/${fileName}`
       
       // Convert file to base64
@@ -388,23 +379,14 @@ export default function AdminEditor() {
         )
         
         if (response.ok) {
-          // Store the mapping between blob URL and GitHub path
-          const newUrlMap = {...imageUrlMap}
-          newUrlMap[previewUrl] = `/images/${fileName}`
-          setImageUrlMap(newUrlMap)
-          
           // Store the preview data URL in localStorage with BOTH paths
           const previews = JSON.parse(localStorage.getItem('foxbuilt-image-previews') || '{}')
           previews[`/images/${fileName}`] = base64Data
           previews[`public/images/${fileName}`] = base64Data  // Also store with public/ prefix
           localStorage.setItem('foxbuilt-image-previews', JSON.stringify(previews))
           
-          // Store the URL mapping in localStorage too
-          localStorage.setItem('foxbuilt-url-map', JSON.stringify(newUrlMap))
-          
-          // Update the product to use the GitHub path instead of blob URL
-          updateProduct(category, productId, 'image', `/images/${fileName}`)
-          debugLog(`Updated product image to: /images/${fileName}`)
+          // No need for URL mapping - already using GitHub path
+          debugLog(`Product image uploaded to: /images/${fileName}`)
           
           clearTimeout(uploadTimeout)
         setActiveUploads(count => count - 1)
@@ -436,19 +418,32 @@ export default function AdminEditor() {
 
   // Add gallery image to upload queue
   const handleGalleryImageUpload = (index: number, file: File) => {
-    // Create a preview URL immediately
-    const previewUrl = URL.createObjectURL(file)
+    // Generate the filename immediately
+    const timestamp = Date.now()
+    const fileName = `gallery-${index}-${timestamp}.jpg`
+    const githubPath = `/images/${fileName}`
+    
+    // Update to use GitHub path immediately
     const newImages = [...pendingGalleryImages]
-    newImages[index] = previewUrl
+    newImages[index] = githubPath
     setPendingGalleryImages(newImages)
     
-    // Add to queue
-    setUploadQueue(queue => [...queue, { type: 'gallery', file, index }])
+    // Store the file data as base64 for preview
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const previews = JSON.parse(localStorage.getItem('foxbuilt-image-previews') || '{}')
+      previews[githubPath] = e.target?.result
+      localStorage.setItem('foxbuilt-image-previews', JSON.stringify(previews))
+    }
+    reader.readAsDataURL(file)
+    
+    // Add to queue with the filename
+    setUploadQueue(queue => [...queue, { type: 'gallery', file, index, fileName }])
   }
   
   // Process gallery image upload
-  const processGalleryImageUpload = async (index: number, file: File) => {
-    debugLog(`Starting gallery upload for index: ${index}`)
+  const processGalleryImageUpload = async (index: number, file: File, fileName: string) => {
+    debugLog(`Starting gallery upload for index: ${index}, fileName: ${fileName}`)
     setActiveUploads(count => count + 1)
     
     // Set a timeout to prevent infinite loading
@@ -458,9 +453,6 @@ export default function AdminEditor() {
       setActiveUploads(count => count - 1)
     }, 30000) // 30 second timeout
     
-    // Get the preview URL from pendingGalleryImages
-    const previewUrl = pendingGalleryImages[index]
-    debugLog(`Preview URL: ${previewUrl}`)
     debugLog(`File size: ${file.size} bytes (${(file.size / 1024 / 1024).toFixed(2)} MB)`)
     
     try {
@@ -472,9 +464,7 @@ export default function AdminEditor() {
       const OWNER = 'lakotafox'
       const REPO = 'FOXSITE'
       
-      // Generate unique filename
-      const timestamp = Date.now()
-      const fileName = `gallery-${index}-${timestamp}.jpg`
+      // Use the pre-generated filename
       const PATH = `public/images/${fileName}`
       
       // Convert file to base64
@@ -528,10 +518,7 @@ export default function AdminEditor() {
           return
         }
         
-        // Store the mapping between blob URL and GitHub path
-        const newUrlMap = {...imageUrlMap}
-        newUrlMap[previewUrl] = `/images/${fileName}`
-        setImageUrlMap(newUrlMap)
+        // No need for URL mapping anymore - images already use GitHub paths
         
         // Store the preview data URL in localStorage with BOTH paths
         const previews = JSON.parse(localStorage.getItem('foxbuilt-image-previews') || '{}')
@@ -539,19 +526,8 @@ export default function AdminEditor() {
         previews[`public/images/${fileName}`] = base64Data  // Also store with public/ prefix
         localStorage.setItem('foxbuilt-image-previews', JSON.stringify(previews))
         
-        // Store the URL mapping in localStorage too
-        localStorage.setItem('foxbuilt-url-map', JSON.stringify(newUrlMap))
-        
         debugLog('✅ Upload successful!')
-        debugLog(`Stored mapping: ${previewUrl} -> /images/${fileName}`)
-        
-        // Update the gallery to use the GitHub path instead of blob URL
-        setPendingGalleryImages(current => {
-          const newImages = [...current]
-          newImages[index] = `/images/${fileName}`
-          debugLog(`Updated gallery index ${index} to use: /images/${fileName}`)
-          return newImages
-        })
+        debugLog(`Uploaded to: /images/${fileName}`)
         
         clearTimeout(uploadTimeout)
         setActiveUploads(count => count - 1)
@@ -630,30 +606,12 @@ export default function AdminEditor() {
         sha = currentFile.sha
       }
       
-      // Convert blob URLs to GitHub paths using the map
-      const urlMap = JSON.parse(localStorage.getItem('foxbuilt-url-map') || '{}')
+      // No conversion needed - images already use GitHub paths
+      const convertedProducts = featuredProducts
+      const convertedGallery = pendingGalleryImages
       
-      const convertedProducts = JSON.parse(JSON.stringify(featuredProducts))
-      Object.keys(convertedProducts).forEach(category => {
-        convertedProducts[category].forEach((product: any) => {
-          if (product.image && product.image.startsWith('blob:')) {
-            product.image = urlMap[product.image] || product.image
-          }
-        })
-      })
-      
-      debugLog(`URL map before conversion: ${JSON.stringify(urlMap)}`)
-      debugLog(`Pending gallery images: ${JSON.stringify(pendingGalleryImages)}`)
-      
-      const convertedGallery = pendingGalleryImages.map((img, idx) => {
-        debugLog(`Converting gallery image ${idx}: ${img}`)
-        if (img && img.startsWith('blob:')) {
-          const mapped = urlMap[img] || img
-          debugLog(`Blob URL mapped to: ${mapped}`)
-          return mapped
-        }
-        return img
-      })
+      debugLog(`Publishing products: ${JSON.stringify(Object.keys(convertedProducts))}`)
+      debugLog(`Publishing gallery: ${JSON.stringify(convertedGallery)}`)
       
       // Prepare the content
       const content = {
@@ -690,9 +648,10 @@ export default function AdminEditor() {
       
       if (updateResponse.ok) {
         // Also save to localStorage as backup
-        saveProducts(featuredProducts)
-        localStorage.setItem('foxbuilt-gallery', JSON.stringify(pendingGalleryImages))
-        setGalleryImages(pendingGalleryImages)
+        saveProducts(convertedProducts)
+        localStorage.setItem('foxbuilt-gallery', JSON.stringify(convertedGallery))
+        setGalleryImages(convertedGallery)
+        setPendingGalleryImages(convertedGallery)
         
         setSaveMessage("✅ Published successfully!")
         
