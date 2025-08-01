@@ -4,26 +4,28 @@
       {
         "id": 1,
         "title": "Classic Laminate Series - Silver Birch",
-        "image": "/images/product-1-1754072285522.jpg",
+        "image": "/images/desk grey L showroom.jpg",
         "price": "Price coming soon",
         "description": "Website is a work in progress - prices and products coming soon!",
         "features": [
           "Silver Square Handles",
           "Metal connections",
           "Core removable locks"
-        ]
+        ],
+        "specs": "Dimensions: 60\"W x 30\"D x 29\"H\nWeight: 120 lbs\nMaterial: Laminate surface with metal frame\nColors: Silver Birch, Natural Oak, Espresso"
       },
       {
         "id": 2,
         "title": "Elements Laminate Series",
-        "image": "/images/product-2-1754072299460.jpg",
+        "image": "/images/small desk.jpg",
         "price": "Price coming soon",
         "description": "Website is a work in progress - prices and products coming soon!",
         "features": [
           "Greenguard Certified",
           "Heavy duty steel frame",
           "Coordinates with Classic storage"
-        ]
+        ],
+        "specs": "Dimensions: 48\"W x 24\"D x 29\"H\nWeight: 95 lbs\nMaterial: Heavy-duty steel frame\nLoad Capacity: 300 lbs"
       },
       {
         "id": 3,
@@ -35,7 +37,8 @@
           "Wood VA Legs available",
           "Metal VA Legs available",
           "Modern design"
-        ]
+        ],
+        "specs": "Dimensions: 72\"W x 36\"D x 30\"H\nWeight: 150 lbs\nMaterial: Premium wood veneer\nOptions: Multiple leg styles"
       }
     ],
     "battleTested": [
@@ -49,7 +52,8 @@
           "Brushed Steel Base",
           "Standard grommet",
           "Multiple sizes available"
-        ]
+        ],
+        "specs": "Dimensions: 96\"W x 42\"D x 29\"H\nWeight: 200 lbs\nMaterial: Solid wood top\nSeating: 6-8 people"
       },
       {
         "id": 5,
@@ -61,7 +65,8 @@
           "3-stage legs",
           "Memory handset",
           "265 lb weight rating"
-        ]
+        ],
+        "specs": "Height Range: 24\" - 50\"\nWidth Options: 48\", 60\", 72\"\nDepth: 30\"\nWeight Capacity: 265 lbs\nMotor: Dual motor system"
       },
       {
         "id": 6,
@@ -73,7 +78,8 @@
           "Beveled steel frame",
           "Greenguard Certified",
           "Works with Elements storage"
-        ]
+        ],
+        "specs": "Dimensions: 60\"W x 30\"D x 29\"H\nWeight: 110 lbs\nMaterial: Steel frame with laminate\nWarranty: 10 year limited"
       }
     ],
     "seating": [
@@ -87,7 +93,8 @@
           "Award-winning design",
           "Ergonomic features",
           "Multiple series available"
-        ]
+        ],
+        "specs": "Seat Height: 16\" - 21\" adjustable\nSeat Width: 19\"\nBack Height: 38\" - 42\"\nWeight Capacity: 300 lbs\nMaterials: Mesh back, foam cushion"
       },
       {
         "id": 8,
@@ -99,7 +106,8 @@
           "Ball bearing slides",
           "Locking options",
           "Multiple finishes"
-        ]
+        ],
+        "specs": "Dimensions: 36\"W x 18\"D x 28\"H\nDrawers: 3 or 4 drawer options\nLock: Central locking system\nWeight: 75-90 lbs"
       },
       {
         "id": 9,
@@ -111,18 +119,19 @@
           "Anti-microbial vinyl",
           "Designer fabrics",
           "Modular options"
-        ]
+        ],
+        "specs": "Dimensions: 72\"W x 28\"D x 32\"H\nSeating: 3 person capacity\nMaterial: Commercial grade vinyl\nFrame: Steel reinforced"
       }
     ]
   },
   "gallery": [
-    "/images/gallery-0-1754070936755.jpg",
+    "/images/showroom-1.jpg",
     "/images/showroom-2.jpg",
     "/images/Showroomwglassboard.jpg",
     "/images/showfacinggarage.jpg",
     "/images/tanconf.jpg",
     "/images/reception tan.jpg"
   ],
-  "savedAt": "2025-08-01T18:18:27.179Z",
+  "savedAt": "2025-08-01T18:24:26.780Z",
   "savedBy": "Kyle"
 }
