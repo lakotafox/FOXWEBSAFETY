@@ -109,11 +109,17 @@ export default function AdminEditor() {
     // Also check with public/ prefix in case that's how it's stored
     if (previews[`public${imagePath}`]) return previews[`public${imagePath}`]
     
-    // If it starts with /images/ and we're in development, try to load it
-    // In production after build, these will be served from public folder
+    // If it starts with /images/ and looks like an uploaded image (has timestamp)
+    // Use GitHub raw URL for immediate display
+    if (imagePath.startsWith('/images/') && imagePath.match(/\d{13}/)) {
+      // Use GitHub raw URL until Netlify rebuilds
+      // Add timestamp to prevent caching issues when images are replaced
+      const timestamp = Date.now()
+      return `https://raw.githubusercontent.com/lakotafox/FOXSITE/main/public${imagePath}?t=${timestamp}`
+    }
+    
+    // For default images or after Netlify rebuild
     if (imagePath.startsWith('/images/')) {
-      // For uploaded images that might not have previews, just return the path
-      // It will work after Netlify rebuild
       return imagePath
     }
     
