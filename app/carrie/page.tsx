@@ -102,7 +102,9 @@ export default function AdminEditor() {
     // First try to load draft from GitHub
     const loadDraft = async () => {
       try {
-        const response = await fetch('/draft.json')
+        const response = await fetch('/draft.json', {
+          cache: 'no-cache'
+        })
         if (response.ok) {
           const draft = await response.json()
           // Check if draft is newer than 24 hours
@@ -121,7 +123,8 @@ export default function AdminEditor() {
           }
         }
       } catch (e) {
-        console.log('No draft found or error loading draft:', e)
+        // Don't log 404 errors - it's normal if no draft exists
+        console.log('No draft found - you have nothing staged to save')
       }
       
       // If no draft or user declined, load from localStorage as fallback
@@ -194,6 +197,9 @@ export default function AdminEditor() {
     
     try {
       // GitHub API configuration
+      // GitHub token - if this stops working, get a new one from:
+      // https://github.com/settings/tokens/new
+      // Scopes needed: repo (full control)
       const GITHUB_TOKEN = 'GITHUB_TOKEN_GOES_HERE'
       const OWNER = 'khabefox'
       const REPO = 'foxbuilt-websiteFOX'
@@ -238,8 +244,13 @@ export default function AdminEditor() {
         } else {
           const error = await response.json()
           console.error('GitHub upload error:', error)
-          setSaveMessage("❌ Error uploading image")
-          setTimeout(() => setSaveMessage(""), 3000)
+          if (response.status === 401) {
+            setSaveMessage("❌ GitHub token expired - Tell Khabe: 'GitHub 401 error'")
+            alert("ERROR: GitHub token expired (401)\n\nTell Khabe: 'GitHub 401 error - need new token'\n\nHe'll fix it free!")
+          } else {
+            setSaveMessage(`❌ Error: ${error.message || response.status}`)
+          }
+          setTimeout(() => setSaveMessage(""), 5000)
         }
       }
       
@@ -259,6 +270,9 @@ export default function AdminEditor() {
     setSaveMessage("📸 Uploading gallery image to GitHub...")
     
     try {
+      // GitHub token - if this stops working, get a new one from:
+      // https://github.com/settings/tokens/new
+      // Scopes needed: repo (full control)
       const GITHUB_TOKEN = 'GITHUB_TOKEN_GOES_HERE'
       const OWNER = 'khabefox'
       const REPO = 'foxbuilt-websiteFOX'
@@ -294,9 +308,21 @@ export default function AdminEditor() {
           }
         )
         
-        if (response.ok) {
-          // Update gallery with new image path
-          const newImages = [...pendingGalleryImages]
+        if (!response.ok) {
+          const error = await response.json()
+          console.error('GitHub API error:', error)
+          if (response.status === 401) {
+            setSaveMessage("❌ GitHub token expired - Tell Khabe: 'GitHub 401 error'")
+            alert("ERROR: GitHub token expired (401)\n\nTell Khabe: 'GitHub 401 error - need new token'\n\nHe'll fix it free!")
+          } else {
+            setSaveMessage(`❌ Error: ${error.message || response.status}`)
+          }
+          setTimeout(() => setSaveMessage(""), 5000)
+          return
+        }
+        
+        // Update gallery with new image path
+        const newImages = [...pendingGalleryImages]
           newImages[index] = `/images/${fileName}`
           setPendingGalleryImages(newImages)
           setSaveMessage("✅ Gallery image uploaded!")
@@ -318,6 +344,9 @@ export default function AdminEditor() {
     setSaveMessage("💾 Saving draft...")
     
     try {
+      // GitHub token - if this stops working, get a new one from:
+      // https://github.com/settings/tokens/new
+      // Scopes needed: repo (full control)
       const GITHUB_TOKEN = 'GITHUB_TOKEN_GOES_HERE'
       const OWNER = 'khabefox'
       const REPO = 'foxbuilt-websiteFOX'
@@ -396,6 +425,9 @@ export default function AdminEditor() {
     
     try {
       // GitHub API configuration
+      // GitHub token - if this stops working, get a new one from:
+      // https://github.com/settings/tokens/new
+      // Scopes needed: repo (full control)
       const GITHUB_TOKEN = 'GITHUB_TOKEN_GOES_HERE'
       const OWNER = 'khabefox'
       const REPO = 'foxbuilt-websiteFOX'
