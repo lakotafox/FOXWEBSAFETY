@@ -703,10 +703,10 @@ export default function AdminEditor() {
                 className="bg-white text-red-600 hover:bg-gray-100 text-xs sm:text-sm"
               >
                 Revert to V1.0
-            </Button>
-            <Button
-              onClick={saveDraft}
-              size="sm"
+              </Button>
+              <Button
+                onClick={saveDraft}
+                size="sm"
               className="bg-white text-blue-600 hover:bg-blue-100"
             >
               <Save className="w-4 h-4 mr-1" />
