@@ -139,12 +139,10 @@ export default function AdminEditor() {
     // Skip localStorage on mobile due to size limits
     if (imagePath.startsWith('/images/')) {
       const githubUrl = `https://raw.githubusercontent.com/lakotafox/FOXSITE/main/public${imagePath}`
-      debugLog(`Using GitHub URL: ${githubUrl}`)
       return githubUrl
     }
     
     // Default
-    debugLog(`Using default path: ${imagePath}`)
     return imagePath
   }
 
