@@ -95,6 +95,11 @@ export default function AdminEditor() {
   const [galleryImages, setGalleryImages] = useState(defaultGalleryImages)
   const [pendingGalleryImages, setPendingGalleryImages] = useState(defaultGalleryImages)
   
+  // Upload queue management
+  const [uploadQueue, setUploadQueue] = useState<Array<{type: 'product' | 'gallery', file: File, category?: string, productId?: number, index?: number}>>([])
+  const [isUploading, setIsUploading] = useState(false)
+  const [activeUploads, setActiveUploads] = useState(0)
+  
   // Helper function to get displayable image URL
   const getImageUrl = (imagePath: string) => {
     if (!imagePath) return "/placeholder.svg"
@@ -181,6 +186,20 @@ export default function AdminEditor() {
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
+  
+  // Process upload queue
+  useEffect(() => {
+    if (uploadQueue.length > 0 && activeUploads < 1) { // Only 1 upload at a time
+      const nextUpload = uploadQueue[0]
+      setUploadQueue(queue => queue.slice(1))
+      
+      if (nextUpload.type === 'product') {
+        processProductImageUpload(nextUpload.category!, nextUpload.productId!, nextUpload.file)
+      } else {
+        processGalleryImageUpload(nextUpload.index!, nextUpload.file)
+      }
+    }
+  }, [uploadQueue, activeUploads])
 
   // Auto-slide gallery
   useEffect(() => {
@@ -220,8 +239,20 @@ export default function AdminEditor() {
     }
   }
 
-  // Handle image upload
-  const handleImageUpload = async (category: string, productId: number, file: File) => {
+  // Add image to upload queue
+  const handleImageUpload = (category: string, productId: number, file: File) => {
+    // Create immediate preview
+    const previewUrl = URL.createObjectURL(file)
+    updateProduct(category, productId, 'image', previewUrl)
+    
+    // Add to queue
+    setUploadQueue(queue => [...queue, { type: 'product', file, category, productId }])
+    showMessage(`📸 Image queued for upload (${uploadQueue.length + 1} in queue)`, 2000)
+  }
+  
+  // Process product image upload
+  const processProductImageUpload = async (category: string, productId: number, file: File) => {
+    setActiveUploads(count => count + 1)
     // Show loading state
     showMessage("📸 Uploading image to GitHub...", 30000) // 30 seconds for upload
     
@@ -290,6 +321,7 @@ export default function AdminEditor() {
           // The GitHub path will be used when publishing
           
           showMessage("✅ Image uploaded successfully!", 2000)
+          setActiveUploads(count => count - 1)
         } else {
           const error = await response.json()
           console.error('GitHub upload error:', error)
@@ -299,27 +331,41 @@ export default function AdminEditor() {
           } else {
             showMessage(`❌ Error: ${error.message || response.status}`, 5000)
           }
+          setActiveUploads(count => count - 1)
         }
       }
       
       reader.onerror = () => {
         showMessage("❌ Error reading image file", 3000)
+        setActiveUploads(count => count - 1)
       }
     } catch (error) {
       console.error('Image upload error:', error)
       showMessage("❌ Error uploading image", 3000)
+      setActiveUploads(count => count - 1)
     }
   }
 
-  // Handle gallery image upload
-  const handleGalleryImageUpload = async (index: number, file: File) => {
-    showMessage("📸 Uploading gallery image to GitHub...", 30000) // 30 seconds for upload
-    
+  // Add gallery image to upload queue
+  const handleGalleryImageUpload = (index: number, file: File) => {
     // Create a preview URL immediately
     const previewUrl = URL.createObjectURL(file)
     const newImages = [...pendingGalleryImages]
     newImages[index] = previewUrl
     setPendingGalleryImages(newImages)
+    
+    // Add to queue
+    setUploadQueue(queue => [...queue, { type: 'gallery', file, index }])
+    showMessage(`📸 Gallery image queued for upload (${uploadQueue.length + 1} in queue)`, 2000)
+  }
+  
+  // Process gallery image upload
+  const processGalleryImageUpload = async (index: number, file: File) => {
+    setActiveUploads(count => count + 1)
+    showMessage("📸 Uploading gallery image to GitHub...", 30000) // 30 seconds for upload
+    
+    // Get the preview URL from pendingGalleryImages
+    const previewUrl = pendingGalleryImages[index]
     
     try {
       // GitHub token from environment variable
@@ -373,6 +419,7 @@ export default function AdminEditor() {
           } else {
             showMessage(`❌ Error: ${error.message || response.status}`, 5000)
           }
+          setActiveUploads(count => count - 1)
           return
         }
         
@@ -391,10 +438,17 @@ export default function AdminEditor() {
         localStorage.setItem('foxbuilt-url-map', JSON.stringify(newUrlMap))
         
         showMessage("✅ Gallery image uploaded!", 2000)
+        setActiveUploads(count => count - 1)
+      }
+      
+      reader.onerror = () => {
+        showMessage("❌ Error reading gallery image", 3000)
+        setActiveUploads(count => count - 1)
       }
     } catch (error) {
       console.error('Gallery upload error:', error)
       showMessage("❌ Error uploading image", 3000)
+      setActiveUploads(count => count - 1)
     }
   }
 
@@ -422,6 +476,12 @@ export default function AdminEditor() {
 
   // Save all changes (publish live)
   const saveAllChanges = async () => {
+    // Check if uploads are still in progress
+    if (activeUploads > 0 || uploadQueue.length > 0) {
+      showMessage(`⏳ Please wait! ${activeUploads} uploads in progress, ${uploadQueue.length} in queue`, 3000)
+      return
+    }
+    
     showMessage("🚀 Publishing live site...", 30000) // 30 seconds for publish
     
     try {
@@ -645,6 +705,11 @@ export default function AdminEditor() {
             <div className="flex items-center gap-2">
               <Edit2 className="w-5 h-5" />
               <span className="font-bold text-sm sm:text-base">ADMIN EDIT MODE</span>
+              {(activeUploads > 0 || uploadQueue.length > 0) && (
+                <span className="ml-4 bg-yellow-500 text-black px-3 py-1 rounded-full text-sm font-bold animate-pulse">
+                  📤 {activeUploads} uploading, {uploadQueue.length} queued
+                </span>
+              )}
             </div>
             <div className="flex gap-2 flex-wrap justify-center">
               <Button
