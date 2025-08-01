@@ -202,8 +202,8 @@ export default function AdminEditor() {
       // Name: NEXT_PUBLIC_GITHUB_TOKEN
       // Value: your GitHub token (get from https://github.com/settings/tokens/new)
       const GITHUB_TOKEN = process.env.NEXT_PUBLIC_GITHUB_TOKEN || 'SET_IN_NETLIFY_ENV'
-      const OWNER = 'khabefox'
-      const REPO = 'foxbuilt-websiteFOX'
+      const OWNER = 'lakotafox'
+      const REPO = 'FOXSITE'
       
       // Generate unique filename
       const timestamp = Date.now()
@@ -276,8 +276,8 @@ export default function AdminEditor() {
       // Name: NEXT_PUBLIC_GITHUB_TOKEN
       // Value: your GitHub token (get from https://github.com/settings/tokens/new)
       const GITHUB_TOKEN = process.env.NEXT_PUBLIC_GITHUB_TOKEN || 'SET_IN_NETLIFY_ENV'
-      const OWNER = 'khabefox'
-      const REPO = 'foxbuilt-websiteFOX'
+      const OWNER = 'lakotafox'
+      const REPO = 'FOXSITE'
       
       // Generate unique filename
       const timestamp = Date.now()
@@ -313,9 +313,12 @@ export default function AdminEditor() {
         if (!response.ok) {
           const error = await response.json()
           console.error('GitHub API error:', error)
+          console.error('Tried to upload to:', PATH)
           if (response.status === 401) {
             setSaveMessage("❌ GitHub token expired - Tell Khabe: 'GitHub 401 error'")
             alert("ERROR: GitHub token expired (401)\n\nTell Khabe: 'GitHub 401 error - need new token'\n\nHe'll fix it free!")
+          } else if (response.status === 404) {
+            setSaveMessage(`❌ GitHub repo not found or no access - check token permissions`)
           } else {
             setSaveMessage(`❌ Error: ${error.message || response.status}`)
           }
@@ -347,8 +350,8 @@ export default function AdminEditor() {
       // Name: NEXT_PUBLIC_GITHUB_TOKEN
       // Value: your GitHub token (get from https://github.com/settings/tokens/new)
       const GITHUB_TOKEN = process.env.NEXT_PUBLIC_GITHUB_TOKEN || 'SET_IN_NETLIFY_ENV'
-      const OWNER = 'khabefox'
-      const REPO = 'foxbuilt-websiteFOX'
+      const OWNER = 'lakotafox'
+      const REPO = 'FOXSITE'
       const PATH = 'public/draft.json'
       
       // Get current draft file SHA if it exists
@@ -429,8 +432,8 @@ export default function AdminEditor() {
       // Name: NEXT_PUBLIC_GITHUB_TOKEN
       // Value: your GitHub token (get from https://github.com/settings/tokens/new)
       const GITHUB_TOKEN = process.env.NEXT_PUBLIC_GITHUB_TOKEN || 'SET_IN_NETLIFY_ENV'
-      const OWNER = 'khabefox'
-      const REPO = 'foxbuilt-websiteFOX'
+      const OWNER = 'lakotafox'
+      const REPO = 'FOXSITE'
       const PATH = 'public/content.json'
       
       // First, get the current file to get its SHA
