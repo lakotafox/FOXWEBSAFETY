@@ -23,6 +23,19 @@ export default function FoxBuiltWebsite() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSpecsModal, setShowSpecsModal] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState<any>(null)
+  
+  // Helper function to get displayable image URL
+  const getImageUrl = (imagePath: string) => {
+    if (!imagePath) return "/placeholder.svg"
+    
+    // For any /images/ path, always use GitHub raw URL
+    if (imagePath.startsWith('/images/')) {
+      return `https://raw.githubusercontent.com/lakotafox/FOXSITE/main/public${imagePath}`
+    }
+    
+    // Default
+    return imagePath
+  }
 
   // Gallery images
   const defaultGalleryImages = [
@@ -272,7 +285,7 @@ export default function FoxBuiltWebsite() {
                     index === currentSlide ? "opacity-100" : "opacity-0"
                   }`}
                 >
-                  <Image src={image || "/placeholder.svg"} alt={`Project ${index + 1}`} fill className="object-cover" />
+                  <Image src={getImageUrl(image)} alt={`Project ${index + 1}`} fill className="object-cover" />
                 </div>
               ))}
             </div>
@@ -358,7 +371,7 @@ export default function FoxBuiltWebsite() {
                 className="overflow-hidden hover:shadow-2xl transition-all border-4 border-slate-600 bg-zinc-100"
               >
                 <div className="relative h-56">
-                  <Image src={product.image || "/placeholder.svg"} alt={product.title} fill className="object-cover" />
+                  <Image src={getImageUrl(product.image)} alt={product.title} fill className="object-cover" />
                   <div
                     className={`absolute top-4 right-4 text-white px-3 py-1 font-black text-sm ${
                       featuredCategory === "new"
