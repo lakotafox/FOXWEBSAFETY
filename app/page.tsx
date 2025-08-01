@@ -467,7 +467,7 @@ export default function FoxBuiltWebsite() {
             <div className="bg-gradient-to-r from-red-600 to-blue-600 text-white border-8 border-slate-700 p-10 text-center">
               <h3 className="text-3xl font-black mb-6 tracking-wide">WANT TO SEE IT IN PERSON?</h3>
               <p className="text-xl mb-8 font-bold">
-                Visit our showroom at 420 W Commerce Dr Building LL, Pleasant Grove, UT 84062. Coffee's hot, snacks are
+                We are located in Pleasant Grove right off of the freeway. Drinks are cold, snacks are
                 free, and the furniture is built to last.
               </p>
               <Button

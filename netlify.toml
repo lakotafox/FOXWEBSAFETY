@@ -1,7 +1,7 @@
 [build]
-  # Only rebuild when content.json changes (when you click Publish)
-  # This command returns 0 (ignore) if content.json hasn't changed
-  ignore = "git diff --quiet $COMMIT_REF $CACHED_COMMIT_REF -- public/content.json"
+  # Build ONLY when content.json changes
+  # Returns 1 (build) if content.json changed, 0 (ignore) if it didn't
+  ignore = "git diff --quiet $COMMIT_REF $CACHED_COMMIT_REF -- public/content.json && echo 'No content.json changes, skipping build' || false"
 
 # Optional: Set Node version
 [build.environment]
