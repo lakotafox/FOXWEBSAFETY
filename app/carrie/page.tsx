@@ -95,6 +95,25 @@ export default function AdminEditor() {
   const [galleryImages, setGalleryImages] = useState(defaultGalleryImages)
   const [pendingGalleryImages, setPendingGalleryImages] = useState(defaultGalleryImages)
   
+  // Helper function to get displayable image URL
+  const getImageUrl = (imagePath: string) => {
+    if (!imagePath) return "/placeholder.svg"
+    
+    // If it's a blob URL, return as is
+    if (imagePath.startsWith('blob:')) return imagePath
+    
+    // Check localStorage for preview
+    const previews = JSON.parse(localStorage.getItem('foxbuilt-image-previews') || '{}')
+    if (previews[imagePath]) return previews[imagePath]
+    
+    // If it starts with /images/ and looks like an uploaded image, return as is
+    // Next.js will handle serving it from the public folder
+    if (imagePath.startsWith('/images/')) return imagePath
+    
+    // Default
+    return imagePath
+  }
+
   // Helper function to set save message with auto-clear
   const showMessage = (message: string, duration: number = 3000) => {
     // Clear any existing timeout
@@ -241,9 +260,10 @@ export default function AdminEditor() {
           newUrlMap[previewUrl] = `/images/${fileName}`
           setImageUrlMap(newUrlMap)
           
-          // Store the preview data URL in localStorage
+          // Store the preview data URL in localStorage with BOTH paths
           const previews = JSON.parse(localStorage.getItem('foxbuilt-image-previews') || '{}')
           previews[`/images/${fileName}`] = base64Data
+          previews[`public/images/${fileName}`] = base64Data  // Also store with public/ prefix
           localStorage.setItem('foxbuilt-image-previews', JSON.stringify(previews))
           
           // Store the URL mapping in localStorage too
@@ -344,9 +364,10 @@ export default function AdminEditor() {
         newUrlMap[previewUrl] = `/images/${fileName}`
         setImageUrlMap(newUrlMap)
         
-        // Store the preview data URL in localStorage
+        // Store the preview data URL in localStorage with BOTH paths
         const previews = JSON.parse(localStorage.getItem('foxbuilt-image-previews') || '{}')
         previews[`/images/${fileName}`] = base64Data
+        previews[`public/images/${fileName}`] = base64Data  // Also store with public/ prefix
         localStorage.setItem('foxbuilt-image-previews', JSON.stringify(previews))
         
         // Store the URL mapping in localStorage too
@@ -360,6 +381,27 @@ export default function AdminEditor() {
     }
   }
 
+
+  // Revert to V1.0
+  const revertToV1 = () => {
+    if (confirm("Are you sure you want to revert to V1.0? This will reset all products and gallery images to their original state.")) {
+      setFeaturedProducts(defaultProducts)
+      saveProducts(defaultProducts)
+      setGalleryImages(defaultGalleryImages)
+      setPendingGalleryImages(defaultGalleryImages)
+      localStorage.setItem('foxbuilt-gallery', JSON.stringify(defaultGalleryImages))
+      
+      // Clear image previews and URL map
+      localStorage.removeItem('foxbuilt-image-previews')
+      localStorage.removeItem('foxbuilt-url-map')
+      setImageUrlMap({})
+      
+      showMessage("🔄 Reverted to V1.0! All products and gallery reset to original.", 5000)
+      
+      // Trigger storage event for main page
+      window.dispatchEvent(new Event('storage'))
+    }
+  }
 
   // Save all changes (publish live)
   const saveAllChanges = async () => {
@@ -589,6 +631,13 @@ export default function AdminEditor() {
             </div>
             <div className="flex gap-2 flex-wrap justify-center">
               <Button
+                onClick={revertToV1}
+                size="sm"
+                className="bg-red-600 text-white hover:bg-red-700 font-bold"
+              >
+                🔄 Revert to V1.0
+              </Button>
+              <Button
                 onClick={saveAllChanges}
                 size="lg"
                 className="bg-green-600 text-white hover:bg-green-700 font-bold px-8 py-3 text-lg"
@@ -733,14 +782,7 @@ export default function AdminEditor() {
                     }`}
                   >
                     <Image 
-                      src={(() => {
-                        if (!image) return "/placeholder.svg"
-                        // Check if this is a blob URL (immediate preview)
-                        if (image.startsWith('blob:')) return image
-                        // Check localStorage for preview
-                        const previews = JSON.parse(localStorage.getItem('foxbuilt-image-previews') || '{}')
-                        return previews[image] || image
-                      })()} 
+                      src={getImageUrl(image)} 
                       alt={`Project ${index + 1}`} 
                       fill 
                       className="object-cover"
@@ -832,14 +874,7 @@ export default function AdminEditor() {
                 >
                   <div className="relative h-56 group">
                     <Image 
-                      src={(() => {
-                        if (!product.image) return "/placeholder.svg"
-                        // Check if this is a blob URL (immediate preview)
-                        if (product.image.startsWith('blob:')) return product.image
-                        // Check localStorage for preview
-                        const previews = JSON.parse(localStorage.getItem('foxbuilt-image-previews') || '{}')
-                        return previews[product.image] || product.image
-                      })()} 
+                      src={getImageUrl(product.image)} 
                       alt={product.title} 
                       fill 
                       className="object-cover"
@@ -1182,13 +1217,7 @@ Colors: Available in multiple finishes"
                   <div className="relative aspect-video bg-gray-100 rounded border-2 border-dashed border-gray-300 overflow-hidden group">
                     {image && (
                       <Image 
-                        src={(() => {
-                          // Check if this is a blob URL (immediate preview)
-                          if (image.startsWith('blob:')) return image
-                          // Check localStorage for preview
-                          const previews = JSON.parse(localStorage.getItem('foxbuilt-image-previews') || '{}')
-                          return previews[image] || image
-                        })()} 
+                        src={getImageUrl(image)} 
                         alt={`Gallery ${index + 1}`} 
                         fill 
                         className="object-cover"
