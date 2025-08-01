@@ -1,0 +1,8 @@
+[build]
+  # Only rebuild when content.json changes
+  # This prevents rebuilds when draft.json or images are updated
+  ignore = "git diff --quiet $COMMIT_REF $CACHED_COMMIT_REF -- public/content.json"
+
+# Optional: Set Node version
+[build.environment]
+  NODE_VERSION = "18"

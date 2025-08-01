@@ -99,16 +99,45 @@ export default function AdminEditor() {
   
   // Load saved data on mount
   useEffect(() => {
-    const savedGallery = localStorage.getItem('foxbuilt-gallery')
-    if (savedGallery) {
+    // First try to load draft from GitHub
+    const loadDraft = async () => {
       try {
-        const images = JSON.parse(savedGallery)
-        setGalleryImages(images)
-        setPendingGalleryImages(images)
+        const response = await fetch('/draft.json')
+        if (response.ok) {
+          const draft = await response.json()
+          // Check if draft is newer than 24 hours
+          const draftAge = new Date().getTime() - new Date(draft.savedAt).getTime()
+          const hoursSinceDraft = draftAge / (1000 * 60 * 60)
+          
+          if (hoursSinceDraft < 24) {
+            if (confirm(`Found a draft from ${new Date(draft.savedAt).toLocaleString()}. Load it?`)) {
+              setFeaturedProducts(draft.products)
+              setGalleryImages(draft.gallery)
+              setPendingGalleryImages(draft.gallery)
+              setSaveMessage("✅ Draft loaded successfully!")
+              setTimeout(() => setSaveMessage(""), 3000)
+              return // Don't load from localStorage if we loaded draft
+            }
+          }
+        }
       } catch (e) {
-        console.error('Error loading gallery images:', e)
+        console.log('No draft found or error loading draft:', e)
+      }
+      
+      // If no draft or user declined, load from localStorage as fallback
+      const savedGallery = localStorage.getItem('foxbuilt-gallery')
+      if (savedGallery) {
+        try {
+          const images = JSON.parse(savedGallery)
+          setGalleryImages(images)
+          setPendingGalleryImages(images)
+        } catch (e) {
+          console.error('Error loading gallery images:', e)
+        }
       }
     }
+    
+    loadDraft()
   }, [])
 
   // Handle scroll effect for header
@@ -159,43 +188,289 @@ export default function AdminEditor() {
   }
 
   // Handle image upload
-  const handleImageUpload = (category: string, productId: number, file: File) => {
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      updateProduct(category, productId, 'image', e.target?.result as string)
+  const handleImageUpload = async (category: string, productId: number, file: File) => {
+    // Show loading state
+    setSaveMessage("📸 Uploading image to GitHub...")
+    
+    try {
+      // GitHub API configuration
+      const GITHUB_TOKEN = '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'
+      const OWNER = 'khabefox'
+      const REPO = 'foxbuilt-websiteFOX'
+      
+      // Generate unique filename
+      const timestamp = Date.now()
+      const fileName = `product-${productId}-${timestamp}.jpg`
+      const PATH = `public/images/${fileName}`
+      
+      // Convert file to base64
+      const reader = new FileReader()
+      reader.readAsDataURL(file)
+      
+      reader.onload = async () => {
+        const base64Data = reader.result as string
+        // Remove the data:image/jpeg;base64, prefix
+        const base64Content = base64Data.split(',')[1]
+        
+        // Upload to GitHub
+        const response = await fetch(
+          `https://api.github.com/repos/${OWNER}/${REPO}/contents/${PATH}`,
+          {
+            method: 'PUT',
+            headers: {
+              'Authorization': `token ${GITHUB_TOKEN}`,
+              'Accept': 'application/vnd.github.v3+json',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              message: `Add product image: ${fileName}`,
+              content: base64Content,
+              branch: 'main'
+            })
+          }
+        )
+        
+        if (response.ok) {
+          // Update product with new image path
+          updateProduct(category, productId, 'image', `/images/${fileName}`)
+          setSaveMessage("✅ Image uploaded successfully!")
+          setTimeout(() => setSaveMessage(""), 2000)
+        } else {
+          const error = await response.json()
+          console.error('GitHub upload error:', error)
+          setSaveMessage("❌ Error uploading image")
+          setTimeout(() => setSaveMessage(""), 3000)
+        }
+      }
+      
+      reader.onerror = () => {
+        setSaveMessage("❌ Error reading image file")
+        setTimeout(() => setSaveMessage(""), 3000)
+      }
+    } catch (error) {
+      console.error('Image upload error:', error)
+      setSaveMessage("❌ Error uploading image")
+      setTimeout(() => setSaveMessage(""), 3000)
     }
-    reader.readAsDataURL(file)
   }
 
   // Handle gallery image upload
-  const handleGalleryImageUpload = (index: number, file: File) => {
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      const newImages = [...pendingGalleryImages]
-      newImages[index] = e.target?.result as string
-      setPendingGalleryImages(newImages)
+  const handleGalleryImageUpload = async (index: number, file: File) => {
+    setSaveMessage("📸 Uploading gallery image to GitHub...")
+    
+    try {
+      const GITHUB_TOKEN = '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'
+      const OWNER = 'khabefox'
+      const REPO = 'foxbuilt-websiteFOX'
+      
+      // Generate unique filename
+      const timestamp = Date.now()
+      const fileName = `gallery-${index}-${timestamp}.jpg`
+      const PATH = `public/images/${fileName}`
+      
+      // Convert file to base64
+      const reader = new FileReader()
+      reader.readAsDataURL(file)
+      
+      reader.onload = async () => {
+        const base64Data = reader.result as string
+        const base64Content = base64Data.split(',')[1]
+        
+        // Upload to GitHub
+        const response = await fetch(
+          `https://api.github.com/repos/${OWNER}/${REPO}/contents/${PATH}`,
+          {
+            method: 'PUT',
+            headers: {
+              'Authorization': `token ${GITHUB_TOKEN}`,
+              'Accept': 'application/vnd.github.v3+json',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              message: `Add gallery image: ${fileName}`,
+              content: base64Content,
+              branch: 'main'
+            })
+          }
+        )
+        
+        if (response.ok) {
+          // Update gallery with new image path
+          const newImages = [...pendingGalleryImages]
+          newImages[index] = `/images/${fileName}`
+          setPendingGalleryImages(newImages)
+          setSaveMessage("✅ Gallery image uploaded!")
+          setTimeout(() => setSaveMessage(""), 2000)
+        } else {
+          setSaveMessage("❌ Error uploading gallery image")
+          setTimeout(() => setSaveMessage(""), 3000)
+        }
+      }
+    } catch (error) {
+      console.error('Gallery upload error:', error)
+      setSaveMessage("❌ Error uploading image")
+      setTimeout(() => setSaveMessage(""), 3000)
     }
-    reader.readAsDataURL(file)
   }
 
-  // Save all changes
-  const saveAllChanges = () => {
-    saveProducts(featuredProducts)
-    // Save gallery images
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('foxbuilt-gallery', JSON.stringify(pendingGalleryImages))
+  // Save draft to GitHub
+  const saveDraft = async () => {
+    setSaveMessage("💾 Saving draft...")
+    
+    try {
+      const GITHUB_TOKEN = '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'
+      const OWNER = 'khabefox'
+      const REPO = 'foxbuilt-websiteFOX'
+      const PATH = 'public/draft.json'
+      
+      // Get current draft file SHA if it exists
+      let sha = ''
+      try {
+        const currentFileResponse = await fetch(
+          `https://api.github.com/repos/${OWNER}/${REPO}/contents/${PATH}`,
+          {
+            headers: {
+              'Authorization': `token ${GITHUB_TOKEN}`,
+              'Accept': 'application/vnd.github.v3+json'
+            }
+          }
+        )
+        
+        if (currentFileResponse.ok) {
+          const currentFile = await currentFileResponse.json()
+          sha = currentFile.sha
+        }
+      } catch (e) {
+        // File doesn't exist yet, that's OK
+      }
+      
+      // Prepare draft content
+      const draftContent = {
+        products: featuredProducts,
+        gallery: pendingGalleryImages,
+        savedAt: new Date().toISOString(),
+        savedBy: "Kyle"
+      }
+      
+      // Encode content to base64
+      const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(draftContent, null, 2))))
+      
+      // Update or create draft file
+      const updateResponse = await fetch(
+        `https://api.github.com/repos/${OWNER}/${REPO}/contents/${PATH}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Authorization': `token ${GITHUB_TOKEN}`,
+            'Accept': 'application/vnd.github.v3+json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            message: `Save draft - ${new Date().toLocaleString()}`,
+            content: contentBase64,
+            sha: sha || undefined,
+            branch: 'main'
+          })
+        }
+      )
+      
+      if (updateResponse.ok) {
+        setSaveMessage("✅ Draft saved! You can continue from any device.")
+        setTimeout(() => setSaveMessage(""), 3000)
+      } else {
+        const error = await updateResponse.json()
+        console.error('GitHub API error:', error)
+        setSaveMessage("❌ Error saving draft. Check console.")
+        setTimeout(() => setSaveMessage(""), 5000)
+      }
+    } catch (error) {
+      console.error('Error saving draft:', error)
+      setSaveMessage("❌ Error saving draft.")
+      setTimeout(() => setSaveMessage(""), 5000)
     }
-    // Update the displayed gallery images to match pending
-    setGalleryImages(pendingGalleryImages)
-    setSaveMessage("✅ Changes saved successfully! The website has been updated.")
+  }
+
+  // Save all changes (publish live)
+  const saveAllChanges = async () => {
+    setSaveMessage("🚀 Publishing live site...")
     
-    // Trigger storage event for main page
-    window.dispatchEvent(new Event('storage'))
-    
-    setTimeout(() => {
-      setSaveMessage("")
-      setShowPublishConfirm(true)
-    }, 2000)
+    try {
+      // GitHub API configuration
+      const GITHUB_TOKEN = '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'
+      const OWNER = 'khabefox'
+      const REPO = 'foxbuilt-websiteFOX'
+      const PATH = 'public/content.json'
+      
+      // First, get the current file to get its SHA
+      const currentFileResponse = await fetch(
+        `https://api.github.com/repos/${OWNER}/${REPO}/contents/${PATH}`,
+        {
+          headers: {
+            'Authorization': `token ${GITHUB_TOKEN}`,
+            'Accept': 'application/vnd.github.v3+json'
+          }
+        }
+      )
+      
+      let sha = ''
+      if (currentFileResponse.ok) {
+        const currentFile = await currentFileResponse.json()
+        sha = currentFile.sha
+      }
+      
+      // Prepare the content
+      const content = {
+        products: featuredProducts,
+        gallery: pendingGalleryImages,
+        lastUpdated: new Date().toISOString(),
+        updatedBy: "Kyle"
+      }
+      
+      // Encode content to base64
+      const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2))))
+      
+      // Update the file on GitHub
+      const updateResponse = await fetch(
+        `https://api.github.com/repos/${OWNER}/${REPO}/contents/${PATH}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Authorization': `token ${GITHUB_TOKEN}`,
+            'Accept': 'application/vnd.github.v3+json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            message: `Update products and gallery via admin panel - ${new Date().toLocaleString()}`,
+            content: contentBase64,
+            sha: sha, // Required for updates
+            branch: 'main'
+          })
+        }
+      )
+      
+      if (updateResponse.ok) {
+        // Also save to localStorage as backup
+        saveProducts(featuredProducts)
+        localStorage.setItem('foxbuilt-gallery', JSON.stringify(pendingGalleryImages))
+        setGalleryImages(pendingGalleryImages)
+        
+        setSaveMessage("✅ Published successfully! Website will update in ~30 seconds.")
+        
+        setTimeout(() => {
+          setSaveMessage("")
+          setShowPublishConfirm(true)
+        }, 3000)
+      } else {
+        const error = await updateResponse.json()
+        console.error('GitHub API error:', error)
+        setSaveMessage("❌ Error publishing. Check console for details.")
+        setTimeout(() => setSaveMessage(""), 5000)
+      }
+    } catch (error) {
+      console.error('Error publishing to GitHub:', error)
+      setSaveMessage("❌ Error publishing. Check your GitHub token.")
+      setTimeout(() => setSaveMessage(""), 5000)
+    }
   }
 
   // Save to version slot
@@ -397,23 +672,20 @@ export default function AdminEditor() {
               Revert to V1.0
             </Button>
             <Button
-              onClick={saveAllChanges}
+              onClick={saveDraft}
               size="sm"
-              className="bg-white text-green-600 hover:bg-gray-100"
+              className="bg-white text-blue-600 hover:bg-blue-100"
             >
               <Save className="w-4 h-4 mr-1" />
-              Publish
+              💾 Save Draft
             </Button>
             <Button
-              onClick={() => {
-                setVersionAction('save')
-                setShowVersionModal(true)
-              }}
+              onClick={saveAllChanges}
               size="sm"
-              className="bg-white text-purple-600 hover:bg-gray-100"
+              className="bg-white text-green-600 hover:bg-green-100"
             >
               <Save className="w-4 h-4 mr-1" />
-              New Build
+              🚀 Publish Live
             </Button>
           </div>
         </div>

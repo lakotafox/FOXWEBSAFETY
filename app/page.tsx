@@ -35,36 +35,33 @@ export default function FoxBuiltWebsite() {
   ]
   const [galleryImages, setGalleryImages] = useState(defaultGalleryImages)
 
-  // Load products from localStorage on mount
+  // Load products from content.json
   useEffect(() => {
-    setFeaturedProducts(getProducts())
-    
-    // Load gallery images
-    const savedGallery = localStorage.getItem('foxbuilt-gallery')
-    if (savedGallery) {
-      try {
-        setGalleryImages(JSON.parse(savedGallery))
-      } catch (e) {
-        console.error('Error loading gallery images:', e)
-      }
-    }
-    
-    // Listen for storage changes from admin page
-    const handleStorageChange = () => {
-      setFeaturedProducts(getProducts())
-      // Also reload gallery images
-      const savedGallery = localStorage.getItem('foxbuilt-gallery')
-      if (savedGallery) {
-        try {
-          setGalleryImages(JSON.parse(savedGallery))
-        } catch (e) {
-          console.error('Error loading gallery images:', e)
+    // First try to load from content.json
+    fetch('/content.json')
+      .then(response => response.json())
+      .then(data => {
+        if (data.products) {
+          setFeaturedProducts(data.products)
         }
-      }
-    }
-    
-    window.addEventListener('storage', handleStorageChange)
-    return () => window.removeEventListener('storage', handleStorageChange)
+        if (data.gallery) {
+          setGalleryImages(data.gallery)
+        }
+      })
+      .catch(error => {
+        console.error('Error loading content.json, falling back to defaults:', error)
+        // Fallback to localStorage/defaults if content.json fails
+        setFeaturedProducts(getProducts())
+        
+        const savedGallery = localStorage.getItem('foxbuilt-gallery')
+        if (savedGallery) {
+          try {
+            setGalleryImages(JSON.parse(savedGallery))
+          } catch (e) {
+            console.error('Error loading gallery images:', e)
+          }
+        }
+      })
   }, [])
 
   // Handle scroll effect for header
