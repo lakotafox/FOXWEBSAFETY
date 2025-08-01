@@ -197,10 +197,11 @@ export default function AdminEditor() {
     
     try {
       // GitHub API configuration
-      // GitHub token - if this stops working, get a new one from:
-      // https://github.com/settings/tokens/new
-      // Scopes needed: repo (full control)
-      const GITHUB_TOKEN = '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'
+      // GitHub token from environment variable
+      // Set this in Netlify: Site settings → Environment variables
+      // Name: NEXT_PUBLIC_GITHUB_TOKEN
+      // Value: your GitHub token (get from https://github.com/settings/tokens/new)
+      const GITHUB_TOKEN = process.env.NEXT_PUBLIC_GITHUB_TOKEN || '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'
       const OWNER = 'khabefox'
       const REPO = 'foxbuilt-websiteFOX'
       
@@ -270,10 +271,11 @@ export default function AdminEditor() {
     setSaveMessage("📸 Uploading gallery image to GitHub...")
     
     try {
-      // GitHub token - if this stops working, get a new one from:
-      // https://github.com/settings/tokens/new
-      // Scopes needed: repo (full control)
-      const GITHUB_TOKEN = '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'
+      // GitHub token from environment variable
+      // Set this in Netlify: Site settings → Environment variables
+      // Name: NEXT_PUBLIC_GITHUB_TOKEN
+      // Value: your GitHub token (get from https://github.com/settings/tokens/new)
+      const GITHUB_TOKEN = process.env.NEXT_PUBLIC_GITHUB_TOKEN || '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'
       const OWNER = 'khabefox'
       const REPO = 'foxbuilt-websiteFOX'
       
@@ -344,10 +346,11 @@ export default function AdminEditor() {
     setSaveMessage("💾 Saving draft...")
     
     try {
-      // GitHub token - if this stops working, get a new one from:
-      // https://github.com/settings/tokens/new
-      // Scopes needed: repo (full control)
-      const GITHUB_TOKEN = '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'
+      // GitHub token from environment variable
+      // Set this in Netlify: Site settings → Environment variables
+      // Name: NEXT_PUBLIC_GITHUB_TOKEN
+      // Value: your GitHub token (get from https://github.com/settings/tokens/new)
+      const GITHUB_TOKEN = process.env.NEXT_PUBLIC_GITHUB_TOKEN || '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'
       const OWNER = 'khabefox'
       const REPO = 'foxbuilt-websiteFOX'
       const PATH = 'public/draft.json'
@@ -425,10 +428,11 @@ export default function AdminEditor() {
     
     try {
       // GitHub API configuration
-      // GitHub token - if this stops working, get a new one from:
-      // https://github.com/settings/tokens/new
-      // Scopes needed: repo (full control)
-      const GITHUB_TOKEN = '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'
+      // GitHub token from environment variable
+      // Set this in Netlify: Site settings → Environment variables
+      // Name: NEXT_PUBLIC_GITHUB_TOKEN
+      // Value: your GitHub token (get from https://github.com/settings/tokens/new)
+      const GITHUB_TOKEN = process.env.NEXT_PUBLIC_GITHUB_TOKEN || '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'
       const OWNER = 'khabefox'
       const REPO = 'foxbuilt-websiteFOX'
       const PATH = 'public/content.json'
