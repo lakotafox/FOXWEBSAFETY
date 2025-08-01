@@ -106,21 +106,9 @@ export default function AdminEditor() {
     const previews = JSON.parse(localStorage.getItem('foxbuilt-image-previews') || '{}')
     if (previews[imagePath]) return previews[imagePath]
     
-    // Also check with public/ prefix in case that's how it's stored
-    if (previews[`public${imagePath}`]) return previews[`public${imagePath}`]
-    
-    // If it starts with /images/ and looks like an uploaded image (has timestamp)
-    // Use GitHub raw URL for immediate display
-    if (imagePath.startsWith('/images/') && imagePath.match(/\d{13}/)) {
-      // Use GitHub raw URL until Netlify rebuilds
-      // Add timestamp to prevent caching issues when images are replaced
-      const timestamp = Date.now()
-      return `https://raw.githubusercontent.com/lakotafox/FOXSITE/main/public${imagePath}?t=${timestamp}`
-    }
-    
-    // For default images or after Netlify rebuild
+    // For any /images/ path, always use GitHub raw URL
     if (imagePath.startsWith('/images/')) {
-      return imagePath
+      return `https://raw.githubusercontent.com/lakotafox/FOXSITE/main/public${imagePath}`
     }
     
     // Default
