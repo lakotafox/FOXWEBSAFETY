@@ -78,12 +78,12 @@ export default function AdminEditor() {
   const [isEditMode, setIsEditMode] = useState(true)
   const [showGalleryEditor, setShowGalleryEditor] = useState(false)
   const [showPasswordScreen, setShowPasswordScreen] = useState(false)
-  const [showVersionModal, setShowVersionModal] = useState(false)
-  const [versionAction, setVersionAction] = useState<'save' | 'load' | 'delete'>('save')
   const [showPublishConfirm, setShowPublishConfirm] = useState(false)
   const [showSpecsModal, setShowSpecsModal] = useState(false)
   const [selectedProductForSpecs, setSelectedProductForSpecs] = useState<any>(null)
   const [editingSpecs, setEditingSpecs] = useState("")
+  const [showDraftModal, setShowDraftModal] = useState(false)
+  const [draftAction, setDraftAction] = useState<'save' | 'load'>('save')
 
   // Gallery images
   const defaultGalleryImages = [
@@ -164,6 +164,10 @@ export default function AdminEditor() {
     // Show loading state
     setSaveMessage("📸 Uploading image to GitHub...")
     
+    // Create immediate preview
+    const previewUrl = URL.createObjectURL(file)
+    updateProduct(category, productId, 'image', previewUrl)
+    
     try {
       // GitHub API configuration
       // GitHub token from environment variable
@@ -209,6 +213,12 @@ export default function AdminEditor() {
         if (response.ok) {
           // Update product with new image path
           updateProduct(category, productId, 'image', `/images/${fileName}`)
+          
+          // Store the preview data URL in localStorage
+          const previews = JSON.parse(localStorage.getItem('foxbuilt-image-previews') || '{}')
+          previews[`/images/${fileName}`] = base64Data
+          localStorage.setItem('foxbuilt-image-previews', JSON.stringify(previews))
+          
           setSaveMessage("✅ Image uploaded successfully!")
           setTimeout(() => setSaveMessage(""), 2000)
         } else {
@@ -238,6 +248,12 @@ export default function AdminEditor() {
   // Handle gallery image upload
   const handleGalleryImageUpload = async (index: number, file: File) => {
     setSaveMessage("📸 Uploading gallery image to GitHub...")
+    
+    // Create a preview URL immediately
+    const previewUrl = URL.createObjectURL(file)
+    const newImages = [...pendingGalleryImages]
+    newImages[index] = previewUrl
+    setPendingGalleryImages(newImages)
     
     try {
       // GitHub token from environment variable
@@ -295,10 +311,16 @@ export default function AdminEditor() {
           return
         }
         
-        // Update gallery with new image path
+        // Update gallery with new image path and store preview
         const newImages = [...pendingGalleryImages]
         newImages[index] = `/images/${fileName}`
         setPendingGalleryImages(newImages)
+        
+        // Store the preview data URL in localStorage
+        const previews = JSON.parse(localStorage.getItem('foxbuilt-image-previews') || '{}')
+        previews[`/images/${fileName}`] = base64Data
+        localStorage.setItem('foxbuilt-image-previews', JSON.stringify(previews))
+        
         setSaveMessage("✅ Gallery image uploaded!")
         setTimeout(() => setSaveMessage(""), 2000)
       }
@@ -310,8 +332,57 @@ export default function AdminEditor() {
   }
 
   // Save draft to GitHub
+  const saveDraftToSlot = async (slot: number) => {
+    setSaveMessage(`💾 Saving draft to slot ${slot}...`)
+    
+    const draftData = {
+      products: featuredProducts,
+      gallery: pendingGalleryImages,
+      lastUpdated: new Date().toISOString(),
+      updatedBy: "Admin"
+    }
+    
+    // Save to localStorage with slot number
+    localStorage.setItem(`foxbuilt-draft-${slot}`, JSON.stringify(draftData))
+    
+    // Also save image previews with slot
+    const currentPreviews = JSON.parse(localStorage.getItem('foxbuilt-image-previews') || '{}')
+    localStorage.setItem(`foxbuilt-previews-${slot}`, JSON.stringify(currentPreviews))
+    
+    setSaveMessage(`✅ Draft saved to slot ${slot}!`)
+    setShowDraftModal(false)
+    setTimeout(() => setSaveMessage(""), 3000)
+  }
+  
+  const loadDraftFromSlot = (slot: number) => {
+    const draftData = localStorage.getItem(`foxbuilt-draft-${slot}`)
+    if (draftData) {
+      const parsed = JSON.parse(draftData)
+      setFeaturedProducts(parsed.products)
+      setPendingGalleryImages(parsed.gallery)
+      
+      // Load the previews for this slot
+      const slotPreviews = localStorage.getItem(`foxbuilt-previews-${slot}`)
+      if (slotPreviews) {
+        localStorage.setItem('foxbuilt-image-previews', slotPreviews)
+      }
+      
+      setSaveMessage(`✅ Draft loaded from slot ${slot}!`)
+      setShowDraftModal(false)
+      setTimeout(() => setSaveMessage(""), 3000)
+    } else {
+      alert(`No draft found in slot ${slot}`)
+    }
+  }
+  
   const saveDraft = async () => {
-    setSaveMessage("💾 Saving draft...")
+    // Show the draft modal to select a slot
+    setDraftAction('save')
+    setShowDraftModal(true)
+  }
+  
+  const saveDraftToGitHub = async () => {
+    setSaveMessage("💾 Saving draft to GitHub...")
     
     try {
       // GitHub token from environment variable
@@ -477,74 +548,7 @@ export default function AdminEditor() {
     }
   }
 
-  // Save to version slot
-  const saveToVersion = (version: string) => {
-    const versionData = {
-      products: featuredProducts,
-      gallery: pendingGalleryImages,
-      savedAt: new Date().toISOString()
-    }
-    localStorage.setItem(`foxbuilt-version-${version}`, JSON.stringify(versionData))
-    setSaveMessage(`✅ Saved to ${version}!`)
-    setShowVersionModal(false)
-    setTimeout(() => setSaveMessage(""), 3000)
-  }
 
-  // Load from version slot
-  const loadFromVersion = (version: string) => {
-    const versionData = localStorage.getItem(`foxbuilt-version-${version}`)
-    if (versionData) {
-      const parsed = JSON.parse(versionData)
-      setFeaturedProducts(parsed.products)
-      setGalleryImages(parsed.gallery)
-      setPendingGalleryImages(parsed.gallery)
-      saveProducts(parsed.products)
-      localStorage.setItem('foxbuilt-gallery', JSON.stringify(parsed.gallery))
-      setSaveMessage(`🔄 Loaded ${version}!`)
-      setShowVersionModal(false)
-      
-      // Trigger storage event for main page
-      window.dispatchEvent(new Event('storage'))
-      
-      setTimeout(() => setSaveMessage(""), 3000)
-    } else {
-      alert(`No saved data found for ${version}`)
-    }
-  }
-
-  // Check if version has saved data
-  const hasVersionData = (version: string): boolean => {
-    return !!localStorage.getItem(`foxbuilt-version-${version}`)
-  }
-
-  // Delete version
-  const deleteVersion = (version: string) => {
-    if (confirm(`Are you sure you want to delete ${version}? This cannot be undone.`)) {
-      localStorage.removeItem(`foxbuilt-version-${version}`)
-      setSaveMessage(`🗑️ Deleted ${version}!`)
-      setTimeout(() => setSaveMessage(""), 3000)
-    }
-  }
-
-  // Revert to V1.0
-  const revertToV1 = () => {
-    if (confirm("Are you sure you want to revert to V1.0? This will reset all products and gallery images to their original state.")) {
-      setFeaturedProducts(defaultProducts)
-      saveProducts(defaultProducts)
-      setGalleryImages(defaultGalleryImages)
-      setPendingGalleryImages(defaultGalleryImages)
-      localStorage.setItem('foxbuilt-gallery', JSON.stringify(defaultGalleryImages))
-      
-      setSaveMessage("🔄 Reverted to V1.0! All products and gallery reset to original.")
-      
-      // Trigger storage event for main page
-      window.dispatchEvent(new Event('storage'))
-      
-      setTimeout(() => {
-        setSaveMessage("")
-      }, 3000)
-    }
-  }
 
   // Login screen
   if (!isAuthenticated) {
@@ -658,31 +662,23 @@ export default function AdminEditor() {
             </div>
             <div className="flex gap-2 flex-wrap justify-center">
               <Button
-                onClick={() => {
-                  setVersionAction('load')
-                  setShowVersionModal(true)
-                }}
-                variant="outline"
-                size="sm"
-                className="bg-white text-blue-600 hover:bg-gray-100 text-xs sm:text-sm"
-              >
-                Versions
-              </Button>
-              <Button
-                onClick={revertToV1}
-                variant="outline"
-                size="sm"
-                className="bg-white text-red-600 hover:bg-gray-100 text-xs sm:text-sm"
-              >
-                Revert to V1.0
-              </Button>
-              <Button
                 onClick={saveDraft}
                 size="sm"
                 className="bg-blue-600 text-white hover:bg-blue-700 font-bold"
               >
                 <Save className="w-4 h-4 mr-1" />
                 💾 Save Draft
+              </Button>
+              <Button
+                onClick={() => {
+                  setDraftAction('load')
+                  setShowDraftModal(true)
+                }}
+                size="sm"
+                className="bg-purple-600 text-white hover:bg-purple-700 font-bold"
+              >
+                <FileText className="w-4 h-4 mr-1" />
+                📂 Load Draft
               </Button>
               <Button
                 onClick={saveAllChanges}
@@ -829,7 +825,20 @@ export default function AdminEditor() {
                       index === currentSlide ? "opacity-100" : "opacity-0"
                     }`}
                   >
-                    <Image src={image || "/placeholder.svg"} alt={`Project ${index + 1}`} fill className="object-cover" />
+                    <Image 
+                      src={(() => {
+                        if (!image) return "/placeholder.svg"
+                        // Check if this is a blob URL (immediate preview)
+                        if (image.startsWith('blob:')) return image
+                        // Check localStorage for preview
+                        const previews = JSON.parse(localStorage.getItem('foxbuilt-image-previews') || '{}')
+                        return previews[image] || image
+                      })()} 
+                      alt={`Project ${index + 1}`} 
+                      fill 
+                      className="object-cover"
+                      unoptimized
+                    />
                   </div>
                 ))}
               </div>
@@ -916,7 +925,14 @@ export default function AdminEditor() {
                 >
                   <div className="relative h-56 group">
                     <Image 
-                      src={product.image || "/placeholder.svg"} 
+                      src={(() => {
+                        if (!product.image) return "/placeholder.svg"
+                        // Check if this is a blob URL (immediate preview)
+                        if (product.image.startsWith('blob:')) return product.image
+                        // Check localStorage for preview
+                        const previews = JSON.parse(localStorage.getItem('foxbuilt-image-previews') || '{}')
+                        return previews[product.image] || product.image
+                      })()} 
                       alt={product.title} 
                       fill 
                       className="object-cover"
@@ -1048,17 +1064,19 @@ export default function AdminEditor() {
                           {product.price}
                         </span>
                       )}
-                      <Button 
-                        variant="outline" 
-                        className="border-2 border-slate-700 font-bold"
-                        onClick={() => {
-                          setSelectedProductForSpecs(product)
-                          setEditingSpecs(product.specs || "")
-                          setShowSpecsModal(true)
-                        }}
-                      >
-                        SPECS
-                      </Button>
+                      {isEditMode && (
+                        <Button 
+                          className="bg-purple-600 text-white hover:bg-purple-700 font-bold"
+                          onClick={() => {
+                            setSelectedProductForSpecs(product)
+                            setEditingSpecs(product.specs || "")
+                            setShowSpecsModal(true)
+                          }}
+                        >
+                          <Edit2 className="w-4 h-4 mr-1" />
+                          Edit Specs
+                        </Button>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -1242,10 +1260,17 @@ export default function AdminEditor() {
                   <div className="relative aspect-video bg-gray-100 rounded border-2 border-dashed border-gray-300 overflow-hidden group">
                     {image && (
                       <Image 
-                        src={image} 
+                        src={(() => {
+                          // Check if this is a blob URL (immediate preview)
+                          if (image.startsWith('blob:')) return image
+                          // Check localStorage for preview
+                          const previews = JSON.parse(localStorage.getItem('foxbuilt-image-previews') || '{}')
+                          return previews[image] || image
+                        })()} 
                         alt={`Gallery ${index + 1}`} 
                         fill 
-                        className="object-cover" 
+                        className="object-cover"
+                        unoptimized
                       />
                     )}
                     <label className="absolute inset-0 flex items-center justify-center cursor-pointer bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-opacity">
@@ -1276,6 +1301,7 @@ export default function AdminEditor() {
                   setShowGalleryEditor(false)
                 }}
                 variant="outline"
+                className="border-2 border-gray-600 text-gray-700 hover:bg-gray-100 font-bold"
               >
                 Cancel
               </Button>
@@ -1294,97 +1320,6 @@ export default function AdminEditor() {
         </div>
       )}
 
-      {/* Version Management Modal */}
-      {showVersionModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-[70] flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-md w-full p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold">
-                {versionAction === 'save' ? 'Save Build Version' : versionAction === 'load' ? 'Load Build Version' : 'Delete Build Version'}
-              </h2>
-              <Button
-                onClick={() => setShowVersionModal(false)}
-                variant="outline"
-                size="sm"
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-3">
-              {['V2.0', 'V3.0', 'V4.0', 'V5.0', 'V6.0', 'V7.0', 'V8.0', 'V9.0'].map((version) => {
-                const hasData = hasVersionData(version)
-                const versionInfo = hasData ? JSON.parse(localStorage.getItem(`foxbuilt-version-${version}`) || '{}') : null
-                
-                return (
-                  <Button
-                    key={version}
-                    onClick={() => {
-                      if (versionAction === 'save') {
-                        if (hasData && !confirm(`${version} already has saved data. Overwrite?`)) {
-                          return
-                        }
-                        saveToVersion(version)
-                      } else if (versionAction === 'load') {
-                        loadFromVersion(version)
-                      } else if (versionAction === 'delete') {
-                        if (hasData) {
-                          deleteVersion(version)
-                          // Force re-render by closing and reopening modal
-                          setShowVersionModal(false)
-                          setTimeout(() => {
-                            setShowVersionModal(true)
-                            setVersionAction('delete')
-                          }, 100)
-                        }
-                      }
-                    }}
-                    variant={hasData ? "default" : "outline"}
-                    className={`h-20 flex flex-col items-center justify-center ${
-                      hasData 
-                        ? versionAction === 'save' 
-                          ? 'bg-amber-500 hover:bg-amber-600 text-white' 
-                          : versionAction === 'load'
-                            ? 'bg-green-600 hover:bg-green-700 text-white'
-                            : 'bg-red-600 hover:bg-red-700 text-white'
-                        : 'bg-gray-100 hover:bg-gray-200'
-                    }`}
-                  >
-                    <span className="font-bold text-lg">{version}</span>
-                    {hasData && versionInfo?.savedAt && (
-                      <span className="text-xs opacity-80">
-                        {new Date(versionInfo.savedAt).toLocaleDateString()}
-                      </span>
-                    )}
-                    {!hasData && (
-                      <span className="text-xs opacity-60">Empty Slot</span>
-                    )}
-                  </Button>
-                )
-              })}
-            </div>
-            
-            <div className="mt-6 flex justify-between items-center">
-              <div className="flex gap-2">
-                <Button
-                  onClick={() => setVersionAction(versionAction === 'delete' ? 'load' : 'delete')}
-                  variant="outline"
-                  size="sm"
-                  className={versionAction === 'delete' ? 'text-red-600 border-red-600' : ''}
-                >
-                  {versionAction === 'delete' ? 'Back to Load' : 'Delete Mode'}
-                </Button>
-              </div>
-              <Button
-                onClick={() => setShowVersionModal(false)}
-                variant="outline"
-              >
-                Cancel
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Publish Confirmation Modal */}
       {showPublishConfirm && (
@@ -1476,6 +1411,82 @@ Warranty: 10 year limited"
               >
                 <Check className="w-4 h-4 mr-2" />
                 Save Specifications
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Draft Slot Modal */}
+      {showDraftModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-[70] flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold">
+                {draftAction === 'save' ? 'Save Draft to Slot' : 'Load Draft from Slot'}
+              </h2>
+              <Button
+                onClick={() => setShowDraftModal(false)}
+                variant="outline"
+                size="sm"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+            
+            <p className="text-gray-600 mb-6">
+              {draftAction === 'save' 
+                ? 'Choose a slot to save your current draft. This will overwrite any existing draft in that slot.'
+                : 'Choose a slot to load a draft from. This will replace your current work.'}
+            </p>
+            
+            <div className="grid grid-cols-3 gap-4">
+              {[1, 2, 3].map((slot) => {
+                const hasDraft = !!localStorage.getItem(`foxbuilt-draft-${slot}`)
+                const draftInfo = hasDraft ? JSON.parse(localStorage.getItem(`foxbuilt-draft-${slot}`) || '{}') : null
+                
+                return (
+                  <Button
+                    key={slot}
+                    onClick={() => {
+                      if (draftAction === 'save') {
+                        if (hasDraft && !confirm(`Slot ${slot} already has a draft. Overwrite?`)) {
+                          return
+                        }
+                        saveDraftToSlot(slot)
+                      } else {
+                        loadDraftFromSlot(slot)
+                      }
+                    }}
+                    variant={hasDraft ? "default" : "outline"}
+                    className={`h-24 flex flex-col items-center justify-center ${
+                      hasDraft 
+                        ? draftAction === 'save'
+                          ? 'bg-amber-500 hover:bg-amber-600 text-white'
+                          : 'bg-green-600 hover:bg-green-700 text-white'
+                        : 'bg-gray-100 hover:bg-gray-200'
+                    }`}
+                  >
+                    <span className="font-bold text-xl">Slot {slot}</span>
+                    {hasDraft && draftInfo?.lastUpdated && (
+                      <span className="text-xs mt-1 opacity-80">
+                        {new Date(draftInfo.lastUpdated).toLocaleDateString()}
+                      </span>
+                    )}
+                    {!hasDraft && (
+                      <span className="text-xs mt-1 opacity-60">Empty</span>
+                    )}
+                  </Button>
+                )
+              })}
+            </div>
+            
+            <div className="mt-6 flex justify-end">
+              <Button
+                onClick={() => setShowDraftModal(false)}
+                variant="outline"
+              >
+                Cancel
               </Button>
             </div>
           </div>
