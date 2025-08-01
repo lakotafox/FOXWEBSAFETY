@@ -282,6 +282,13 @@ export default function AdminEditor() {
   const processProductImageUpload = async (category: string, productId: number, file: File) => {
     setActiveUploads(count => count + 1)
     
+    // Set a timeout to prevent infinite loading
+    const uploadTimeout = setTimeout(() => {
+      console.error('Product upload timeout after 30 seconds')
+      showMessage("❌ Upload timeout - please try again", 5000)
+      setActiveUploads(count => count - 1)
+    }, 30000) // 30 second timeout
+    
     // Create immediate preview
     const previewUrl = URL.createObjectURL(file)
     updateProduct(category, productId, 'image', previewUrl)
@@ -346,7 +353,8 @@ export default function AdminEditor() {
           // Don't update the product image - keep showing the blob URL
           // The GitHub path will be used when publishing
           
-          setActiveUploads(count => count - 1)
+          clearTimeout(uploadTimeout)
+        setActiveUploads(count => count - 1)
         } else {
           const error = await response.json()
           console.error('GitHub upload error:', error)
@@ -356,12 +364,14 @@ export default function AdminEditor() {
           } else {
             showMessage(`❌ Error: ${error.message || response.status}`, 5000)
           }
-          setActiveUploads(count => count - 1)
+          clearTimeout(uploadTimeout)
+        setActiveUploads(count => count - 1)
         }
       }
       
       reader.onerror = () => {
         showMessage("❌ Error reading image file", 3000)
+        clearTimeout(uploadTimeout)
         setActiveUploads(count => count - 1)
       }
     } catch (error) {
@@ -385,10 +395,20 @@ export default function AdminEditor() {
   
   // Process gallery image upload
   const processGalleryImageUpload = async (index: number, file: File) => {
+    console.log('Starting gallery upload for index:', index)
     setActiveUploads(count => count + 1)
+    
+    // Set a timeout to prevent infinite loading
+    const uploadTimeout = setTimeout(() => {
+      console.error('Upload timeout after 30 seconds')
+      showMessage("❌ Upload timeout - please try again", 5000)
+      setActiveUploads(count => count - 1)
+    }, 30000) // 30 second timeout
     
     // Get the preview URL from pendingGalleryImages
     const previewUrl = pendingGalleryImages[index]
+    console.log('Preview URL:', previewUrl)
+    console.log('File size:', file.size, 'bytes', (file.size / 1024 / 1024).toFixed(2), 'MB')
     
     try {
       // GitHub token from environment variable
@@ -409,11 +429,15 @@ export default function AdminEditor() {
       reader.readAsDataURL(file)
       
       reader.onload = async () => {
-        const base64Data = reader.result as string
-        const base64Content = base64Data.split(',')[1]
-        
-        // Upload to GitHub
-        const response = await fetch(
+        try {
+          const base64Data = reader.result as string
+          console.log('Base64 data length:', base64Data.length)
+          const base64Content = base64Data.split(',')[1]
+          console.log('Base64 content length:', base64Content.length)
+          
+          // Upload to GitHub
+          console.log('Uploading to GitHub:', PATH)
+          const response = await fetch(
           `https://api.github.com/repos/${OWNER}/${REPO}/contents/${PATH}`,
           {
             method: 'PUT',
@@ -430,6 +454,8 @@ export default function AdminEditor() {
           }
         )
         
+        console.log('GitHub response status:', response.status)
+        
         if (!response.ok) {
           const error = await response.json()
           console.error('GitHub API error:', error)
@@ -442,7 +468,8 @@ export default function AdminEditor() {
           } else {
             showMessage(`❌ Error: ${error.message || response.status}`, 5000)
           }
-          setActiveUploads(count => count - 1)
+          clearTimeout(uploadTimeout)
+        setActiveUploads(count => count - 1)
           return
         }
         
@@ -460,11 +487,20 @@ export default function AdminEditor() {
         // Store the URL mapping in localStorage too
         localStorage.setItem('foxbuilt-url-map', JSON.stringify(newUrlMap))
         
+        clearTimeout(uploadTimeout)
         setActiveUploads(count => count - 1)
+        } catch (uploadError) {
+          console.error('Error during upload:', uploadError)
+          showMessage("❌ Upload error - check console", 5000)
+          clearTimeout(uploadTimeout)
+          setActiveUploads(count => count - 1)
+        }
       }
       
       reader.onerror = () => {
+        console.error('FileReader error')
         showMessage("❌ Error reading gallery image", 3000)
+        clearTimeout(uploadTimeout)
         setActiveUploads(count => count - 1)
       }
     } catch (error) {
