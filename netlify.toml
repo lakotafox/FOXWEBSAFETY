@@ -1,7 +1,7 @@
 [build]
   # Only rebuild when content.json changes (when you click Publish)
-  # Images will still be accessible via GitHub URLs
-  ignore = "git diff --quiet $COMMIT_REF $CACHED_COMMIT_REF -- public/content.json"
+  # Ignore all image uploads to prevent build spam
+  ignore = "! git diff --quiet $COMMIT_REF $CACHED_COMMIT_REF -- public/content.json"
 
 # Optional: Set Node version
 [build.environment]
