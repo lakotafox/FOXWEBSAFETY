@@ -106,9 +106,16 @@ export default function AdminEditor() {
     const previews = JSON.parse(localStorage.getItem('foxbuilt-image-previews') || '{}')
     if (previews[imagePath]) return previews[imagePath]
     
-    // If it starts with /images/ and looks like an uploaded image, return as is
-    // Next.js will handle serving it from the public folder
-    if (imagePath.startsWith('/images/')) return imagePath
+    // Also check with public/ prefix in case that's how it's stored
+    if (previews[`public${imagePath}`]) return previews[`public${imagePath}`]
+    
+    // If it starts with /images/ and we're in development, try to load it
+    // In production after build, these will be served from public folder
+    if (imagePath.startsWith('/images/')) {
+      // For uploaded images that might not have previews, just return the path
+      // It will work after Netlify rebuild
+      return imagePath
+    }
     
     // Default
     return imagePath
@@ -154,6 +161,22 @@ export default function AdminEditor() {
         console.error('Error loading URL map:', e)
       }
     }
+    
+    // Also try to load from published content.json for fresh editor sessions
+    fetch('/content.json')
+      .then(res => res.json())
+      .then(data => {
+        if (data.products) {
+          setFeaturedProducts(data.products)
+          saveProducts(data.products)
+        }
+        if (data.gallery) {
+          setGalleryImages(data.gallery)
+          setPendingGalleryImages(data.gallery)
+          localStorage.setItem('foxbuilt-gallery', JSON.stringify(data.gallery))
+        }
+      })
+      .catch(err => console.log('Could not load content.json:', err))
   }, [])
 
   // Handle scroll effect for header
