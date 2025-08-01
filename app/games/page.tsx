@@ -277,18 +277,34 @@ export default function GamesPage() {
             gameState.ballY >= gameState.playerY && 
             gameState.ballY <= gameState.playerY + gameState.paddleHeight &&
             gameState.ballDX < 0) {
-          gameState.ballDX = Math.abs(gameState.ballDX)
-          // Add some randomness to angle
-          gameState.ballDY += (Math.random() - 0.5) * 2
+          // Calculate where ball hit the paddle (from -1 to 1)
+          let collidePoint = (gameState.ballY - (gameState.playerY + gameState.paddleHeight / 2))
+          collidePoint = collidePoint / (gameState.paddleHeight / 2)
+          
+          // Calculate bounce angle (max 45 degrees)
+          let angle = collidePoint * Math.PI / 4
+          
+          // Set new ball speeds based on angle
+          const speed = Math.sqrt(gameState.ballDX * gameState.ballDX + gameState.ballDY * gameState.ballDY)
+          gameState.ballDX = speed * Math.cos(angle)
+          gameState.ballDY = speed * Math.sin(angle)
         }
         
         if (gameState.ballX >= canvas.width - 40 && 
             gameState.ballY >= gameState.aiY && 
             gameState.ballY <= gameState.aiY + gameState.paddleHeight &&
             gameState.ballDX > 0) {
-          gameState.ballDX = -Math.abs(gameState.ballDX)
-          // Add some randomness to angle
-          gameState.ballDY += (Math.random() - 0.5) * 2
+          // Calculate where ball hit the paddle (from -1 to 1)
+          let collidePoint = (gameState.ballY - (gameState.aiY + gameState.paddleHeight / 2))
+          collidePoint = collidePoint / (gameState.paddleHeight / 2)
+          
+          // Calculate bounce angle (max 45 degrees)
+          let angle = collidePoint * Math.PI / 4
+          
+          // Set new ball speeds based on angle
+          const speed = Math.sqrt(gameState.ballDX * gameState.ballDX + gameState.ballDY * gameState.ballDY)
+          gameState.ballDX = -speed * Math.cos(angle)
+          gameState.ballDY = speed * Math.sin(angle)
         }
         
         // Score
