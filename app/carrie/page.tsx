@@ -677,7 +677,7 @@ export default function AdminEditor() {
   return (
     <div className="min-h-screen bg-zinc-100">
       {/* Admin Controls Bar */}
-      <div className="fixed top-0 left-0 right-0 z-[60] bg-green-600 text-white p-2">
+      <div className="bg-green-600 text-white p-2">
         <div className="container mx-auto">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-2">
             <div className="flex items-center gap-2">
@@ -726,19 +726,20 @@ export default function AdminEditor() {
 
       {/* Save message */}
       {saveMessage && (
-        <div className="fixed top-12 left-0 right-0 z-[59] bg-green-500 text-white p-4 text-center font-bold">
+        <div className="fixed top-0 left-0 right-0 z-[59] bg-green-500 text-white p-4 text-center font-bold">
           {saveMessage}
         </div>
       )}
 
       {/* Main site content with edit capability */}
-      <div className={saveMessage ? "pt-24" : "pt-12"}>
-        {/* Header - Same as main site */}
-        <header
-          className={`fixed top-12 sm:top-12 left-0 right-0 z-50 bg-slate-900 border-b-4 border-red-600 shadow-xl transition-all duration-500 ${
-            isScrolled ? "py-0.25" : "py-1.5"
-          } ${isEditMode ? "top-20 sm:top-12" : ""}`}
-        >
+      <div>
+        {/* Header - Hidden in admin mode */}
+        {!isEditMode && (
+          <header
+            className={`fixed top-0 left-0 right-0 z-50 bg-slate-900 border-b-4 border-red-600 shadow-xl transition-all duration-500 ${
+              isScrolled ? "py-0.25" : "py-1.5"
+            }`}
+          >
           <div className="container mx-auto px-4 flex items-center justify-between">
             <div className={`transition-all duration-500 ${isScrolled ? "scale-50" : "scale-100"}`}>
               <div className="flex items-center space-x-3">
@@ -785,9 +786,10 @@ export default function AdminEditor() {
             </div>
           </div>
         </header>
+        )}
 
         {/* Hero Section - Same as main site */}
-        <section className={`bg-gradient-to-br from-slate-800 via-slate-900 to-zinc-900 py-24 text-white relative overflow-hidden ${isEditMode ? "pt-48 sm:pt-40" : "pt-40"}`}>
+        <section className={`bg-gradient-to-br from-slate-800 via-slate-900 to-zinc-900 py-24 text-white relative overflow-hidden ${isEditMode ? "pt-24" : "pt-40"}`}>
           <div className="absolute inset-0 opacity-10">
             <div className="absolute inset-0 bg-gradient-to-r from-red-600/20 to-blue-600/20"></div>
             <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-red-600 via-white to-blue-600"></div>
