@@ -678,30 +678,31 @@ export default function AdminEditor() {
     <div className="min-h-screen bg-zinc-100">
       {/* Admin Controls Bar */}
       <div className="fixed top-0 left-0 right-0 z-[60] bg-green-600 text-white p-2">
-        <div className="container mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <Edit2 className="w-5 h-5" />
-            <span className="font-bold">ADMIN EDIT MODE</span>
-          </div>
-          <div className="flex gap-2">
-            <Button
-              onClick={() => {
-                setVersionAction('load')
-                setShowVersionModal(true)
-              }}
-              variant="outline"
-              size="sm"
-              className="bg-white text-blue-600 hover:bg-gray-100"
-            >
-              Versions
-            </Button>
-            <Button
-              onClick={revertToV1}
-              variant="outline"
-              size="sm"
-              className="bg-white text-red-600 hover:bg-gray-100"
-            >
-              Revert to V1.0
+        <div className="container mx-auto">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-2">
+            <div className="flex items-center gap-2">
+              <Edit2 className="w-5 h-5" />
+              <span className="font-bold text-sm sm:text-base">ADMIN EDIT MODE</span>
+            </div>
+            <div className="flex gap-2 flex-wrap justify-center">
+              <Button
+                onClick={() => {
+                  setVersionAction('load')
+                  setShowVersionModal(true)
+                }}
+                variant="outline"
+                size="sm"
+                className="bg-white text-blue-600 hover:bg-gray-100 text-xs sm:text-sm"
+              >
+                Versions
+              </Button>
+              <Button
+                onClick={revertToV1}
+                variant="outline"
+                size="sm"
+                className="bg-white text-red-600 hover:bg-gray-100 text-xs sm:text-sm"
+              >
+                Revert to V1.0
             </Button>
             <Button
               onClick={saveDraft}
@@ -734,9 +735,9 @@ export default function AdminEditor() {
       <div className={saveMessage ? "pt-24" : "pt-12"}>
         {/* Header - Same as main site */}
         <header
-          className={`fixed top-12 left-0 right-0 z-50 bg-slate-900 border-b-4 border-red-600 shadow-xl transition-all duration-500 ${
+          className={`fixed top-12 sm:top-12 left-0 right-0 z-50 bg-slate-900 border-b-4 border-red-600 shadow-xl transition-all duration-500 ${
             isScrolled ? "py-0.25" : "py-1.5"
-          }`}
+          } ${isEditMode ? "top-20 sm:top-12" : ""}`}
         >
           <div className="container mx-auto px-4 flex items-center justify-between">
             <div className={`transition-all duration-500 ${isScrolled ? "scale-50" : "scale-100"}`}>
@@ -786,7 +787,7 @@ export default function AdminEditor() {
         </header>
 
         {/* Hero Section - Same as main site */}
-        <section className="pt-40 bg-gradient-to-br from-slate-800 via-slate-900 to-zinc-900 py-24 text-white relative overflow-hidden">
+        <section className={`bg-gradient-to-br from-slate-800 via-slate-900 to-zinc-900 py-24 text-white relative overflow-hidden ${isEditMode ? "pt-48 sm:pt-40" : "pt-40"}`}>
           <div className="absolute inset-0 opacity-10">
             <div className="absolute inset-0 bg-gradient-to-r from-red-600/20 to-blue-600/20"></div>
             <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-red-600 via-white to-blue-600"></div>
