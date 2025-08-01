@@ -102,6 +102,28 @@ export default function AdminEditor() {
   const [showLoadingOverlay, setShowLoadingOverlay] = useState(false)
   const [loadingStartTime, setLoadingStartTime] = useState<number | null>(null)
   const [debugLogs, setDebugLogs] = useState<string[]>([])
+  const [showPublishLoadingOverlay, setShowPublishLoadingOverlay] = useState(false)
+  const [publishMessage, setPublishMessage] = useState("")
+  
+  // Construction messages for publish loading
+  const constructionMessages = [
+    "Counting kickplates...",
+    "This truck is diesel right?",
+    "Leveling...",
+    "Measuring...",
+    "Straightening spines...",
+    "Leveling again...",
+    "Adding cantilevers...",
+    "Smacking topcaps...",
+    "Switching bits...",
+    "Cleaning tiles...",
+    "Loading the truck...",
+    "Unloading the truck...",
+    "Checking measurements twice...",
+    "Torquing bolts to spec...",
+    "Applying finish coat...",
+    "Quality control inspection..."
+  ]
   
   // Debug logging function
   const debugLog = (message: string) => {
@@ -111,23 +133,23 @@ export default function AdminEditor() {
   
   // Helper function to get displayable image URL
   const getImageUrl = (imagePath: string) => {
+    debugLog(`getImageUrl called with: ${imagePath}`)
     if (!imagePath) return "/placeholder.svg"
     
     // If it's a blob URL, check if we have a mapping to the real URL
     if (imagePath.startsWith('blob:')) {
       const urlMap = JSON.parse(localStorage.getItem('foxbuilt-url-map') || '{}')
       const mappedPath = urlMap[imagePath]
+      debugLog(`URL map contains: ${Object.keys(urlMap).length} entries`)
       if (mappedPath) {
         debugLog(`Mapped blob URL to: ${mappedPath}`)
-        // Check for preview first
-        const previews = JSON.parse(localStorage.getItem('foxbuilt-image-previews') || '{}')
-        if (previews[mappedPath]) {
-          return previews[mappedPath]
-        }
-        // Otherwise use GitHub raw URL
-        return `https://raw.githubusercontent.com/lakotafox/FOXSITE/main/public${mappedPath}`
+        // Skip preview on mobile, go straight to GitHub URL
+        const githubUrl = `https://raw.githubusercontent.com/lakotafox/FOXSITE/main/public${mappedPath}`
+        debugLog(`Using GitHub URL: ${githubUrl}`)
+        return githubUrl
       }
       // If no mapping, return blob URL
+      debugLog(`No mapping found for blob URL`)
       return imagePath
     }
     
@@ -380,8 +402,9 @@ export default function AdminEditor() {
           // Store the URL mapping in localStorage too
           localStorage.setItem('foxbuilt-url-map', JSON.stringify(newUrlMap))
           
-          // Don't update the product image - keep showing the blob URL
-          // The GitHub path will be used when publishing
+          // Update the product to use the GitHub path instead of blob URL
+          updateProduct(category, productId, 'image', `/images/${fileName}`)
+          debugLog(`Updated product image to: /images/${fileName}`)
           
           clearTimeout(uploadTimeout)
         setActiveUploads(count => count - 1)
@@ -522,8 +545,13 @@ export default function AdminEditor() {
         debugLog('✅ Upload successful!')
         debugLog(`Stored mapping: ${previewUrl} -> /images/${fileName}`)
         
-        // Force a re-render of the gallery
-        setPendingGalleryImages(current => [...current])
+        // Update the gallery to use the GitHub path instead of blob URL
+        setPendingGalleryImages(current => {
+          const newImages = [...current]
+          newImages[index] = `/images/${fileName}`
+          debugLog(`Updated gallery index ${index} to use: /images/${fileName}`)
+          return newImages
+        })
         
         clearTimeout(uploadTimeout)
         setActiveUploads(count => count - 1)
@@ -657,12 +685,30 @@ export default function AdminEditor() {
         localStorage.setItem('foxbuilt-gallery', JSON.stringify(pendingGalleryImages))
         setGalleryImages(pendingGalleryImages)
         
-        setSaveMessage("✅ Published successfully! Website will update in ~30 seconds.")
+        setSaveMessage("✅ Published successfully!")
         
+        // Show publish loading overlay for 1 minute
         setTimeout(() => {
           setSaveMessage("")
-          setShowPublishConfirm(true)
-        }, 3000)
+          setShowPublishLoadingOverlay(true)
+          
+          // Start rotating messages
+          let messageIndex = 0
+          setPublishMessage(constructionMessages[0])
+          
+          const messageInterval = setInterval(() => {
+            messageIndex = (messageIndex + 1) % constructionMessages.length
+            setPublishMessage(constructionMessages[messageIndex])
+          }, 4000) // Change message every 4 seconds
+          
+          // Hide overlay after 60 seconds
+          setTimeout(() => {
+            clearInterval(messageInterval)
+            setShowPublishLoadingOverlay(false)
+            setPublishMessage("")
+            setShowPublishConfirm(true)
+          }, 60000) // 1 minute
+        }, 2000)
       } else {
         const error = await updateResponse.json()
         console.error('GitHub API error:', error)
@@ -801,6 +847,27 @@ export default function AdminEditor() {
           >
             <source src="/foxloading.webm" type="video/webm" />
           </video>
+        </div>
+      )}
+      
+      {/* Publish Loading Overlay */}
+      {showPublishLoadingOverlay && (
+        <div className="fixed inset-0 bg-black/95 z-[100] flex flex-col items-center justify-center pointer-events-auto" style={{ pointerEvents: 'all' }}>
+          {/* Fox loading video */}
+          <video 
+            className="w-64 h-64 mb-8"
+            autoPlay
+            loop
+            muted
+            playsInline
+          >
+            <source src="/foxloading.webm" type="video/webm" />
+          </video>
+          
+          {/* Construction message */}
+          <div className="text-white text-xl font-bold animate-pulse">
+            {publishMessage}
+          </div>
         </div>
       )}
       
