@@ -690,13 +690,16 @@ export default function AdminEditor() {
         <div className="fixed inset-0 bg-black/80 z-[100] flex items-center justify-center pointer-events-auto" style={{ pointerEvents: 'all' }}>
           <div className="bg-white rounded-lg p-8 text-center max-w-sm">
             <div className="mb-6">
-              {/* Spinning Chrome/Fox logo */}
-              <div className="relative w-32 h-32 mx-auto animate-spin">
-                <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-red-500 via-yellow-500 to-green-500"></div>
-                <div className="absolute inset-2 rounded-full bg-gradient-to-tr from-green-500 via-blue-500 to-red-500"></div>
-                <div className="absolute inset-4 rounded-full bg-white"></div>
-                <div className="absolute inset-6 rounded-full bg-blue-500"></div>
-              </div>
+              {/* Fox loading video */}
+              <video 
+                className="w-32 h-32 mx-auto"
+                autoPlay
+                loop
+                muted
+                playsInline
+              >
+                <source src="/foxloading.webm" type="video/webm" />
+              </video>
             </div>
             <h2 className="text-2xl font-black text-slate-900 mb-2">
               UPLOADING IMAGES
