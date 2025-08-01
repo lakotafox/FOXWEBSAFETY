@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Image from "next/image"
 import { ChevronLeft, ChevronRight, Phone, Mail, MapPin, FileText, Save, Edit2, X, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -75,15 +75,15 @@ export default function AdminEditor() {
   const [featuredProducts, setFeaturedProducts] = useState(getProducts())
   const [editingId, setEditingId] = useState<number | null>(null)
   const [saveMessage, setSaveMessage] = useState("")
+  const messageTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const [isEditMode, setIsEditMode] = useState(true)
   const [showGalleryEditor, setShowGalleryEditor] = useState(false)
   const [showPasswordScreen, setShowPasswordScreen] = useState(false)
   const [showPublishConfirm, setShowPublishConfirm] = useState(false)
-  const [showSpecsModal, setShowSpecsModal] = useState(false)
-  const [selectedProductForSpecs, setSelectedProductForSpecs] = useState<any>(null)
-  const [editingSpecs, setEditingSpecs] = useState("")
+  const [expandedSpecs, setExpandedSpecs] = useState<number | null>(null)
   const [showDraftModal, setShowDraftModal] = useState(false)
-  const [draftAction, setDraftAction] = useState<'save' | 'load'>('save')
+  const [draftAction, setDraftAction] = useState<'save' | 'load' | 'delete'>('save')
+  const [imageUrlMap, setImageUrlMap] = useState<{[blobUrl: string]: string}>({})
 
   // Gallery images
   const defaultGalleryImages = [
@@ -97,6 +97,23 @@ export default function AdminEditor() {
   const [galleryImages, setGalleryImages] = useState(defaultGalleryImages)
   const [pendingGalleryImages, setPendingGalleryImages] = useState(defaultGalleryImages)
   
+  // Helper function to set save message with auto-clear
+  const showMessage = (message: string, duration: number = 3000) => {
+    // Clear any existing timeout
+    if (messageTimeoutRef.current) {
+      clearTimeout(messageTimeoutRef.current)
+    }
+    
+    // Set the new message
+    setSaveMessage(message)
+    
+    // Set a new timeout
+    messageTimeoutRef.current = setTimeout(() => {
+      setSaveMessage("")
+      messageTimeoutRef.current = null
+    }, duration)
+  }
+
   // Load saved data on mount
   useEffect(() => {
     // Load from localStorage only - no automatic draft loading
@@ -108,6 +125,16 @@ export default function AdminEditor() {
         setPendingGalleryImages(images)
       } catch (e) {
         console.error('Error loading gallery images:', e)
+      }
+    }
+    
+    // Load URL map from localStorage
+    const savedUrlMap = localStorage.getItem('foxbuilt-url-map')
+    if (savedUrlMap) {
+      try {
+        setImageUrlMap(JSON.parse(savedUrlMap))
+      } catch (e) {
+        console.error('Error loading URL map:', e)
       }
     }
   }, [])
@@ -162,7 +189,7 @@ export default function AdminEditor() {
   // Handle image upload
   const handleImageUpload = async (category: string, productId: number, file: File) => {
     // Show loading state
-    setSaveMessage("📸 Uploading image to GitHub...")
+    showMessage("📸 Uploading image to GitHub...", 30000) // 30 seconds for upload
     
     // Create immediate preview
     const previewUrl = URL.createObjectURL(file)
@@ -211,43 +238,47 @@ export default function AdminEditor() {
         )
         
         if (response.ok) {
-          // Update product with new image path
-          updateProduct(category, productId, 'image', `/images/${fileName}`)
+          // Store the mapping between blob URL and GitHub path
+          const newUrlMap = {...imageUrlMap}
+          newUrlMap[previewUrl] = `/images/${fileName}`
+          setImageUrlMap(newUrlMap)
           
           // Store the preview data URL in localStorage
           const previews = JSON.parse(localStorage.getItem('foxbuilt-image-previews') || '{}')
           previews[`/images/${fileName}`] = base64Data
           localStorage.setItem('foxbuilt-image-previews', JSON.stringify(previews))
           
-          setSaveMessage("✅ Image uploaded successfully!")
-          setTimeout(() => setSaveMessage(""), 2000)
+          // Store the URL mapping in localStorage too
+          localStorage.setItem('foxbuilt-url-map', JSON.stringify(newUrlMap))
+          
+          // Don't update the product image - keep showing the blob URL
+          // The GitHub path will be used when publishing
+          
+          showMessage("✅ Image uploaded successfully!", 2000)
         } else {
           const error = await response.json()
           console.error('GitHub upload error:', error)
           if (response.status === 401) {
-            setSaveMessage("❌ GitHub token expired - Tell Khabe: 'GitHub 401 error'")
+            showMessage("❌ GitHub token expired - Tell Khabe: 'GitHub 401 error'", 5000)
             alert("ERROR: GitHub token expired (401)\n\nTell Khabe: 'GitHub 401 error - need new token'\n\nHe'll fix it free!")
           } else {
-            setSaveMessage(`❌ Error: ${error.message || response.status}`)
+            showMessage(`❌ Error: ${error.message || response.status}`, 5000)
           }
-          setTimeout(() => setSaveMessage(""), 5000)
         }
       }
       
       reader.onerror = () => {
-        setSaveMessage("❌ Error reading image file")
-        setTimeout(() => setSaveMessage(""), 3000)
+        showMessage("❌ Error reading image file", 3000)
       }
     } catch (error) {
       console.error('Image upload error:', error)
-      setSaveMessage("❌ Error uploading image")
-      setTimeout(() => setSaveMessage(""), 3000)
+      showMessage("❌ Error uploading image", 3000)
     }
   }
 
   // Handle gallery image upload
   const handleGalleryImageUpload = async (index: number, file: File) => {
-    setSaveMessage("📸 Uploading gallery image to GitHub...")
+    showMessage("📸 Uploading gallery image to GitHub...", 30000) // 30 seconds for upload
     
     // Create a preview URL immediately
     const previewUrl = URL.createObjectURL(file)
@@ -300,44 +331,63 @@ export default function AdminEditor() {
           console.error('GitHub API error:', error)
           console.error('Tried to upload to:', PATH)
           if (response.status === 401) {
-            setSaveMessage("❌ GitHub token expired - Tell Khabe: 'GitHub 401 error'")
+            showMessage("❌ GitHub token expired - Tell Khabe: 'GitHub 401 error'", 5000)
             alert("ERROR: GitHub token expired (401)\n\nTell Khabe: 'GitHub 401 error - need new token'\n\nHe'll fix it free!")
           } else if (response.status === 404) {
-            setSaveMessage(`❌ GitHub repo not found or no access - check token permissions`)
+            showMessage(`❌ GitHub repo not found or no access - check token permissions`, 5000)
           } else {
-            setSaveMessage(`❌ Error: ${error.message || response.status}`)
+            showMessage(`❌ Error: ${error.message || response.status}`, 5000)
           }
-          setTimeout(() => setSaveMessage(""), 5000)
           return
         }
         
-        // Update gallery with new image path and store preview
-        const newImages = [...pendingGalleryImages]
-        newImages[index] = `/images/${fileName}`
-        setPendingGalleryImages(newImages)
+        // Store the mapping between blob URL and GitHub path
+        const newUrlMap = {...imageUrlMap}
+        newUrlMap[previewUrl] = `/images/${fileName}`
+        setImageUrlMap(newUrlMap)
         
         // Store the preview data URL in localStorage
         const previews = JSON.parse(localStorage.getItem('foxbuilt-image-previews') || '{}')
         previews[`/images/${fileName}`] = base64Data
         localStorage.setItem('foxbuilt-image-previews', JSON.stringify(previews))
         
-        setSaveMessage("✅ Gallery image uploaded!")
-        setTimeout(() => setSaveMessage(""), 2000)
+        // Store the URL mapping in localStorage too
+        localStorage.setItem('foxbuilt-url-map', JSON.stringify(newUrlMap))
+        
+        showMessage("✅ Gallery image uploaded!", 2000)
       }
     } catch (error) {
       console.error('Gallery upload error:', error)
-      setSaveMessage("❌ Error uploading image")
-      setTimeout(() => setSaveMessage(""), 3000)
+      showMessage("❌ Error uploading image", 3000)
     }
   }
 
   // Save draft to GitHub
   const saveDraftToSlot = async (slot: number) => {
-    setSaveMessage(`💾 Saving draft to slot ${slot}...`)
+    showMessage(`💾 Saving draft to slot ${slot}...`, 5000)
+    
+    // Convert blob URLs to GitHub paths using the map
+    const urlMap = JSON.parse(localStorage.getItem('foxbuilt-url-map') || '{}')
+    
+    const convertedProducts = JSON.parse(JSON.stringify(featuredProducts))
+    Object.keys(convertedProducts).forEach(category => {
+      convertedProducts[category].forEach((product: any) => {
+        if (product.image && product.image.startsWith('blob:')) {
+          product.image = urlMap[product.image] || product.image
+        }
+      })
+    })
+    
+    const convertedGallery = pendingGalleryImages.map(img => {
+      if (img && img.startsWith('blob:')) {
+        return urlMap[img] || img
+      }
+      return img
+    })
     
     const draftData = {
-      products: featuredProducts,
-      gallery: pendingGalleryImages,
+      products: convertedProducts,
+      gallery: convertedGallery,
       lastUpdated: new Date().toISOString(),
       updatedBy: "Admin"
     }
@@ -349,9 +399,8 @@ export default function AdminEditor() {
     const currentPreviews = JSON.parse(localStorage.getItem('foxbuilt-image-previews') || '{}')
     localStorage.setItem(`foxbuilt-previews-${slot}`, JSON.stringify(currentPreviews))
     
-    setSaveMessage(`✅ Draft saved to slot ${slot}!`)
+    showMessage(`✅ Draft saved to slot ${slot}!`, 3000)
     setShowDraftModal(false)
-    setTimeout(() => setSaveMessage(""), 3000)
   }
   
   const loadDraftFromSlot = (slot: number) => {
@@ -367,11 +416,23 @@ export default function AdminEditor() {
         localStorage.setItem('foxbuilt-image-previews', slotPreviews)
       }
       
-      setSaveMessage(`✅ Draft loaded from slot ${slot}!`)
+      showMessage(`✅ Draft loaded from slot ${slot}!`, 3000)
       setShowDraftModal(false)
-      setTimeout(() => setSaveMessage(""), 3000)
     } else {
       alert(`No draft found in slot ${slot}`)
+    }
+  }
+  
+  const deleteDraftFromSlot = (slot: number) => {
+    if (confirm(`Are you sure you want to delete the draft in slot ${slot}? This cannot be undone.`)) {
+      localStorage.removeItem(`foxbuilt-draft-${slot}`)
+      localStorage.removeItem(`foxbuilt-previews-${slot}`)
+      showMessage(`🗑️ Draft deleted from slot ${slot}!`, 3000)
+      // Force re-render of modal
+      setShowDraftModal(false)
+      setTimeout(() => {
+        setShowDraftModal(true)
+      }, 100)
     }
   }
   
@@ -463,7 +524,7 @@ export default function AdminEditor() {
 
   // Save all changes (publish live)
   const saveAllChanges = async () => {
-    setSaveMessage("🚀 Publishing live site...")
+    showMessage("🚀 Publishing live site...", 30000) // 30 seconds for publish
     
     try {
       // GitHub API configuration
@@ -493,10 +554,29 @@ export default function AdminEditor() {
         sha = currentFile.sha
       }
       
+      // Convert blob URLs to GitHub paths using the map
+      const urlMap = JSON.parse(localStorage.getItem('foxbuilt-url-map') || '{}')
+      
+      const convertedProducts = JSON.parse(JSON.stringify(featuredProducts))
+      Object.keys(convertedProducts).forEach(category => {
+        convertedProducts[category].forEach((product: any) => {
+          if (product.image && product.image.startsWith('blob:')) {
+            product.image = urlMap[product.image] || product.image
+          }
+        })
+      })
+      
+      const convertedGallery = pendingGalleryImages.map(img => {
+        if (img && img.startsWith('blob:')) {
+          return urlMap[img] || img
+        }
+        return img
+      })
+      
       // Prepare the content
       const content = {
-        products: featuredProducts,
-        gallery: pendingGalleryImages,
+        products: convertedProducts,
+        gallery: convertedGallery,
         lastUpdated: new Date().toISOString(),
         updatedBy: "Kyle"
       }
@@ -601,15 +681,23 @@ export default function AdminEditor() {
         
         <Card className="max-w-2xl w-full bg-white/95 backdrop-blur shadow-2xl border-4 border-red-600">
           <CardContent className="p-12">
-            {/* ASCII Art */}
-            <pre className="text-red-600 font-mono text-xs md:text-sm text-center mb-8 font-bold">
-{`                                                     •
-███████╗  ██████╗  ██╗  ██╗ ██████╗  ██╗   ██╗ ██╗ ██╗    ████████╗
-██╔════╝ ██╔═══██╗ ╚██╗██╔╝ ██╔══██╗ ██║   ██║ ██║ ██║    ╚══██╔══╝
-█████╗   ██║   ██║  ╚███╔╝  ██████╔╝ ██║   ██║ ██║ ██║       ██║   
-██╔══╝   ██║   ██║  ██╔██╗  ██╔══██╗ ██║   ██║ ██║ ██║       ██║   
-██║      ╚██████╔╝ ██╔╝ ██╗ ██████╔╝ ╚██████╔╝ ██║ ███████╗  ██║   
-╚═╝       ╚═════╝  ╚═╝  ╚═╝ ╚═════╝   ╚═════╝  ╚═╝ ╚══════╝  ╚═╝`}
+            {/* ASCII Art - FOX on mobile, FOXBUILT on desktop */}
+            <pre className="text-red-600 font-mono text-xs text-center mb-8 font-bold block md:hidden">
+{`███████╗  ██████╗  ██╗  ██╗
+██╔════╝ ██╔═══██╗ ╚██╗██╔╝
+█████╗   ██║   ██║  ╚███╔╝ 
+██╔══╝   ██║   ██║  ██╔██╗ 
+██║      ╚██████╔╝ ██╔╝ ██╗
+╚═╝       ╚═════╝  ╚═╝  ╚═╝`}
+            </pre>
+            
+            <pre className="text-red-600 font-mono text-sm text-center mb-8 font-bold hidden md:block">
+{`███████╗  ██████╗  ██╗  ██╗ ██████╗  ██╗   ██╗ ██╗ ██╗   ████████╗
+██╔════╝ ██╔═══██╗ ╚██╗██╔╝ ██╔══██╗ ██║   ██║ ██║ ██║   ╚══██╔══╝
+█████╗   ██║   ██║  ╚███╔╝  ██████╔╝ ██║   ██║ ██║ ██║      ██║   
+██╔══╝   ██║   ██║  ██╔██╗  ██╔══██╗ ██║   ██║ ██║ ██║      ██║   
+██║      ╚██████╔╝ ██╔╝ ██╗ ██████╔╝ ╚██████╔╝ ██║ ███████╗ ██║   
+╚═╝       ╚═════╝  ╚═╝  ╚═╝ ╚═════╝   ╚═════╝  ╚═╝ ╚══════╝ ╚═╝`}
             </pre>
             
             <div className="text-center mb-8">
@@ -1066,18 +1154,32 @@ export default function AdminEditor() {
                       )}
                       {isEditMode && (
                         <Button 
-                          className="bg-purple-600 text-white hover:bg-purple-700 font-bold"
+                          variant="outline" 
+                          className="border-2 border-slate-700 font-bold"
                           onClick={() => {
-                            setSelectedProductForSpecs(product)
-                            setEditingSpecs(product.specs || "")
-                            setShowSpecsModal(true)
+                            setExpandedSpecs(expandedSpecs === product.id ? null : product.id)
                           }}
                         >
-                          <Edit2 className="w-4 h-4 mr-1" />
-                          Edit Specs
+                          SPECS
                         </Button>
                       )}
                     </div>
+                    
+                    {/* Inline specs editor for edit mode */}
+                    {isEditMode && expandedSpecs === product.id && (
+                      <div className="mt-4 bg-slate-100 p-4 rounded-lg">
+                        <h3 className="font-bold text-lg mb-3 text-slate-800">Specifications:</h3>
+                        <textarea
+                          value={product.specs || ""}
+                          onChange={(e) => updateProduct(featuredCategory, product.id, 'specs', e.target.value)}
+                          className="w-full h-32 p-3 border-2 border-gray-300 rounded font-mono text-sm"
+                          placeholder="Dimensions: 60&quot;W x 30&quot;D x 29&quot;H
+Weight: 120 lbs
+Material: Laminate surface with metal frame
+Colors: Available in multiple finishes"
+                        />
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               ))}
@@ -1244,10 +1346,11 @@ export default function AdminEditor() {
               <h2 className="text-2xl font-bold">Edit Gallery Images</h2>
               <Button
                 onClick={() => setShowGalleryEditor(false)}
-                variant="outline"
+                variant="ghost"
                 size="sm"
+                className="text-black hover:bg-gray-100"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </Button>
             </div>
             
@@ -1348,74 +1451,6 @@ export default function AdminEditor() {
         </div>
       )}
 
-      {/* Specs Editor Modal */}
-      {showSpecsModal && selectedProductForSpecs && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-[70] flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold">
-                Edit Specifications - {selectedProductForSpecs.title}
-              </h2>
-              <Button
-                onClick={() => setShowSpecsModal(false)}
-                variant="outline"
-                size="sm"
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
-            
-            <div className="mb-6">
-              <label className="block text-sm font-medium mb-2">
-                Product Specifications (measurements, materials, etc.)
-              </label>
-              <textarea
-                value={editingSpecs}
-                onChange={(e) => setEditingSpecs(e.target.value)}
-                className="w-full h-64 p-4 border-2 border-gray-300 rounded-lg font-mono text-sm"
-                placeholder="Dimensions: 60&quot;W x 30&quot;D x 29&quot;H
-Weight: 120 lbs
-Material: Laminate surface with metal frame
-Colors: Silver Birch, Natural Oak, Espresso
-Warranty: 10 year limited"
-              />
-              <p className="text-sm text-gray-500 mt-2">
-                Tip: Use line breaks to separate different specifications
-              </p>
-            </div>
-            
-            <div className="flex justify-end gap-2">
-              <Button
-                onClick={() => {
-                  setShowSpecsModal(false)
-                  setEditingSpecs("")
-                }}
-                variant="outline"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={() => {
-                  // Find the product in the current category and update its specs
-                  Object.keys(featuredProducts).forEach(category => {
-                    const productIndex = featuredProducts[category].findIndex(p => p.id === selectedProductForSpecs.id)
-                    if (productIndex !== -1) {
-                      const newProducts = { ...featuredProducts }
-                      newProducts[category][productIndex].specs = editingSpecs
-                      setFeaturedProducts(newProducts)
-                    }
-                  })
-                  setShowSpecsModal(false)
-                }}
-                className="bg-green-600 hover:bg-green-700"
-              >
-                <Check className="w-4 h-4 mr-2" />
-                Save Specifications
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Draft Slot Modal */}
       {showDraftModal && (
@@ -1423,22 +1458,49 @@ Warranty: 10 year limited"
           <div className="bg-white rounded-lg max-w-md w-full p-6">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold">
-                {draftAction === 'save' ? 'Save Draft to Slot' : 'Load Draft from Slot'}
+                {draftAction === 'save' ? 'Save Draft to Slot' : draftAction === 'load' ? 'Load Draft from Slot' : 'Delete Draft from Slot'}
               </h2>
               <Button
                 onClick={() => setShowDraftModal(false)}
-                variant="outline"
+                variant="ghost"
                 size="sm"
+                className="text-black hover:bg-gray-100"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </Button>
             </div>
             
             <p className="text-gray-600 mb-6">
               {draftAction === 'save' 
                 ? 'Choose a slot to save your current draft. This will overwrite any existing draft in that slot.'
-                : 'Choose a slot to load a draft from. This will replace your current work.'}
+                : draftAction === 'load'
+                ? 'Choose a slot to load a draft from. This will replace your current work.'
+                : 'Choose a slot to delete. This action cannot be undone.'}
             </p>
+            
+            {draftAction !== 'delete' && (
+              <div className="flex justify-end mb-4">
+                <Button
+                  onClick={() => setDraftAction('delete')}
+                  variant="outline"
+                  className="text-red-600 border-red-600 hover:bg-red-50"
+                  size="sm"
+                >
+                  🗑️ Delete Mode
+                </Button>
+              </div>
+            )}
+            {draftAction === 'delete' && (
+              <div className="flex justify-end mb-4">
+                <Button
+                  onClick={() => setDraftAction('load')}
+                  variant="outline"
+                  size="sm"
+                >
+                  Back to Load
+                </Button>
+              </div>
+            )}
             
             <div className="grid grid-cols-3 gap-4">
               {[1, 2, 3].map((slot) => {
@@ -1454,18 +1516,23 @@ Warranty: 10 year limited"
                           return
                         }
                         saveDraftToSlot(slot)
-                      } else {
+                      } else if (draftAction === 'load') {
                         loadDraftFromSlot(slot)
+                      } else if (draftAction === 'delete') {
+                        if (hasDraft) {
+                          deleteDraftFromSlot(slot)
+                        }
                       }
                     }}
-                    variant={hasDraft ? "default" : "outline"}
+                    variant="default"
                     className={`h-24 flex flex-col items-center justify-center ${
                       hasDraft 
-                        ? draftAction === 'save'
-                          ? 'bg-amber-500 hover:bg-amber-600 text-white'
+                        ? draftAction === 'delete'
+                          ? 'bg-red-600 hover:bg-red-700 text-white'
                           : 'bg-green-600 hover:bg-green-700 text-white'
-                        : 'bg-gray-100 hover:bg-gray-200'
+                        : 'bg-gray-200 hover:bg-gray-300 text-gray-800'
                     }`}
+                    disabled={draftAction === 'delete' && !hasDraft}
                   >
                     <span className="font-bold text-xl">Slot {slot}</span>
                     {hasDraft && draftInfo?.lastUpdated && (
@@ -1481,14 +1548,6 @@ Warranty: 10 year limited"
               })}
             </div>
             
-            <div className="mt-6 flex justify-end">
-              <Button
-                onClick={() => setShowDraftModal(false)}
-                variant="outline"
-              >
-                Cancel
-              </Button>
-            </div>
           </div>
         </div>
       )}
