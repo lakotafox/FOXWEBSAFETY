@@ -135,18 +135,16 @@ export default function AdminEditor() {
   const getImageUrl = (imagePath: string) => {
     if (!imagePath) return "/placeholder.svg"
     
-    // Check localStorage for preview first
-    const previews = JSON.parse(localStorage.getItem('foxbuilt-image-previews') || '{}')
-    if (previews[imagePath]) {
-      return previews[imagePath]
-    }
-    
-    // For any /images/ path, use GitHub raw URL
+    // For any /images/ path, use GitHub raw URL directly
+    // Skip localStorage on mobile due to size limits
     if (imagePath.startsWith('/images/')) {
-      return `https://raw.githubusercontent.com/lakotafox/FOXSITE/main/public${imagePath}`
+      const githubUrl = `https://raw.githubusercontent.com/lakotafox/FOXSITE/main/public${imagePath}`
+      debugLog(`Using GitHub URL: ${githubUrl}`)
+      return githubUrl
     }
     
     // Default
+    debugLog(`Using default path: ${imagePath}`)
     return imagePath
   }
 
@@ -312,14 +310,8 @@ export default function AdminEditor() {
     // Update to use GitHub path immediately
     updateProduct(category, productId, 'image', githubPath)
     
-    // Store the file data as base64 for preview
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      const previews = JSON.parse(localStorage.getItem('foxbuilt-image-previews') || '{}')
-      previews[githubPath] = e.target?.result
-      localStorage.setItem('foxbuilt-image-previews', JSON.stringify(previews))
-    }
-    reader.readAsDataURL(file)
+    // No need to store preview - we'll use GitHub URLs directly
+    debugLog(`Image will be available at: ${githubPath}`)
     
     // Add to queue with the filename
     setUploadQueue(queue => [...queue, { type: 'product', file, category, productId, fileName }])
@@ -428,14 +420,8 @@ export default function AdminEditor() {
     newImages[index] = githubPath
     setPendingGalleryImages(newImages)
     
-    // Store the file data as base64 for preview
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      const previews = JSON.parse(localStorage.getItem('foxbuilt-image-previews') || '{}')
-      previews[githubPath] = e.target?.result
-      localStorage.setItem('foxbuilt-image-previews', JSON.stringify(previews))
-    }
-    reader.readAsDataURL(file)
+    // No need to store preview - we'll use GitHub URLs directly
+    debugLog(`Image will be available at: ${githubPath}`)
     
     // Add to queue with the filename
     setUploadQueue(queue => [...queue, { type: 'gallery', file, index, fileName }])
