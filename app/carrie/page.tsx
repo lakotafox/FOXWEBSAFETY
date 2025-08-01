@@ -81,6 +81,9 @@ export default function AdminEditor() {
   const [showVersionModal, setShowVersionModal] = useState(false)
   const [versionAction, setVersionAction] = useState<'save' | 'load' | 'delete'>('save')
   const [showPublishConfirm, setShowPublishConfirm] = useState(false)
+  const [showSpecsModal, setShowSpecsModal] = useState(false)
+  const [selectedProductForSpecs, setSelectedProductForSpecs] = useState<any>(null)
+  const [editingSpecs, setEditingSpecs] = useState("")
 
   // Gallery images
   const defaultGalleryImages = [
@@ -759,7 +762,15 @@ export default function AdminEditor() {
                           {product.price}
                         </span>
                       )}
-                      <Button variant="outline" className="border-2 border-slate-700 font-bold">
+                      <Button 
+                        variant="outline" 
+                        className="border-2 border-slate-700 font-bold"
+                        onClick={() => {
+                          setSelectedProductForSpecs(product)
+                          setEditingSpecs(product.specs || "")
+                          setShowSpecsModal(true)
+                        }}
+                      >
                         SPECS
                       </Button>
                     </div>
@@ -1110,6 +1121,75 @@ export default function AdminEditor() {
                 className="px-8"
               >
                 No
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Specs Editor Modal */}
+      {showSpecsModal && selectedProductForSpecs && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-[70] flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold">
+                Edit Specifications - {selectedProductForSpecs.title}
+              </h2>
+              <Button
+                onClick={() => setShowSpecsModal(false)}
+                variant="outline"
+                size="sm"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+            
+            <div className="mb-6">
+              <label className="block text-sm font-medium mb-2">
+                Product Specifications (measurements, materials, etc.)
+              </label>
+              <textarea
+                value={editingSpecs}
+                onChange={(e) => setEditingSpecs(e.target.value)}
+                className="w-full h-64 p-4 border-2 border-gray-300 rounded-lg font-mono text-sm"
+                placeholder="Dimensions: 60&quot;W x 30&quot;D x 29&quot;H
+Weight: 120 lbs
+Material: Laminate surface with metal frame
+Colors: Silver Birch, Natural Oak, Espresso
+Warranty: 10 year limited"
+              />
+              <p className="text-sm text-gray-500 mt-2">
+                Tip: Use line breaks to separate different specifications
+              </p>
+            </div>
+            
+            <div className="flex justify-end gap-2">
+              <Button
+                onClick={() => {
+                  setShowSpecsModal(false)
+                  setEditingSpecs("")
+                }}
+                variant="outline"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  // Find the product in the current category and update its specs
+                  Object.keys(featuredProducts).forEach(category => {
+                    const productIndex = featuredProducts[category].findIndex(p => p.id === selectedProductForSpecs.id)
+                    if (productIndex !== -1) {
+                      const newProducts = { ...featuredProducts }
+                      newProducts[category][productIndex].specs = editingSpecs
+                      setFeaturedProducts(newProducts)
+                    }
+                  })
+                  setShowSpecsModal(false)
+                }}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                <Check className="w-4 h-4 mr-2" />
+                Save Specifications
               </Button>
             </div>
           </div>

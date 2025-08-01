@@ -334,18 +334,38 @@ export default function GamesPage() {
       
       const interval = setInterval(gameLoop, 16)
       
-      // Mouse control
-      const handleMouseMove = (e: MouseEvent) => {
-        gameState.playerY = Math.max(0, 
-          Math.min(e.clientY - gameState.paddleHeight / 2, 
-          canvas.height - gameState.paddleHeight))
+      // Keyboard controls
+      const keys: {[key: string]: boolean} = {}
+      
+      const handleKeyDown = (e: KeyboardEvent) => {
+        keys[e.key] = true
       }
       
-      canvas.addEventListener('mousemove', handleMouseMove)
+      const handleKeyUp = (e: KeyboardEvent) => {
+        keys[e.key] = false
+      }
+      
+      // Update player position based on keys
+      const updatePlayerPosition = () => {
+        const paddleSpeed = 8
+        if (keys['ArrowUp'] && gameState.playerY > 0) {
+          gameState.playerY -= paddleSpeed
+        }
+        if (keys['ArrowDown'] && gameState.playerY < canvas.height - gameState.paddleHeight) {
+          gameState.playerY += paddleSpeed
+        }
+      }
+      
+      const controlInterval = setInterval(updatePlayerPosition, 16)
+      
+      window.addEventListener('keydown', handleKeyDown)
+      window.addEventListener('keyup', handleKeyUp)
       
       return () => {
         clearInterval(interval)
-        canvas.removeEventListener('mousemove', handleMouseMove)
+        clearInterval(controlInterval)
+        window.removeEventListener('keydown', handleKeyDown)
+        window.removeEventListener('keyup', handleKeyUp)
       }
     }, [scores])
     
@@ -353,10 +373,11 @@ export default function GamesPage() {
       <div className="fixed inset-0 bg-black">
         <canvas 
           ref={canvasRef} 
-          className="absolute inset-0 cursor-none"
+          className="absolute inset-0"
         />
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 text-white text-xl">
-          First to 10 wins!
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 text-white text-center">
+          <p className="text-xl mb-2">First to 10 wins!</p>
+          <p className="text-sm text-gray-400">Use ↑↓ Arrow Keys to move</p>
         </div>
         {(scores.player >= 10 || scores.ai >= 10) && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/50">
