@@ -99,6 +99,8 @@ export default function AdminEditor() {
   const [uploadQueue, setUploadQueue] = useState<Array<{type: 'product' | 'gallery', file: File, category?: string, productId?: number, index?: number}>>([])
   const [isUploading, setIsUploading] = useState(false)
   const [activeUploads, setActiveUploads] = useState(0)
+  const [showLoadingOverlay, setShowLoadingOverlay] = useState(false)
+  const [loadingStartTime, setLoadingStartTime] = useState<number | null>(null)
   
   // Helper function to get displayable image URL
   const getImageUrl = (imagePath: string) => {
@@ -200,6 +202,33 @@ export default function AdminEditor() {
       }
     }
   }, [uploadQueue, activeUploads])
+  
+  // Manage loading overlay with 4-second minimum
+  useEffect(() => {
+    const shouldShowOverlay = activeUploads > 0 || uploadQueue.length > 0
+    
+    if (shouldShowOverlay && !showLoadingOverlay) {
+      // Start showing overlay
+      setShowLoadingOverlay(true)
+      setLoadingStartTime(Date.now())
+    } else if (!shouldShowOverlay && showLoadingOverlay && loadingStartTime) {
+      // Check if 4 seconds have passed
+      const elapsed = Date.now() - loadingStartTime
+      const remaining = 4000 - elapsed
+      
+      if (remaining > 0) {
+        // Wait for remaining time
+        setTimeout(() => {
+          setShowLoadingOverlay(false)
+          setLoadingStartTime(null)
+        }, remaining)
+      } else {
+        // 4 seconds have passed, hide immediately
+        setShowLoadingOverlay(false)
+        setLoadingStartTime(null)
+      }
+    }
+  }, [activeUploads, uploadQueue.length, showLoadingOverlay, loadingStartTime])
 
   // Auto-slide gallery
   useEffect(() => {
@@ -686,39 +715,18 @@ export default function AdminEditor() {
   return (
     <div className="min-h-screen bg-zinc-100">
       {/* Loading Overlay */}
-      {(activeUploads > 0 || uploadQueue.length > 0) && (
-        <div className="fixed inset-0 bg-black/80 z-[100] flex items-center justify-center pointer-events-auto" style={{ pointerEvents: 'all' }}>
-          <div className="bg-white rounded-lg p-8 text-center max-w-sm">
-            <div className="mb-6">
-              {/* Fox loading video */}
-              <video 
-                className="w-32 h-32 mx-auto"
-                autoPlay
-                loop
-                muted
-                playsInline
-              >
-                <source src="/foxloading.webm" type="video/webm" />
-              </video>
-            </div>
-            <h2 className="text-2xl font-black text-slate-900 mb-2">
-              UPLOADING IMAGES
-            </h2>
-            <p className="text-lg font-bold text-slate-700 mb-4">
-              Please wait, this may take a moment...
-            </p>
-            <div className="bg-slate-100 rounded-lg p-4">
-              <p className="font-bold text-slate-800">
-                📤 {activeUploads} uploading
-              </p>
-              <p className="font-bold text-slate-800">
-                ⏳ {uploadQueue.length} in queue
-              </p>
-            </div>
-            <p className="mt-4 text-sm text-slate-600 font-semibold">
-              Don't close this tab!
-            </p>
-          </div>
+      {showLoadingOverlay && (
+        <div className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center pointer-events-auto" style={{ pointerEvents: 'all' }}>
+          {/* Fox loading video only */}
+          <video 
+            className="w-64 h-64"
+            autoPlay
+            loop
+            muted
+            playsInline
+          >
+            <source src="/foxloading.webm" type="video/webm" />
+          </video>
         </div>
       )}
       
