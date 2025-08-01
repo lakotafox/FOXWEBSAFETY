@@ -68,6 +68,7 @@ const BouncingEmoji = ({ emoji, delay = 0 }: { emoji: string; delay?: number }) 
 export default function AdminEditor() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [password, setPassword] = useState("")
+  const [isMobile, setIsMobile] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [currentSlide, setCurrentSlide] = useState(0)
   const [featuredCategory, setFeaturedCategory] = useState("new")
@@ -101,7 +102,6 @@ export default function AdminEditor() {
   const [activeUploads, setActiveUploads] = useState(0)
   const [showLoadingOverlay, setShowLoadingOverlay] = useState(false)
   const [loadingStartTime, setLoadingStartTime] = useState<number | null>(null)
-  const [debugLogs, setDebugLogs] = useState<string[]>([])
   const [showPublishLoadingOverlay, setShowPublishLoadingOverlay] = useState(false)
   const [publishMessage, setPublishMessage] = useState("")
   
@@ -124,12 +124,6 @@ export default function AdminEditor() {
     "Applying finish coat...",
     "Quality control inspection..."
   ]
-  
-  // Debug logging function
-  const debugLog = (message: string) => {
-    console.log(message)
-    setDebugLogs(prev => [...prev.slice(-20), `${new Date().toLocaleTimeString()}: ${message}`])
-  }
   
   // Helper function to get displayable image URL
   const getImageUrl = (imagePath: string) => {
@@ -163,8 +157,16 @@ export default function AdminEditor() {
     }, duration)
   }
 
-  // Load saved data on mount
+  // Check if mobile and load saved data on mount
   useEffect(() => {
+    // Check if mobile
+    const checkMobile = () => {
+      const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera
+      const isMobileDevice = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent.toLowerCase())
+      setIsMobile(isMobileDevice)
+    }
+    checkMobile()
+    
     // Load from localStorage only - no automatic draft loading
     const savedGallery = localStorage.getItem('foxbuilt-gallery')
     if (savedGallery) {
@@ -230,30 +232,24 @@ export default function AdminEditor() {
   // Manage loading overlay with 4-second minimum
   useEffect(() => {
     const shouldShowOverlay = activeUploads > 0 || uploadQueue.length > 0
-    debugLog(`Overlay check: activeUploads=${activeUploads}, queueLength=${uploadQueue.length}, shouldShow=${shouldShowOverlay}, currentlyShowing=${showLoadingOverlay}`)
     
     if (shouldShowOverlay && !showLoadingOverlay) {
       // Start showing overlay
-      debugLog('Starting loading overlay')
       setShowLoadingOverlay(true)
       setLoadingStartTime(Date.now())
     } else if (!shouldShowOverlay && showLoadingOverlay && loadingStartTime) {
       // Check if 4 seconds have passed
       const elapsed = Date.now() - loadingStartTime
       const remaining = 4000 - elapsed
-      debugLog(`Upload complete. Elapsed: ${elapsed}ms, Remaining for 4s minimum: ${remaining}ms`)
       
       if (remaining > 0) {
         // Wait for remaining time
-        debugLog(`Waiting ${remaining}ms before hiding overlay`)
         setTimeout(() => {
-          debugLog('Hiding overlay after 4s minimum')
           setShowLoadingOverlay(false)
           setLoadingStartTime(null)
         }, remaining)
       } else {
         // 4 seconds have passed, hide immediately
-        debugLog('Hiding overlay immediately (4s already passed)')
         setShowLoadingOverlay(false)
         setLoadingStartTime(null)
       }
@@ -309,7 +305,6 @@ export default function AdminEditor() {
     updateProduct(category, productId, 'image', githubPath)
     
     // No need to store preview - we'll use GitHub URLs directly
-    debugLog(`Image will be available at: ${githubPath}`)
     
     // Add to queue with the filename
     setUploadQueue(queue => [...queue, { type: 'product', file, category, productId, fileName }])
@@ -340,12 +335,10 @@ export default function AdminEditor() {
       const PATH = `public/images/${fileName}`
       
       // Convert file to base64
-      debugLog('Starting FileReader...')
       const reader = new FileReader()
       reader.readAsDataURL(file)
       
       reader.onload = async () => {
-        debugLog('FileReader onload triggered')
         const base64Data = reader.result as string
         // Remove the data:image/jpeg;base64, prefix
         const base64Content = base64Data.split(',')[1]
@@ -376,7 +369,6 @@ export default function AdminEditor() {
           localStorage.setItem('foxbuilt-image-previews', JSON.stringify(previews))
           
           // No need for URL mapping - already using GitHub path
-          debugLog(`Product image uploaded to: /images/${fileName}`)
           
           clearTimeout(uploadTimeout)
         setActiveUploads(count => count - 1)
@@ -419,7 +411,6 @@ export default function AdminEditor() {
     setPendingGalleryImages(newImages)
     
     // No need to store preview - we'll use GitHub URLs directly
-    debugLog(`Image will be available at: ${githubPath}`)
     
     // Add to queue with the filename
     setUploadQueue(queue => [...queue, { type: 'gallery', file, index, fileName }])
@@ -427,17 +418,14 @@ export default function AdminEditor() {
   
   // Process gallery image upload
   const processGalleryImageUpload = async (index: number, file: File, fileName: string) => {
-    debugLog(`Starting gallery upload for index: ${index}, fileName: ${fileName}`)
     setActiveUploads(count => count + 1)
     
     // Set a timeout to prevent infinite loading
     const uploadTimeout = setTimeout(() => {
-      debugLog('Upload timeout after 30 seconds')
       showMessage("❌ Upload timeout - please try again", 5000)
       setActiveUploads(count => count - 1)
     }, 30000) // 30 second timeout
     
-    debugLog(`File size: ${file.size} bytes (${(file.size / 1024 / 1024).toFixed(2)} MB)`)
     
     try {
       // GitHub token from environment variable
@@ -452,20 +440,15 @@ export default function AdminEditor() {
       const PATH = `public/images/${fileName}`
       
       // Convert file to base64
-      debugLog('Starting FileReader...')
       const reader = new FileReader()
       reader.readAsDataURL(file)
       
       reader.onload = async () => {
-        debugLog('FileReader onload triggered')
         try {
           const base64Data = reader.result as string
-          debugLog(`Base64 data length: ${base64Data.length}`)
           const base64Content = base64Data.split(',')[1]
-          debugLog(`Base64 content length: ${base64Content.length}`)
           
           // Upload to GitHub
-          debugLog(`Uploading to GitHub: ${PATH}`)
           const response = await fetch(
           `https://api.github.com/repos/${OWNER}/${REPO}/contents/${PATH}`,
           {
@@ -483,12 +466,9 @@ export default function AdminEditor() {
           }
         )
         
-        debugLog(`GitHub response status: ${response.status}`)
         
         if (!response.ok) {
           const error = await response.json()
-          debugLog(`GitHub API error: ${JSON.stringify(error)}`)
-          debugLog(`Tried to upload to: ${PATH}`)
           if (response.status === 401) {
             showMessage("❌ GitHub token expired - Tell Khabe: 'GitHub 401 error'", 5000)
             alert("ERROR: GitHub token expired (401)\n\nTell Khabe: 'GitHub 401 error - need new token'\n\nHe'll fix it free!")
@@ -510,8 +490,6 @@ export default function AdminEditor() {
         previews[`public/images/${fileName}`] = base64Data  // Also store with public/ prefix
         localStorage.setItem('foxbuilt-image-previews', JSON.stringify(previews))
         
-        debugLog('✅ Upload successful!')
-        debugLog(`Uploaded to: /images/${fileName}`)
         
         clearTimeout(uploadTimeout)
         setActiveUploads(count => count - 1)
@@ -594,8 +572,6 @@ export default function AdminEditor() {
       const convertedProducts = featuredProducts
       const convertedGallery = pendingGalleryImages
       
-      debugLog(`Publishing products: ${JSON.stringify(Object.keys(convertedProducts))}`)
-      debugLog(`Publishing gallery: ${JSON.stringify(convertedGallery)}`)
       
       // Prepare the content
       const content = {
@@ -605,8 +581,6 @@ export default function AdminEditor() {
         updatedBy: "Kyle"
       }
       
-      debugLog(`Publishing with ${convertedGallery.length} gallery images`)
-      debugLog(`Final gallery paths: ${JSON.stringify(convertedGallery)}`)
       
       // Encode content to base64
       const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2))))
@@ -663,14 +637,11 @@ export default function AdminEditor() {
         }, 2000)
       } else {
         const error = await updateResponse.json()
-        debugLog(`❌ Publish failed! Status: ${updateResponse.status}`)
-        debugLog(`Error: ${JSON.stringify(error)}`)
         console.error('GitHub API error:', error)
         setSaveMessage(`❌ Error publishing: ${error.message || updateResponse.status}`)
         setTimeout(() => setSaveMessage(""), 5000)
       }
     } catch (error) {
-      debugLog(`❌ Publish error: ${error}`)
       console.error('Error publishing to GitHub:', error)
       setSaveMessage(`❌ Error publishing: ${error.message || error}`)
       setTimeout(() => setSaveMessage(""), 5000)
@@ -787,6 +758,31 @@ export default function AdminEditor() {
     )
   }
 
+  // Show mobile warning
+  if (isAuthenticated && isMobile) {
+    return (
+      <div className="min-h-screen bg-red-600 flex items-center justify-center p-4">
+        <div className="bg-white rounded-lg p-8 text-center max-w-md">
+          <h1 className="text-3xl font-black text-red-600 mb-4">
+            ⚠️ MOBILE NOT SUPPORTED
+          </h1>
+          <p className="text-lg mb-6">
+            Editor on mobile is not ready yet!
+          </p>
+          <p className="text-gray-600 mb-8">
+            Please use a desktop or laptop computer to edit the website.
+          </p>
+          <Button 
+            onClick={() => window.location.href = '/'}
+            className="bg-red-600 hover:bg-red-700 text-white font-bold"
+          >
+            Return to Main Site
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-zinc-100">
       {/* Loading Overlay */}
@@ -823,24 +819,6 @@ export default function AdminEditor() {
           <div className="text-white text-xl font-bold animate-pulse">
             {publishMessage}
           </div>
-        </div>
-      )}
-      
-      {/* Debug Panel for Mobile */}
-      {debugLogs.length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 bg-black text-green-400 p-2 max-h-48 overflow-y-auto text-xs font-mono z-50">
-          <div className="flex justify-between items-center mb-2">
-            <span className="font-bold">Debug Logs:</span>
-            <button 
-              onClick={() => setDebugLogs([])}
-              className="bg-red-600 text-white px-2 py-1 rounded text-xs"
-            >
-              Clear
-            </button>
-          </div>
-          {debugLogs.map((log, i) => (
-            <div key={i}>{log}</div>
-          ))}
         </div>
       )}
       
