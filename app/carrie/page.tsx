@@ -1501,5 +1501,6 @@ Warranty: 10 year limited"
         </div>
       )}
     </div>
+    </div>
   )
 }
