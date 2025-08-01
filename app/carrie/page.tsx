@@ -101,6 +101,13 @@ export default function AdminEditor() {
   const [activeUploads, setActiveUploads] = useState(0)
   const [showLoadingOverlay, setShowLoadingOverlay] = useState(false)
   const [loadingStartTime, setLoadingStartTime] = useState<number | null>(null)
+  const [debugLogs, setDebugLogs] = useState<string[]>([])
+  
+  // Debug logging function
+  const debugLog = (message: string) => {
+    console.log(message)
+    setDebugLogs(prev => [...prev.slice(-20), `${new Date().toLocaleTimeString()}: ${message}`])
+  }
   
   // Helper function to get displayable image URL
   const getImageUrl = (imagePath: string) => {
@@ -309,10 +316,12 @@ export default function AdminEditor() {
       const PATH = `public/images/${fileName}`
       
       // Convert file to base64
+      debugLog('Starting FileReader...')
       const reader = new FileReader()
       reader.readAsDataURL(file)
       
       reader.onload = async () => {
+        debugLog('FileReader onload triggered')
         const base64Data = reader.result as string
         // Remove the data:image/jpeg;base64, prefix
         const base64Content = base64Data.split(',')[1]
@@ -395,20 +404,20 @@ export default function AdminEditor() {
   
   // Process gallery image upload
   const processGalleryImageUpload = async (index: number, file: File) => {
-    console.log('Starting gallery upload for index:', index)
+    debugLog(`Starting gallery upload for index: ${index}`)
     setActiveUploads(count => count + 1)
     
     // Set a timeout to prevent infinite loading
     const uploadTimeout = setTimeout(() => {
-      console.error('Upload timeout after 30 seconds')
+      debugLog('Upload timeout after 30 seconds')
       showMessage("❌ Upload timeout - please try again", 5000)
       setActiveUploads(count => count - 1)
     }, 30000) // 30 second timeout
     
     // Get the preview URL from pendingGalleryImages
     const previewUrl = pendingGalleryImages[index]
-    console.log('Preview URL:', previewUrl)
-    console.log('File size:', file.size, 'bytes', (file.size / 1024 / 1024).toFixed(2), 'MB')
+    debugLog(`Preview URL: ${previewUrl}`)
+    debugLog(`File size: ${file.size} bytes (${(file.size / 1024 / 1024).toFixed(2)} MB)`)
     
     try {
       // GitHub token from environment variable
@@ -425,18 +434,20 @@ export default function AdminEditor() {
       const PATH = `public/images/${fileName}`
       
       // Convert file to base64
+      debugLog('Starting FileReader...')
       const reader = new FileReader()
       reader.readAsDataURL(file)
       
       reader.onload = async () => {
+        debugLog('FileReader onload triggered')
         try {
           const base64Data = reader.result as string
-          console.log('Base64 data length:', base64Data.length)
+          debugLog(`Base64 data length: ${base64Data.length}`)
           const base64Content = base64Data.split(',')[1]
-          console.log('Base64 content length:', base64Content.length)
+          debugLog(`Base64 content length: ${base64Content.length}`)
           
           // Upload to GitHub
-          console.log('Uploading to GitHub:', PATH)
+          debugLog(`Uploading to GitHub: ${PATH}`)
           const response = await fetch(
           `https://api.github.com/repos/${OWNER}/${REPO}/contents/${PATH}`,
           {
@@ -454,12 +465,12 @@ export default function AdminEditor() {
           }
         )
         
-        console.log('GitHub response status:', response.status)
+        debugLog(`GitHub response status: ${response.status}`)
         
         if (!response.ok) {
           const error = await response.json()
-          console.error('GitHub API error:', error)
-          console.error('Tried to upload to:', PATH)
+          debugLog(`GitHub API error: ${JSON.stringify(error)}`)
+          debugLog(`Tried to upload to: ${PATH}`)
           if (response.status === 401) {
             showMessage("❌ GitHub token expired - Tell Khabe: 'GitHub 401 error'", 5000)
             alert("ERROR: GitHub token expired (401)\n\nTell Khabe: 'GitHub 401 error - need new token'\n\nHe'll fix it free!")
@@ -763,6 +774,24 @@ export default function AdminEditor() {
           >
             <source src="/foxloading.webm" type="video/webm" />
           </video>
+        </div>
+      )}
+      
+      {/* Debug Panel for Mobile */}
+      {debugLogs.length > 0 && (
+        <div className="fixed bottom-0 left-0 right-0 bg-black text-green-400 p-2 max-h-48 overflow-y-auto text-xs font-mono z-50">
+          <div className="flex justify-between items-center mb-2">
+            <span className="font-bold">Debug Logs:</span>
+            <button 
+              onClick={() => setDebugLogs([])}
+              className="bg-red-600 text-white px-2 py-1 rounded text-xs"
+            >
+              Clear
+            </button>
+          </div>
+          {debugLogs.map((log, i) => (
+            <div key={i}>{log}</div>
+          ))}
         </div>
       )}
       
