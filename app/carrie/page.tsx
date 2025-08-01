@@ -113,8 +113,23 @@ export default function AdminEditor() {
   const getImageUrl = (imagePath: string) => {
     if (!imagePath) return "/placeholder.svg"
     
-    // If it's a blob URL, return as is
-    if (imagePath.startsWith('blob:')) return imagePath
+    // If it's a blob URL, check if we have a mapping to the real URL
+    if (imagePath.startsWith('blob:')) {
+      const urlMap = JSON.parse(localStorage.getItem('foxbuilt-url-map') || '{}')
+      const mappedPath = urlMap[imagePath]
+      if (mappedPath) {
+        debugLog(`Mapped blob URL to: ${mappedPath}`)
+        // Check for preview first
+        const previews = JSON.parse(localStorage.getItem('foxbuilt-image-previews') || '{}')
+        if (previews[mappedPath]) {
+          return previews[mappedPath]
+        }
+        // Otherwise use GitHub raw URL
+        return `https://raw.githubusercontent.com/lakotafox/FOXSITE/main/public${mappedPath}`
+      }
+      // If no mapping, return blob URL
+      return imagePath
+    }
     
     // Check localStorage for preview
     const previews = JSON.parse(localStorage.getItem('foxbuilt-image-previews') || '{}')
@@ -505,6 +520,11 @@ export default function AdminEditor() {
         localStorage.setItem('foxbuilt-url-map', JSON.stringify(newUrlMap))
         
         debugLog('✅ Upload successful!')
+        debugLog(`Stored mapping: ${previewUrl} -> /images/${fileName}`)
+        
+        // Force a re-render of the gallery
+        setPendingGalleryImages(current => [...current])
+        
         clearTimeout(uploadTimeout)
         setActiveUploads(count => count - 1)
         } catch (uploadError) {
