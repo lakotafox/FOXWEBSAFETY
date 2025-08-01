@@ -642,9 +642,15 @@ export default function AdminEditor() {
         })
       })
       
-      const convertedGallery = pendingGalleryImages.map(img => {
+      debugLog(`URL map before conversion: ${JSON.stringify(urlMap)}`)
+      debugLog(`Pending gallery images: ${JSON.stringify(pendingGalleryImages)}`)
+      
+      const convertedGallery = pendingGalleryImages.map((img, idx) => {
+        debugLog(`Converting gallery image ${idx}: ${img}`)
         if (img && img.startsWith('blob:')) {
-          return urlMap[img] || img
+          const mapped = urlMap[img] || img
+          debugLog(`Blob URL mapped to: ${mapped}`)
+          return mapped
         }
         return img
       })
@@ -656,6 +662,9 @@ export default function AdminEditor() {
         lastUpdated: new Date().toISOString(),
         updatedBy: "Kyle"
       }
+      
+      debugLog(`Publishing with ${convertedGallery.length} gallery images`)
+      debugLog(`Final gallery paths: ${JSON.stringify(convertedGallery)}`)
       
       // Encode content to base64
       const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2))))
@@ -711,13 +720,16 @@ export default function AdminEditor() {
         }, 2000)
       } else {
         const error = await updateResponse.json()
+        debugLog(`❌ Publish failed! Status: ${updateResponse.status}`)
+        debugLog(`Error: ${JSON.stringify(error)}`)
         console.error('GitHub API error:', error)
-        setSaveMessage("❌ Error publishing. Check console for details.")
+        setSaveMessage(`❌ Error publishing: ${error.message || updateResponse.status}`)
         setTimeout(() => setSaveMessage(""), 5000)
       }
     } catch (error) {
+      debugLog(`❌ Publish error: ${error}`)
       console.error('Error publishing to GitHub:', error)
-      setSaveMessage("❌ Error publishing. Check your GitHub token.")
+      setSaveMessage(`❌ Error publishing: ${error.message || error}`)
       setTimeout(() => setSaveMessage(""), 5000)
     }
   }
