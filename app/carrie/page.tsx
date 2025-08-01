@@ -81,8 +81,6 @@ export default function AdminEditor() {
   const [showPasswordScreen, setShowPasswordScreen] = useState(false)
   const [showPublishConfirm, setShowPublishConfirm] = useState(false)
   const [expandedSpecs, setExpandedSpecs] = useState<number | null>(null)
-  const [showDraftModal, setShowDraftModal] = useState(false)
-  const [draftAction, setDraftAction] = useState<'save' | 'load' | 'delete'>('save')
   const [imageUrlMap, setImageUrlMap] = useState<{[blobUrl: string]: string}>({})
 
   // Gallery images
@@ -362,165 +360,6 @@ export default function AdminEditor() {
     }
   }
 
-  // Save draft to GitHub
-  const saveDraftToSlot = async (slot: number) => {
-    showMessage(`💾 Saving draft to slot ${slot}...`, 5000)
-    
-    // Convert blob URLs to GitHub paths using the map
-    const urlMap = JSON.parse(localStorage.getItem('foxbuilt-url-map') || '{}')
-    
-    const convertedProducts = JSON.parse(JSON.stringify(featuredProducts))
-    Object.keys(convertedProducts).forEach(category => {
-      convertedProducts[category].forEach((product: any) => {
-        if (product.image && product.image.startsWith('blob:')) {
-          product.image = urlMap[product.image] || product.image
-        }
-      })
-    })
-    
-    const convertedGallery = pendingGalleryImages.map(img => {
-      if (img && img.startsWith('blob:')) {
-        return urlMap[img] || img
-      }
-      return img
-    })
-    
-    const draftData = {
-      products: convertedProducts,
-      gallery: convertedGallery,
-      lastUpdated: new Date().toISOString(),
-      updatedBy: "Admin"
-    }
-    
-    // Save to localStorage with slot number
-    localStorage.setItem(`foxbuilt-draft-${slot}`, JSON.stringify(draftData))
-    
-    // Also save image previews with slot
-    const currentPreviews = JSON.parse(localStorage.getItem('foxbuilt-image-previews') || '{}')
-    localStorage.setItem(`foxbuilt-previews-${slot}`, JSON.stringify(currentPreviews))
-    
-    showMessage(`✅ Draft saved to slot ${slot}!`, 3000)
-    setShowDraftModal(false)
-  }
-  
-  const loadDraftFromSlot = (slot: number) => {
-    const draftData = localStorage.getItem(`foxbuilt-draft-${slot}`)
-    if (draftData) {
-      const parsed = JSON.parse(draftData)
-      setFeaturedProducts(parsed.products)
-      setPendingGalleryImages(parsed.gallery)
-      
-      // Load the previews for this slot
-      const slotPreviews = localStorage.getItem(`foxbuilt-previews-${slot}`)
-      if (slotPreviews) {
-        localStorage.setItem('foxbuilt-image-previews', slotPreviews)
-      }
-      
-      showMessage(`✅ Draft loaded from slot ${slot}!`, 3000)
-      setShowDraftModal(false)
-    } else {
-      alert(`No draft found in slot ${slot}`)
-    }
-  }
-  
-  const deleteDraftFromSlot = (slot: number) => {
-    if (confirm(`Are you sure you want to delete the draft in slot ${slot}? This cannot be undone.`)) {
-      localStorage.removeItem(`foxbuilt-draft-${slot}`)
-      localStorage.removeItem(`foxbuilt-previews-${slot}`)
-      showMessage(`🗑️ Draft deleted from slot ${slot}!`, 3000)
-      // Force re-render of modal
-      setShowDraftModal(false)
-      setTimeout(() => {
-        setShowDraftModal(true)
-      }, 100)
-    }
-  }
-  
-  const saveDraft = async () => {
-    // Show the draft modal to select a slot
-    setDraftAction('save')
-    setShowDraftModal(true)
-  }
-  
-  const saveDraftToGitHub = async () => {
-    setSaveMessage("💾 Saving draft to GitHub...")
-    
-    try {
-      // GitHub token from environment variable
-      // Set this in Netlify: Site settings → Environment variables
-      // Name: NEXT_PUBLIC_GITHUB_TOKEN
-      // Value: your GitHub token (get from https://github.com/settings/tokens/new)
-      const GITHUB_TOKEN = process.env.NEXT_PUBLIC_GITHUB_TOKEN || 'SET_IN_NETLIFY_ENV'
-      const OWNER = 'lakotafox'
-      const REPO = 'FOXSITE'
-      const PATH = 'public/draft.json'
-      
-      // Get current draft file SHA if it exists
-      let sha = ''
-      try {
-        const currentFileResponse = await fetch(
-          `https://api.github.com/repos/${OWNER}/${REPO}/contents/${PATH}`,
-          {
-            headers: {
-              'Authorization': `token ${GITHUB_TOKEN}`,
-              'Accept': 'application/vnd.github.v3+json'
-            }
-          }
-        )
-        
-        if (currentFileResponse.ok) {
-          const currentFile = await currentFileResponse.json()
-          sha = currentFile.sha
-        }
-      } catch (e) {
-        // File doesn't exist yet, that's OK
-      }
-      
-      // Prepare draft content
-      const draftContent = {
-        products: featuredProducts,
-        gallery: pendingGalleryImages,
-        savedAt: new Date().toISOString(),
-        savedBy: "Kyle"
-      }
-      
-      // Encode content to base64
-      const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(draftContent, null, 2))))
-      
-      // Update or create draft file
-      const updateResponse = await fetch(
-        `https://api.github.com/repos/${OWNER}/${REPO}/contents/${PATH}`,
-        {
-          method: 'PUT',
-          headers: {
-            'Authorization': `token ${GITHUB_TOKEN}`,
-            'Accept': 'application/vnd.github.v3+json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            message: `Save draft - ${new Date().toLocaleString()}`,
-            content: contentBase64,
-            sha: sha || undefined,
-            branch: 'main'
-          })
-        }
-      )
-      
-      if (updateResponse.ok) {
-        setSaveMessage("✅ Draft saved! You can continue from any device.")
-        setTimeout(() => setSaveMessage(""), 3000)
-      } else {
-        const error = await updateResponse.json()
-        console.error('GitHub API error:', error)
-        setSaveMessage("❌ Error saving draft. Check console.")
-        setTimeout(() => setSaveMessage(""), 5000)
-      }
-    } catch (error) {
-      console.error('Error saving draft:', error)
-      setSaveMessage("❌ Error saving draft.")
-      setTimeout(() => setSaveMessage(""), 5000)
-    }
-  }
 
   // Save all changes (publish live)
   const saveAllChanges = async () => {
@@ -750,31 +589,11 @@ export default function AdminEditor() {
             </div>
             <div className="flex gap-2 flex-wrap justify-center">
               <Button
-                onClick={saveDraft}
-                size="sm"
-                className="bg-blue-600 text-white hover:bg-blue-700 font-bold"
-              >
-                <Save className="w-4 h-4 mr-1" />
-                💾 Save Draft
-              </Button>
-              <Button
-                onClick={() => {
-                  setDraftAction('load')
-                  setShowDraftModal(true)
-                }}
-                size="sm"
-                className="bg-purple-600 text-white hover:bg-purple-700 font-bold"
-              >
-                <FileText className="w-4 h-4 mr-1" />
-                📂 Load Draft
-              </Button>
-              <Button
                 onClick={saveAllChanges}
-                size="sm"
-                className="bg-green-600 text-white hover:bg-green-700 font-bold"
+                size="lg"
+                className="bg-green-600 text-white hover:bg-green-700 font-bold px-8 py-3 text-lg"
               >
-                <Save className="w-4 h-4 mr-1" />
-                🚀 Publish Live
+                🚀 Publish Changes
               </Button>
           </div>
         </div>
@@ -1452,105 +1271,6 @@ Colors: Available in multiple finishes"
       )}
 
 
-      {/* Draft Slot Modal */}
-      {showDraftModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-[70] flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-md w-full p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold">
-                {draftAction === 'save' ? 'Save Draft to Slot' : draftAction === 'load' ? 'Load Draft from Slot' : 'Delete Draft from Slot'}
-              </h2>
-              <Button
-                onClick={() => setShowDraftModal(false)}
-                variant="ghost"
-                size="sm"
-                className="text-black hover:bg-gray-100"
-              >
-                <X className="w-5 h-5" />
-              </Button>
-            </div>
-            
-            <p className="text-gray-600 mb-6">
-              {draftAction === 'save' 
-                ? 'Choose a slot to save your current draft. This will overwrite any existing draft in that slot.'
-                : draftAction === 'load'
-                ? 'Choose a slot to load a draft from. This will replace your current work.'
-                : 'Choose a slot to delete. This action cannot be undone.'}
-            </p>
-            
-            {draftAction !== 'delete' && (
-              <div className="flex justify-end mb-4">
-                <Button
-                  onClick={() => setDraftAction('delete')}
-                  variant="outline"
-                  className="text-red-600 border-red-600 hover:bg-red-50"
-                  size="sm"
-                >
-                  🗑️ Delete Mode
-                </Button>
-              </div>
-            )}
-            {draftAction === 'delete' && (
-              <div className="flex justify-end mb-4">
-                <Button
-                  onClick={() => setDraftAction('load')}
-                  variant="outline"
-                  size="sm"
-                >
-                  Back to Load
-                </Button>
-              </div>
-            )}
-            
-            <div className="grid grid-cols-3 gap-4">
-              {[1, 2, 3].map((slot) => {
-                const hasDraft = !!localStorage.getItem(`foxbuilt-draft-${slot}`)
-                const draftInfo = hasDraft ? JSON.parse(localStorage.getItem(`foxbuilt-draft-${slot}`) || '{}') : null
-                
-                return (
-                  <Button
-                    key={slot}
-                    onClick={() => {
-                      if (draftAction === 'save') {
-                        if (hasDraft && !confirm(`Slot ${slot} already has a draft. Overwrite?`)) {
-                          return
-                        }
-                        saveDraftToSlot(slot)
-                      } else if (draftAction === 'load') {
-                        loadDraftFromSlot(slot)
-                      } else if (draftAction === 'delete') {
-                        if (hasDraft) {
-                          deleteDraftFromSlot(slot)
-                        }
-                      }
-                    }}
-                    variant="default"
-                    className={`h-24 flex flex-col items-center justify-center ${
-                      hasDraft 
-                        ? draftAction === 'delete'
-                          ? 'bg-red-600 hover:bg-red-700 text-white'
-                          : 'bg-green-600 hover:bg-green-700 text-white'
-                        : 'bg-gray-200 hover:bg-gray-300 text-gray-800'
-                    }`}
-                    disabled={draftAction === 'delete' && !hasDraft}
-                  >
-                    <span className="font-bold text-xl">Slot {slot}</span>
-                    {hasDraft && draftInfo?.lastUpdated && (
-                      <span className="text-xs mt-1 opacity-80">
-                        {new Date(draftInfo.lastUpdated).toLocaleDateString()}
-                      </span>
-                    )}
-                    {!hasDraft && (
-                      <span className="text-xs mt-1 opacity-60">Empty</span>
-                    )}
-                  </Button>
-                )
-              })}
-            </div>
-            
-          </div>
-        </div>
-      )}
     </div>
     </div>
   )
