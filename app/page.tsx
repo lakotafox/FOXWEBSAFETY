@@ -258,14 +258,9 @@ export default function FoxBuiltWebsite() {
           </h1>
           <div className="mb-8">
             <span className="inline-block bg-red-600 text-white px-6 py-3 text-sm font-black uppercase tracking-widest border-4 border-white">
-              🇺 27 YEARS STRONG 🇺
+              AMERICAN MADE 1999
             </span>
           </div>
-          <p className="text-xl text-zinc-300 mb-10 max-w-3xl mx-auto font-bold leading-relaxed">
-            BUILT TOUGH. BUILT RIGHT. BUILT TO LAST.
-            <br />
-            From executive offices to heavy-duty workstations - we outfit America's workforce.
-          </p>
           <div className="flex flex-col sm:flex-row gap-6 justify-center">
             <Button
               size="lg"
