@@ -1111,7 +1111,7 @@ export default function AdminEditor() {
                       <div 
                         className="absolute inset-0"
                         style={{
-                          transform: `translate(${(crop.x - 50) * (crop.scale - 1)}%, ${(crop.y - 50) * (crop.scale - 1)}%) scale(${crop.scale})`,
+                          transform: `translate(${crop.x - 50}%, ${crop.y - 50}%) scale(${crop.scale})`,
                           transition: isEditing ? 'none' : 'transform 0.3s'
                         }}
                       >
@@ -1259,7 +1259,7 @@ export default function AdminEditor() {
                           <div 
                             className="absolute inset-0"
                             style={{
-                              transform: `translate(${(crop.x - 50) * (crop.scale - 1)}%, ${(crop.y - 50) * (crop.scale - 1)}%) scale(${crop.scale})`,
+                              transform: `translate(${crop.x - 50}%, ${crop.y - 50}%) scale(${crop.scale})`,
                               transition: isEditing ? 'none' : 'transform 0.3s'
                             }}
                           >
