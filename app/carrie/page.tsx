@@ -236,6 +236,11 @@ export default function AdminEditor() {
           setPendingGalleryImages(data.gallery)
           localStorage.setItem('foxbuilt-gallery', JSON.stringify(data.gallery))
         }
+        
+        // Load gallery crops if available
+        if (data.galleryCrops) {
+          setCropSettings(prev => ({...prev, ...data.galleryCrops}))
+        }
       })
       .catch(err => console.log('Could not load content.json:', err))
   }, [])
@@ -623,6 +628,7 @@ export default function AdminEditor() {
       const content = {
         products: convertedProducts,
         gallery: convertedGallery,
+        galleryCrops: cropSettings, // Save all crop settings
         lastUpdated: new Date().toISOString(),
         updatedBy: "Kyle"
       }
@@ -1020,23 +1026,97 @@ export default function AdminEditor() {
                   </Button>
                 </div>
               )}
-              <div className="relative h-96 md:h-[500px] overflow-hidden border-8 border-slate-700">
-                {pendingGalleryImages.map((image, index) => (
-                  <div
-                    key={index}
-                    className={`absolute inset-0 transition-opacity duration-1000 ${
-                      index === currentSlide ? "opacity-100" : "opacity-0"
-                    }`}
-                  >
-                    <Image 
-                      src={getImageUrl(image, true)} 
-                      alt={`Project ${index + 1}`} 
-                      fill 
-                      className="object-cover"
-                      unoptimized
-                    />
-                  </div>
-                ))}
+              <div className="relative h-96 md:h-[500px] overflow-hidden border-8 border-slate-700 group">
+                {pendingGalleryImages.map((image, index) => {
+                  const crop = cropSettings[image] || { scale: 1, x: 50, y: 50 }
+                  const isEditing = editingCrop === image
+                  const isActive = index === currentSlide
+                  
+                  return (
+                    <div
+                      key={index}
+                      className={`absolute inset-0 transition-opacity duration-1000 ${
+                        isActive ? "opacity-100" : "opacity-0"
+                      }`}
+                    >
+                      <div 
+                        className="absolute inset-0"
+                        style={{
+                          transform: `scale(${crop.scale})`,
+                          transformOrigin: `${crop.x}% ${crop.y}%`,
+                          transition: isEditing ? 'none' : 'transform 0.3s'
+                        }}
+                      >
+                        <Image 
+                          src={getImageUrl(image, true)} 
+                          alt={`Project ${index + 1}`} 
+                          fill 
+                          className="object-cover"
+                          unoptimized
+                        />
+                      </div>
+                      
+                      {isEditMode && isActive && !isEditing && (
+                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-opacity opacity-0 group-hover:opacity-100 flex items-center justify-center z-10">
+                          <button
+                            onClick={() => setEditingCrop(image)}
+                            className="bg-white hover:bg-gray-100 text-black px-6 py-3 rounded flex items-center gap-2 font-bold shadow-lg"
+                          >
+                            <Maximize2 className="w-5 h-5" />
+                            Resize Image
+                          </button>
+                        </div>
+                      )}
+                      
+                      {isEditing && isActive && (
+                        <div 
+                          className="absolute inset-0 cursor-move z-20"
+                          onMouseDown={(e) => {
+                            e.preventDefault()
+                            const rect = e.currentTarget.getBoundingClientRect()
+                            
+                            const handleMouseMove = (e: MouseEvent) => {
+                              const x = ((e.clientX - rect.left) / rect.width) * 100
+                              const y = ((e.clientY - rect.top) / rect.height) * 100
+                              
+                              setCropSettings(prev => ({
+                                ...prev,
+                                [image]: { ...crop, x, y }
+                              }))
+                            }
+                            
+                            const handleMouseUp = () => {
+                              document.removeEventListener('mousemove', handleMouseMove)
+                              document.removeEventListener('mouseup', handleMouseUp)
+                              setEditingCrop(null)
+                            }
+                            
+                            document.addEventListener('mousemove', handleMouseMove)
+                            document.addEventListener('mouseup', handleMouseUp)
+                          }}
+                          onWheel={(e) => {
+                            e.preventDefault()
+                            const delta = e.deltaY > 0 ? 0.9 : 1.1
+                            const newScale = Math.max(0.5, Math.min(3, crop.scale * delta))
+                            
+                            setCropSettings(prev => ({
+                              ...prev,
+                              [image]: { ...crop, scale: newScale }
+                            }))
+                          }}
+                        >
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="text-white text-center pointer-events-none">
+                              <p className="font-bold text-xl mb-2 drop-shadow-lg">Click and drag to move</p>
+                              <p className="text-lg drop-shadow-lg">Scroll to zoom in/out</p>
+                              <p className="text-sm mt-2 drop-shadow-lg">Release to save</p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
               </div>
 
               <button
@@ -1145,27 +1225,29 @@ export default function AdminEditor() {
                           </div>
                           
                           {isEditMode && !isEditing && (
-                            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-opacity opacity-0 group-hover:opacity-100 flex items-center justify-center gap-3">
-                              <label className="bg-white hover:bg-gray-100 text-black px-4 py-2 rounded cursor-pointer flex items-center gap-2 font-bold">
-                                <Edit2 className="w-4 h-4" />
-                                Change
-                                <input
-                                  type="file"
-                                  accept="image/*"
-                                  className="hidden"
-                                  onChange={(e) => {
-                                    const file = e.target.files?.[0]
-                                    if (file) handleImageUpload(featuredCategory, product.id, file)
-                                  }}
-                                />
-                              </label>
-                              <button
-                                onClick={() => setEditingCrop(product.image)}
-                                className="bg-white hover:bg-gray-100 text-black px-4 py-2 rounded flex items-center gap-2 font-bold"
-                              >
-                                <Maximize2 className="w-4 h-4" />
-                                Resize
-                              </button>
+                            <div className="absolute inset-0 flex items-end justify-center pb-4 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                              <div className="flex gap-2">
+                                <label className="bg-white hover:bg-gray-100 text-black px-4 py-2 rounded cursor-pointer flex items-center gap-2 font-bold shadow-lg">
+                                  <Edit2 className="w-4 h-4" />
+                                  Change
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={(e) => {
+                                      const file = e.target.files?.[0]
+                                      if (file) handleImageUpload(featuredCategory, product.id, file)
+                                    }}
+                                  />
+                                </label>
+                                <button
+                                  onClick={() => setEditingCrop(product.image)}
+                                  className="bg-white hover:bg-gray-100 text-black px-4 py-2 rounded flex items-center gap-2 font-bold shadow-lg"
+                                >
+                                  <Maximize2 className="w-4 h-4" />
+                                  Resize
+                                </button>
+                              </div>
                             </div>
                           )}
                           
@@ -1206,11 +1288,11 @@ export default function AdminEditor() {
                                 }))
                               }}
                             >
-                              <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                              <div className="absolute inset-0 flex items-center justify-center">
                                 <div className="text-white text-center pointer-events-none">
-                                  <p className="font-bold text-lg mb-2">Click and drag to move</p>
-                                  <p className="text-sm">Scroll to zoom in/out</p>
-                                  <p className="text-xs mt-2">Release to save</p>
+                                  <p className="font-bold text-lg mb-2 drop-shadow-lg">Click and drag to move</p>
+                                  <p className="text-sm drop-shadow-lg">Scroll to zoom in/out</p>
+                                  <p className="text-xs mt-2 drop-shadow-lg">Release to save</p>
                                 </div>
                               </div>
                             </div>
