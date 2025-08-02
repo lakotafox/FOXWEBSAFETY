@@ -23,6 +23,8 @@ export default function FoxBuiltWebsite() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSpecsModal, setShowSpecsModal] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState<any>(null)
+  const [cropSettings, setCropSettings] = useState<{[key: string]: {scale: number, x: number, y: number}}>({})
+  const [galleryCrops, setGalleryCrops] = useState<{[key: string]: {scale: number, x: number, y: number}}>({})
   
   // Helper function to get displayable image URL
   const getImageUrl = (imagePath: string) => {
@@ -56,9 +58,23 @@ export default function FoxBuiltWebsite() {
       .then(data => {
         if (data.products) {
           setFeaturedProducts(data.products)
+          
+          // Extract crop settings from products
+          const crops: {[key: string]: {scale: number, x: number, y: number}} = {}
+          Object.keys(data.products).forEach(category => {
+            data.products[category].forEach((product: any) => {
+              if (product.imageCrop && product.image) {
+                crops[product.image] = product.imageCrop
+              }
+            })
+          })
+          setCropSettings(crops)
         }
         if (data.gallery) {
           setGalleryImages(data.gallery)
+        }
+        if (data.galleryCrops) {
+          setGalleryCrops(data.galleryCrops)
         }
       })
       .catch(error => {
@@ -277,17 +293,27 @@ export default function FoxBuiltWebsite() {
             AMERICAN <span className="text-red-600">CRAFTSMANSHIP</span>
           </h2>
           <div className="relative max-w-6xl mx-auto">
-            <div className="relative h-96 md:h-[600px] overflow-hidden border-8 border-slate-700">
-              {galleryImages.map((image, index) => (
-                <div
-                  key={index}
-                  className={`absolute inset-0 transition-opacity duration-1000 ${
-                    index === currentSlide ? "opacity-100" : "opacity-0"
-                  }`}
-                >
-                  <Image src={getImageUrl(image)} alt={`Project ${index + 1}`} fill className="object-cover" />
-                </div>
-              ))}
+            <div className="relative h-96 md:h-[500px] overflow-hidden border-8 border-slate-700">
+              {galleryImages.map((image, index) => {
+                const crop = galleryCrops[image] || { scale: 1, x: 50, y: 50 }
+                return (
+                  <div
+                    key={index}
+                    className={`absolute inset-0 transition-opacity duration-1000 ${
+                      index === currentSlide ? "opacity-100" : "opacity-0"
+                    }`}
+                  >
+                    <div 
+                      className="absolute inset-0"
+                      style={{
+                        transform: `translate(${crop.x - 50}%, ${crop.y - 50}%) scale(${crop.scale})`
+                      }}
+                    >
+                      <Image src={getImageUrl(image)} alt={`Project ${index + 1}`} fill className="object-cover" />
+                    </div>
+                  </div>
+                )
+              })}
             </div>
 
             {/* Navigation buttons */}
@@ -370,10 +396,29 @@ export default function FoxBuiltWebsite() {
                 key={product.id}
                 className="overflow-hidden hover:shadow-2xl transition-all border-4 border-slate-600 bg-zinc-100"
               >
-                <div className="relative h-56">
-                  <Image src={getImageUrl(product.image)} alt={product.title} fill className="object-cover" />
+                <div className="relative h-56 overflow-hidden">
+                  {(() => {
+                    const crop = cropSettings[product.image] || { scale: 1, x: 50, y: 50 }
+                    return (
+                      <div 
+                        className="absolute inset-0"
+                        style={{
+                          transform: `translate(${crop.x - 50}%, ${crop.y - 50}%) scale(${crop.scale})`
+                        }}
+                      >
+                        <Image 
+                          src={getImageUrl(product.image)} 
+                          alt={product.title} 
+                          width={500}
+                          height={500}
+                          className="w-full h-full object-contain"
+                          unoptimized
+                        />
+                      </div>
+                    )
+                  })()}
                   <div
-                    className={`absolute top-4 right-4 text-white px-3 py-1 font-black text-sm ${
+                    className={`absolute top-4 right-4 text-white px-3 py-1 font-black text-sm z-10 ${
                       featuredCategory === "new"
                         ? "bg-red-600"
                         : featuredCategory === "battleTested"
