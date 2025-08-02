@@ -1120,8 +1120,9 @@ export default function AdminEditor() {
                         <Image 
                           src={getImageUrl(image, true)} 
                           alt={`Project ${index + 1}`} 
-                          fill 
-                          className="object-cover"
+                          width={1000}
+                          height={600}
+                          className="w-full h-full object-contain"
                           unoptimized
                         />
                       </div>
