@@ -272,6 +272,7 @@ export default function FoxBuiltWebsite() {
             <Button
               size="lg"
               className="bg-black hover:bg-zinc-800 text-white font-black text-lg px-10 py-4 border-4 border-white tracking-widest"
+              onClick={() => window.location.href = 'tel:+18018999406'}
             >
               (801) 899-9406
             </Button>
