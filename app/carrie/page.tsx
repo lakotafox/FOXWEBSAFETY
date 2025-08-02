@@ -1139,10 +1139,8 @@ export default function AdminEditor() {
                       {isEditing && isActive && (
                         <div 
                           className="absolute inset-0 z-20"
-                          onClick={(e) => {
-                            if (e.target === e.currentTarget) {
-                              setEditingCrop(null)
-                            }
+                          onClick={() => {
+                            setEditingCrop(null)
                           }}
                           onWheel={(e) => {
                             e.preventDefault()
@@ -1155,8 +1153,8 @@ export default function AdminEditor() {
                             }))
                           }}
                         >
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="text-white text-center pointer-events-none">
+                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                            <div className="text-white text-center">
                               <p className="font-bold text-xl mb-2 drop-shadow-lg">Use arrow keys to move</p>
                               <p className="text-lg drop-shadow-lg">Scroll to zoom in/out</p>
                               <p className="text-sm mt-2 drop-shadow-lg">Click anywhere to save</p>
@@ -1303,11 +1301,9 @@ export default function AdminEditor() {
                           
                           {isEditing && (
                             <div 
-                              className="absolute inset-0"
-                              onClick={(e) => {
-                                if (e.target === e.currentTarget) {
-                                  setEditingCrop(null)
-                                }
+                              className="absolute inset-0 z-20"
+                              onClick={() => {
+                                setEditingCrop(null)
                               }}
                               onWheel={(e) => {
                                 e.preventDefault()
@@ -1320,8 +1316,8 @@ export default function AdminEditor() {
                                 }))
                               }}
                             >
-                              <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="text-white text-center pointer-events-none">
+                              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                <div className="text-white text-center">
                                   <p className="font-bold text-lg mb-2 drop-shadow-lg">Use arrow keys to move</p>
                                   <p className="text-sm drop-shadow-lg">Scroll to zoom in/out</p>
                                   <p className="text-xs mt-2 drop-shadow-lg">Click anywhere to save</p>
