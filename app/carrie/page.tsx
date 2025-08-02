@@ -1266,8 +1266,9 @@ export default function AdminEditor() {
                             <Image 
                               src={getImageUrl(product.image, false)} 
                               alt={product.title} 
-                              fill 
-                              className="object-cover"
+                              width={500}
+                              height={500}
+                              className="w-full h-full object-contain"
                               unoptimized
                               key={product.image}
                             />
