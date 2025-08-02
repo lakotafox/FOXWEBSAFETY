@@ -111,6 +111,7 @@ export default function AdminEditor() {
   const [loadingStartTime, setLoadingStartTime] = useState<number | null>(null)
   const [showPublishLoadingOverlay, setShowPublishLoadingOverlay] = useState(false)
   const [publishMessage, setPublishMessage] = useState("")
+  const [showHelp, setShowHelp] = useState(false)
   
   // Construction messages for publish loading
   const constructionMessages = [
@@ -1775,6 +1776,118 @@ Colors: Available in multiple finishes"
         </div>
       )}
 
+      {/* Floating Help Button */}
+      <button
+        onClick={() => setShowHelp(true)}
+        className="fixed bottom-8 right-8 w-16 h-16 bg-blue-600 rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300 z-50 flex items-center justify-center group"
+        style={{ position: 'fixed' }}
+      >
+        <Image
+          src="/questionmark.png"
+          alt="Help"
+          width={40}
+          height={40}
+          className="group-hover:scale-110 transition-transform"
+        />
+      </button>
+
+      {/* Help Modal */}
+      {showHelp && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-[80] flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto p-8">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-3xl font-black text-slate-900">Editor Help</h2>
+              <button
+                onClick={() => setShowHelp(false)}
+                className="text-gray-500 hover:text-gray-700 transition-colors"
+              >
+                <X className="w-8 h-8" />
+              </button>
+            </div>
+            
+            <div className="space-y-6">
+              <div className="bg-blue-50 border-l-4 border-blue-600 p-4">
+                <h3 className="font-bold text-lg mb-2 text-blue-900">🎯 Quick Start</h3>
+                <p className="text-blue-800">
+                  Hover over any product or gallery image to see edit options. Look for the lock icon to resize and position images.
+                </p>
+              </div>
+
+              <div>
+                <h3 className="font-bold text-xl mb-4 text-slate-900">📸 Image Controls</h3>
+                <ul className="space-y-3 text-gray-700">
+                  <li className="flex items-start">
+                    <span className="text-2xl mr-3">🔒</span>
+                    <div>
+                      <strong>Lock Icon:</strong> Click to enter resize/position mode
+                    </div>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-2xl mr-3">⬆️⬇️⬅️➡️</span>
+                    <div>
+                      <strong>Arrow Keys:</strong> Move the image in any direction
+                    </div>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-2xl mr-3">🖱️</span>
+                    <div>
+                      <strong>Scroll Wheel:</strong> Zoom in/out (min: 17%, max: 900%)
+                    </div>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-2xl mr-3">🔓</span>
+                    <div>
+                      <strong>Unlock Icon:</strong> Click to save position and exit resize mode
+                    </div>
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-bold text-xl mb-4 text-slate-900">💾 Publishing Changes</h3>
+                <div className="space-y-3 text-gray-700">
+                  <p className="flex items-start">
+                    <span className="text-2xl mr-3">1️⃣</span>
+                    <span>Make all your changes to products and images</span>
+                  </p>
+                  <p className="flex items-start">
+                    <span className="text-2xl mr-3">2️⃣</span>
+                    <span>Click the <strong>"Publish Live Site"</strong> button at the top</span>
+                  </p>
+                  <p className="flex items-start">
+                    <span className="text-2xl mr-3">3️⃣</span>
+                    <span>Wait <strong>60 seconds</strong> for changes to build and go live</span>
+                  </p>
+                  <p className="flex items-start">
+                    <span className="text-2xl mr-3">4️⃣</span>
+                    <span>Your updates will be visible to all visitors!</span>
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4">
+                <h3 className="font-bold text-lg mb-2 text-yellow-900">💡 Pro Tips</h3>
+                <ul className="space-y-2 text-yellow-800">
+                  <li>• Changes are saved locally until you publish</li>
+                  <li>• Gallery images upload immediately</li>
+                  <li>• Product changes require publishing to go live</li>
+                  <li>• Multiple arrow keys pressed = no movement (safety feature)</li>
+                  <li>• The construction messages during publish are just for fun!</li>
+                </ul>
+              </div>
+
+              <div className="text-center pt-4">
+                <Button
+                  onClick={() => setShowHelp(false)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3"
+                >
+                  Got it! 👍
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
     </div>
