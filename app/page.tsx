@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Image from "next/image"
-import { ChevronLeft, ChevronRight, Phone, MapPin, FileText } from "lucide-react"
+import { ChevronLeft, ChevronRight, Phone, FileText } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -517,7 +517,15 @@ export default function FoxBuiltWebsite() {
                 <div className="mt-8 bg-white/10 border-4 border-white p-6 text-center">
                   <div className="space-y-4">
                     <div className="flex items-center justify-center space-x-4">
-                      <MapPin className="w-6 h-6 text-white" />
+                      <div className="w-6 h-6 relative flex-shrink-0">
+                        <Image 
+                          src="/mapsimage.png" 
+                          alt="Location" 
+                          width={24} 
+                          height={24}
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
                       <a 
                         href="https://maps.apple.com/?address=420+W+Industrial+Dr+Building+LL,+Pleasant+Grove,+UT+84062"
                         target="_blank"
@@ -566,8 +574,14 @@ export default function FoxBuiltWebsite() {
                   </a>
                 </div>
                 <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 bg-red-600 flex items-center justify-center">
-                    <MapPin className="w-6 h-6 text-white" />
+                  <div className="w-12 h-12 relative flex-shrink-0">
+                    <Image 
+                      src="/mapsimage.png" 
+                      alt="Location" 
+                      width={48} 
+                      height={48}
+                      className="w-full h-full object-contain"
+                    />
                   </div>
                   <a 
                     href="https://maps.apple.com/?address=420+W+Industrial+Dr+Building+LL,+Pleasant+Grove,+UT+84062"
