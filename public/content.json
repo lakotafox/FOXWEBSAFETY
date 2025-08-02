@@ -112,15 +112,20 @@
       {
         "id": 9,
         "title": "Reception Seating",
-        "image": "/images/reception tan.jpg",
+        "image": "/images/product-9-1754115312078.jpg",
         "price": "Price coming soon",
         "description": "Website is a work in progress - prices and products coming soon!",
         "features": [
           "Anti-microbial vinyl",
           "Designer fabrics",
-          "Modular options"
+          "hi brutha"
         ],
-        "specs": "Dimensions: 72\"W x 28\"D x 32\"H\nSeating: 3 person capacity\nMaterial: Commercial grade vinyl\nFrame: Steel reinforced"
+        "specs": "Dimensions: 72\"W x 28\"D x 32\"H\nSeating: 3 person capacity\nMaterial: Commercial grade vinyl\nFrame: Steel reinforced",
+        "imageCrop": {
+          "scale": 0.9890025186719993,
+          "x": 50,
+          "y": 50
+        }
       }
     ]
   },
@@ -132,6 +137,13 @@
     "/images/tanconf.jpg",
     "/images/reception tan.jpg"
   ],
-  "lastUpdated": "2025-08-01T18:29:03.963Z",
+  "galleryCrops": {
+    "/images/product-9-1754115312078.jpg": {
+      "scale": 0.9890025186719993,
+      "x": 50,
+      "y": 50
+    }
+  },
+  "lastUpdated": "2025-08-02T06:18:22.270Z",
   "updatedBy": "Kyle"
 }
