@@ -1457,6 +1457,13 @@ export default function AdminEditor() {
                     )}
 
                     {/* Price */}
+                    {/* DEBUG: Red test button */}
+                    <div className="mb-4">
+                      <button className="w-full bg-red-600 text-white font-bold py-2 px-4 rounded">
+                        TEST BUTTON - SPECS SHOULD BE BELOW
+                      </button>
+                    </div>
+                    
                     <div className="flex justify-between items-center">
                       {isEditMode ? (
                         <input
