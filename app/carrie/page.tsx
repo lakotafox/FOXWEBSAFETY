@@ -1696,18 +1696,7 @@ export default function AdminEditor() {
               ))}
             </div>
             
-            <div className="mt-6 flex justify-end gap-2">
-              <Button
-                onClick={() => {
-                  // Reset pending gallery images to current saved state
-                  setPendingGalleryImages(galleryImages)
-                  setShowGalleryEditor(false)
-                }}
-                variant="outline"
-                className="border-2 border-gray-600 text-gray-700 hover:bg-gray-100 font-bold"
-              >
-                Cancel
-              </Button>
+            <div className="mt-6 flex justify-end">
               <Button
                 onClick={() => {
                   setShowGalleryEditor(false)
