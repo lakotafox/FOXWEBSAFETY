@@ -82,6 +82,10 @@ export default function AdminEditor() {
   const [showPasswordScreen, setShowPasswordScreen] = useState(false)
   const [showPublishConfirm, setShowPublishConfirm] = useState(false)
   const [expandedSpecs, setExpandedSpecs] = useState<number | null>(null)
+  
+  // Temporary preview storage for blob URLs
+  const [tempPreviews, setTempPreviews] = useState<{[key: string]: string}>({})
+  const [galleryTempPreviews, setGalleryTempPreviews] = useState<{[key: string]: string}>({})
 
   // Gallery images
   const defaultGalleryImages = [
@@ -125,13 +129,21 @@ export default function AdminEditor() {
   ]
   
   // Helper function to get displayable image URL
-  const getImageUrl = (imagePath: string) => {
+  const getImageUrl = (imagePath: string, isGallery: boolean = false) => {
     if (!imagePath) return "/placeholder.svg"
     
-    // For any /images/ path, just return a placeholder
-    // Images will show after build completes
+    // Check if we have a temporary preview for this path
+    if (isGallery && galleryTempPreviews[imagePath]) {
+      return galleryTempPreviews[imagePath]
+    }
+    if (!isGallery && tempPreviews[imagePath]) {
+      return tempPreviews[imagePath]
+    }
+    
+    // For /images/ paths, convert to GitHub raw URL for preview
     if (imagePath.startsWith('/images/')) {
-      return "/placeholder.svg"
+      const fileName = imagePath.replace('/images/', '')
+      return `https://raw.githubusercontent.com/lakotafox/FOXSITE/main/public/images/${fileName}`
     }
     
     // Default
@@ -154,6 +166,23 @@ export default function AdminEditor() {
       messageTimeoutRef.current = null
     }, duration)
   }
+
+  // Cleanup blob URLs on unmount
+  useEffect(() => {
+    return () => {
+      // Clean up all blob URLs when component unmounts
+      Object.values(tempPreviews).forEach(url => {
+        if (url.startsWith('data:') || url.startsWith('blob:')) {
+          URL.revokeObjectURL(url)
+        }
+      })
+      Object.values(galleryTempPreviews).forEach(url => {
+        if (url.startsWith('data:') || url.startsWith('blob:')) {
+          URL.revokeObjectURL(url)
+        }
+      })
+    }
+  }, [tempPreviews, galleryTempPreviews])
 
   // Check if mobile and load saved data on mount
   useEffect(() => {
@@ -294,7 +323,17 @@ export default function AdminEditor() {
     // Update to use GitHub path immediately
     updateProduct(category, productId, 'image', githubPath)
     
-    // No need to store preview - we'll use GitHub URLs directly
+    // Create a temporary preview URL
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      if (e.target?.result) {
+        setTempPreviews(prev => ({
+          ...prev,
+          [githubPath]: e.target.result as string
+        }))
+      }
+    }
+    reader.readAsDataURL(file)
     
     // Add to queue with the filename
     setUploadQueue(queue => [...queue, { type: 'product', file, category, productId, fileName }])
@@ -393,7 +432,17 @@ export default function AdminEditor() {
     newImages[index] = githubPath
     setPendingGalleryImages(newImages)
     
-    // No need to store preview - we'll use GitHub URLs directly
+    // Create a temporary preview URL
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      if (e.target?.result) {
+        setGalleryTempPreviews(prev => ({
+          ...prev,
+          [githubPath]: e.target.result as string
+        }))
+      }
+    }
+    reader.readAsDataURL(file)
     
     // Add to queue with the filename
     setUploadQueue(queue => [...queue, { type: 'gallery', file, index, fileName }])
@@ -957,7 +1006,7 @@ export default function AdminEditor() {
                     }`}
                   >
                     <Image 
-                      src={getImageUrl(image)} 
+                      src={getImageUrl(image, true)} 
                       alt={`Project ${index + 1}`} 
                       fill 
                       className="object-cover"
@@ -1049,7 +1098,7 @@ export default function AdminEditor() {
                 >
                   <div className="relative h-56 group">
                     <Image 
-                      src={getImageUrl(product.image)} 
+                      src={getImageUrl(product.image, false)} 
                       alt={product.title} 
                       fill 
                       className="object-cover"
@@ -1392,7 +1441,7 @@ Colors: Available in multiple finishes"
                   <div className="relative aspect-video bg-gray-100 rounded border-2 border-dashed border-gray-300 overflow-hidden group">
                     {image && (
                       <Image 
-                        src={getImageUrl(image)} 
+                        src={getImageUrl(image, true)} 
                         alt={`Gallery ${index + 1}`} 
                         fill 
                         className="object-cover"
