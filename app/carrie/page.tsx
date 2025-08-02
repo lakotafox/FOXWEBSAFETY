@@ -1054,8 +1054,7 @@ export default function AdminEditor() {
                       <div 
                         className="absolute inset-0"
                         style={{
-                          transform: `scale(${crop.scale})`,
-                          transformOrigin: `${crop.x}% ${crop.y}%`,
+                          transform: `translate(${(crop.x - 50) * (crop.scale - 1)}%, ${(crop.y - 50) * (crop.scale - 1)}%) scale(${crop.scale})`,
                           transition: isEditing ? 'none' : 'transform 0.3s'
                         }}
                       >
@@ -1063,7 +1062,7 @@ export default function AdminEditor() {
                           src={getImageUrl(image, true)} 
                           alt={`Project ${index + 1}`} 
                           fill 
-                          className={isEditing ? "object-contain" : "object-cover"}
+                          className="object-cover"
                           unoptimized
                         />
                       </div>
@@ -1221,8 +1220,7 @@ export default function AdminEditor() {
                           <div 
                             className="absolute inset-0"
                             style={{
-                              transform: `scale(${crop.scale})`,
-                              transformOrigin: `${crop.x}% ${crop.y}%`,
+                              transform: `translate(${(crop.x - 50) * (crop.scale - 1)}%, ${(crop.y - 50) * (crop.scale - 1)}%) scale(${crop.scale})`,
                               transition: isEditing ? 'none' : 'transform 0.3s'
                             }}
                           >
@@ -1230,7 +1228,7 @@ export default function AdminEditor() {
                               src={getImageUrl(product.image, false)} 
                               alt={product.title} 
                               fill 
-                              className={isEditing ? "object-contain" : "object-cover"}
+                              className="object-cover"
                               unoptimized
                               key={product.image}
                             />
