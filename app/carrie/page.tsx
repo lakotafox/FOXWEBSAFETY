@@ -195,8 +195,21 @@ export default function AdminEditor() {
     // Lock body scroll
     document.body.style.overflow = 'hidden'
     
+    // Track currently pressed keys
+    const pressedKeys = new Set<string>()
+    
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!editingCrop) return
+      
+      // Add key to pressed set
+      pressedKeys.add(e.key)
+      
+      // Count how many arrow keys are pressed
+      const arrowKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']
+      const pressedArrows = arrowKeys.filter(key => pressedKeys.has(key))
+      
+      // Only process movement if exactly one arrow key is pressed
+      if (pressedArrows.length !== 1) return
       
       const moveAmount = 2 // percentage to move per key press
       const currentCrop = cropSettings[editingCrop] || { scale: 1, x: 50, y: 50 }
@@ -236,12 +249,19 @@ export default function AdminEditor() {
       }
     }
     
+    const handleKeyUp = (e: KeyboardEvent) => {
+      // Remove key from pressed set
+      pressedKeys.delete(e.key)
+    }
+    
     document.addEventListener('keydown', handleKeyDown)
+    document.addEventListener('keyup', handleKeyUp)
     
     return () => {
       // Restore body scroll
       document.body.style.overflow = ''
       document.removeEventListener('keydown', handleKeyDown)
+      document.removeEventListener('keyup', handleKeyUp)
     }
   }, [editingCrop, cropSettings])
 
