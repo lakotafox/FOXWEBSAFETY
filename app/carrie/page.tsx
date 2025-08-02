@@ -82,7 +82,6 @@ export default function AdminEditor() {
   const [showPasswordScreen, setShowPasswordScreen] = useState(false)
   const [showPublishConfirm, setShowPublishConfirm] = useState(false)
   const [expandedSpecs, setExpandedSpecs] = useState<number | null>(null)
-  const [imageUrlMap, setImageUrlMap] = useState<{[blobUrl: string]: string}>({})
 
   // Gallery images
   const defaultGalleryImages = [
@@ -129,11 +128,10 @@ export default function AdminEditor() {
   const getImageUrl = (imagePath: string) => {
     if (!imagePath) return "/placeholder.svg"
     
-    // For any /images/ path, use GitHub raw URL directly
-    // Skip localStorage on mobile due to size limits
+    // For any /images/ path, just return a placeholder
+    // Images will show after build completes
     if (imagePath.startsWith('/images/')) {
-      const githubUrl = `https://raw.githubusercontent.com/lakotafox/FOXSITE/main/public${imagePath}`
-      return githubUrl
+      return "/placeholder.svg"
     }
     
     // Default
@@ -180,14 +178,6 @@ export default function AdminEditor() {
     }
     
     // Load URL map from localStorage
-    const savedUrlMap = localStorage.getItem('foxbuilt-url-map')
-    if (savedUrlMap) {
-      try {
-        setImageUrlMap(JSON.parse(savedUrlMap))
-      } catch (e) {
-        console.error('Error loading URL map:', e)
-      }
-    }
     
     // Also try to load from published content.json for fresh editor sessions
     fetch('/content.json')
@@ -362,14 +352,7 @@ export default function AdminEditor() {
         )
         
         if (response.ok) {
-          // Store the preview data URL in localStorage with BOTH paths
-          const previews = JSON.parse(localStorage.getItem('foxbuilt-image-previews') || '{}')
-          previews[`/images/${fileName}`] = base64Data
-          previews[`public/images/${fileName}`] = base64Data  // Also store with public/ prefix
-          localStorage.setItem('foxbuilt-image-previews', JSON.stringify(previews))
-          
-          // No need for URL mapping - already using GitHub path
-          
+          // Upload successful - image will show after build
           clearTimeout(uploadTimeout)
         setActiveUploads(count => count - 1)
         } else {
@@ -482,13 +465,7 @@ export default function AdminEditor() {
           return
         }
         
-        // No need for URL mapping anymore - images already use GitHub paths
-        
-        // Store the preview data URL in localStorage with BOTH paths
-        const previews = JSON.parse(localStorage.getItem('foxbuilt-image-previews') || '{}')
-        previews[`/images/${fileName}`] = base64Data
-        previews[`public/images/${fileName}`] = base64Data  // Also store with public/ prefix
-        localStorage.setItem('foxbuilt-image-previews', JSON.stringify(previews))
+        // Upload successful - image will show after build
         
         
         clearTimeout(uploadTimeout)
@@ -524,10 +501,7 @@ export default function AdminEditor() {
       setPendingGalleryImages(defaultGalleryImages)
       localStorage.setItem('foxbuilt-gallery', JSON.stringify(defaultGalleryImages))
       
-      // Clear image previews and URL map
-      localStorage.removeItem('foxbuilt-image-previews')
-      localStorage.removeItem('foxbuilt-url-map')
-      setImageUrlMap({})
+      // Images will reload after build
       
       showMessage("🔄 Reverted to V1.0! All products and gallery reset to original.", 5000)
       
