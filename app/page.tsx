@@ -565,14 +565,14 @@ export default function FoxBuiltWebsite() {
             <div>
               <h3 className="text-3xl font-black mb-8 tracking-wide">CONTACT INFO</h3>
               <div className="space-y-6">
-                <div className="flex items-center space-x-4">
+                <a href="tel:+18018999406" className="flex items-center space-x-4 hover:opacity-80 transition-opacity -mx-4 px-4 py-3 rounded-lg">
                   <div className="w-12 h-12 bg-red-600 flex items-center justify-center">
                     <Phone className="w-6 h-6 text-white" />
                   </div>
-                  <a href="tel:+18018999406" className="text-xl font-bold hover:text-red-400 transition-colors">
+                  <span className="text-xl font-bold">
                     (801) 899-9406
-                  </a>
-                </div>
+                  </span>
+                </a>
                 <div className="flex items-start space-x-4">
                   <div className="w-12 h-12 relative flex-shrink-0">
                     <Image 
