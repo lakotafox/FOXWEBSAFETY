@@ -352,13 +352,15 @@ export default function AdminEditor() {
     }
   }, [activeUploads, uploadQueue.length, showLoadingOverlay, loadingStartTime])
 
-  // Auto-slide gallery
+  // Auto-slide gallery (only when not in edit mode)
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % galleryImages.length)
-    }, 4000)
-    return () => clearInterval(timer)
-  }, [pendingGalleryImages.length])
+    if (!isEditMode) {
+      const timer = setInterval(() => {
+        setCurrentSlide((prev) => (prev + 1) % galleryImages.length)
+      }, 4000)
+      return () => clearInterval(timer)
+    }
+  }, [pendingGalleryImages.length, isEditMode])
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % pendingGalleryImages.length)

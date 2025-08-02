@@ -221,12 +221,14 @@ export default function GamesPage() {
     const gameStateRef = useRef({
       ballX: 0,
       ballY: 0,
-      ballDX: 5,
-      ballDY: 5,
+      ballDX: 7,
+      ballDY: 7,
       playerY: 0,
       aiY: 0,
       paddleHeight: 120,
-      paddleWidth: 20
+      paddleWidth: 20,
+      baseSpeed: 7,
+      speedMultiplier: 1.05
     })
     
     useEffect(() => {
@@ -284,8 +286,9 @@ export default function GamesPage() {
           // Calculate bounce angle (max 45 degrees)
           let angle = collidePoint * Math.PI / 4
           
-          // Set new ball speeds based on angle
-          const speed = Math.sqrt(gameState.ballDX * gameState.ballDX + gameState.ballDY * gameState.ballDY)
+          // Set new ball speeds based on angle and increase speed slightly
+          let speed = Math.sqrt(gameState.ballDX * gameState.ballDX + gameState.ballDY * gameState.ballDY)
+          speed = Math.min(speed * gameState.speedMultiplier, 15) // Cap at max speed
           gameState.ballDX = speed * Math.cos(angle)
           gameState.ballDY = speed * Math.sin(angle)
         }
@@ -301,8 +304,9 @@ export default function GamesPage() {
           // Calculate bounce angle (max 45 degrees)
           let angle = collidePoint * Math.PI / 4
           
-          // Set new ball speeds based on angle
-          const speed = Math.sqrt(gameState.ballDX * gameState.ballDX + gameState.ballDY * gameState.ballDY)
+          // Set new ball speeds based on angle and increase speed slightly
+          let speed = Math.sqrt(gameState.ballDX * gameState.ballDX + gameState.ballDY * gameState.ballDY)
+          speed = Math.min(speed * gameState.speedMultiplier, 15) // Cap at max speed
           gameState.ballDX = -speed * Math.cos(angle)
           gameState.ballDY = speed * Math.sin(angle)
         }
@@ -312,15 +316,15 @@ export default function GamesPage() {
           setScores(prev => ({ ...prev, ai: prev.ai + 1 }))
           gameState.ballX = canvas.width / 2
           gameState.ballY = canvas.height / 2
-          gameState.ballDX = -5
-          gameState.ballDY = (Math.random() - 0.5) * 10
+          gameState.ballDX = -gameState.baseSpeed
+          gameState.ballDY = (Math.random() - 0.5) * gameState.baseSpeed
         }
         if (gameState.ballX >= canvas.width) {
           setScores(prev => ({ ...prev, player: prev.player + 1 }))
           gameState.ballX = canvas.width / 2
           gameState.ballY = canvas.height / 2
-          gameState.ballDX = 5
-          gameState.ballDY = (Math.random() - 0.5) * 10
+          gameState.ballDX = gameState.baseSpeed
+          gameState.ballDY = (Math.random() - 0.5) * gameState.baseSpeed
         }
         
         // AI movement (improved)
