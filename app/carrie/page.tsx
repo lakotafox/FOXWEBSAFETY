@@ -343,6 +343,12 @@ export default function AdminEditor() {
     // Update to use GitHub path immediately
     updateProduct(category, productId, 'image', githubPath)
     
+    // Reset crop settings for the new image (full image, no crop)
+    setCropSettings(prev => ({
+      ...prev,
+      [githubPath]: { scale: 1, x: 50, y: 50 }
+    }))
+    
     // Create a temporary preview URL
     const reader = new FileReader()
     reader.onload = (e) => {
@@ -451,6 +457,12 @@ export default function AdminEditor() {
     const newImages = [...pendingGalleryImages]
     newImages[index] = githubPath
     setPendingGalleryImages(newImages)
+    
+    // Reset crop settings for the new image (full image, no crop)
+    setCropSettings(prev => ({
+      ...prev,
+      [githubPath]: { scale: 1, x: 50, y: 50 }
+    }))
     
     // Create a temporary preview URL
     const reader = new FileReader()
