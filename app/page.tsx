@@ -518,14 +518,21 @@ export default function FoxBuiltWebsite() {
                   <div className="space-y-4">
                     <div className="flex items-center justify-center space-x-4">
                       <MapPin className="w-6 h-6 text-white" />
-                      <div>
+                      <a 
+                        href="https://maps.apple.com/?address=420+W+Commerce+Dr+Building+LL,+Pleasant+Grove,+UT+84062"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:text-zinc-200 transition-colors"
+                      >
                         <p className="text-xl font-bold">420 W Commerce Dr Building LL</p>
                         <p className="text-xl font-bold">Pleasant Grove, UT 84062</p>
-                      </div>
+                      </a>
                     </div>
                     <div className="flex items-center justify-center space-x-4">
                       <Phone className="w-6 h-6 text-white" />
-                      <span className="text-xl font-bold">(801) 899-9406</span>
+                      <a href="tel:+18018999406" className="text-xl font-bold hover:text-zinc-200 transition-colors">
+                        (801) 899-9406
+                      </a>
                     </div>
                     <div className="text-lg font-bold text-zinc-200">
                       <p>Monday–Friday: 10:00am–5:00pm</p>
@@ -554,7 +561,9 @@ export default function FoxBuiltWebsite() {
                   <div className="w-12 h-12 bg-red-600 flex items-center justify-center">
                     <Phone className="w-6 h-6 text-white" />
                   </div>
-                  <span className="text-xl font-bold">(801) 899-9406</span>
+                  <a href="tel:+18018999406" className="text-xl font-bold hover:text-red-400 transition-colors">
+                    (801) 899-9406
+                  </a>
                 </div>
                 <div className="flex items-center space-x-4">
                   <div className="w-12 h-12 bg-blue-600 flex items-center justify-center">
@@ -566,10 +575,15 @@ export default function FoxBuiltWebsite() {
                   <div className="w-12 h-12 bg-red-600 flex items-center justify-center">
                     <MapPin className="w-6 h-6 text-white" />
                   </div>
-                  <div>
+                  <a 
+                    href="https://maps.apple.com/?address=420+W+Commerce+Dr+Building+LL,+Pleasant+Grove,+UT+84062"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-red-400 transition-colors"
+                  >
                     <p className="text-xl font-bold">420 W Commerce Dr Building LL</p>
                     <p className="text-xl font-bold">Pleasant Grove, UT 84062</p>
-                  </div>
+                  </a>
                 </div>
               </div>
 
