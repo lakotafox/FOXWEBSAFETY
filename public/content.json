@@ -53,7 +53,12 @@
           "Standard grommet",
           "Multiple sizes available"
         ],
-        "specs": "Dimensions: 96\"W x 42\"D x 29\"H\nWeight: 200 lbs\nMaterial: Solid wood top\nSeating: 6-8 people"
+        "specs": "Dimensions: 96\"W x 42\"D x 29\"H\nWeight: 200 lbs\nMaterial: Solid wood top\nSeating: 6-8 people",
+        "imageCrop": {
+          "scale": 2.5937424601000023,
+          "x": 50,
+          "y": 46
+        }
       },
       {
         "id": 5,
@@ -66,7 +71,12 @@
           "Memory handset",
           "265 lb weight rating"
         ],
-        "specs": "Height Range: 24\" - 50\"\nWidth Options: 48\", 60\", 72\"\nDepth: 30\"\nWeight Capacity: 265 lbs\nMotor: Dual motor system"
+        "specs": "Height Range: 24\" - 50\"\nWidth Options: 48\", 60\", 72\"\nDepth: 30\"\nWeight Capacity: 265 lbs\nMotor: Dual motor system",
+        "imageCrop": {
+          "scale": 1.4641000000000006,
+          "x": 50,
+          "y": 70
+        }
       },
       {
         "id": 6,
@@ -107,43 +117,93 @@
           "Locking options",
           "Multiple finishes"
         ],
-        "specs": "Dimensions: 36\"W x 18\"D x 28\"H\nDrawers: 3 or 4 drawer options\nLock: Central locking system\nWeight: 75-90 lbs"
+        "specs": "Dimensions: 36\"W x 18\"D x 28\"H\nDrawers: 3 or 4 drawer options\nLock: Central locking system\nWeight: 75-90 lbs",
+        "imageCrop": {
+          "scale": 1.4349644100000007,
+          "x": 50,
+          "y": 66
+        }
       },
       {
         "id": 9,
-        "title": "Reception Seating",
-        "image": "/images/product-9-1754115312078.jpg",
-        "price": "Price coming soon",
-        "description": "Website is a work in progress - prices and products coming soon!",
+        "title": "Lounge Seating",
+        "image": "/images/product-9-1754156837163.jpg",
+        "price": "Price - Call or text ",
+        "description": "Neo Bucket Lounge Chair",
         "features": [
-          "Anti-microbial vinyl",
-          "Designer fabrics",
-          "hi brutha"
+          "4-prong spider base",
+          "Charcoal vinyl & premium texture fabric",
+          "27\" W x 27 D x 35\" H"
         ],
         "specs": "Dimensions: 72\"W x 28\"D x 32\"H\nSeating: 3 person capacity\nMaterial: Commercial grade vinyl\nFrame: Steel reinforced",
         "imageCrop": {
-          "scale": 0.9890025186719993,
+          "scale": 1.4349644100000007,
           "x": 50,
-          "y": 50
+          "y": 54
         }
       }
     ]
   },
   "gallery": [
-    "/images/showroom-1.jpg",
-    "/images/showroom-2.jpg",
-    "/images/Showroomwglassboard.jpg",
+    "/images/gallery-0-1754156159270.jpg",
+    "/images/gallery-1-1754156223796.jpg",
+    "/images/gallery-2-1754156249548.jpg",
     "/images/showfacinggarage.jpg",
     "/images/tanconf.jpg",
     "/images/reception tan.jpg"
   ],
   "galleryCrops": {
     "/images/product-9-1754115312078.jpg": {
-      "scale": 0.9890025186719993,
+      "scale": 0.42780603780514015,
+      "x": 48,
+      "y": 56
+    },
+    "/images/showroom-1.jpg": {
+      "scale": 1.4349644100000007,
+      "x": 50,
+      "y": 66
+    },
+    "/images/reception tan.jpg": {
+      "scale": 2.5937424601000023,
+      "x": 50,
+      "y": 22
+    },
+    "/images/showroom-2.jpg": {
+      "scale": 1.2100000000000002,
+      "x": 52,
+      "y": 50
+    },
+    "/images/gallery-0-1754156159270.jpg": {
+      "scale": 1.434964410000001,
+      "x": 50,
+      "y": 30
+    },
+    "/images/gallery-1-1754156223796.jpg": {
+      "scale": 1,
       "x": 50,
       "y": 50
+    },
+    "/images/gallery-2-1754156249548.jpg": {
+      "scale": 2.0799220787541923,
+      "x": 50,
+      "y": 42
+    },
+    "/images/showfacinggarage.jpg": {
+      "scale": 1.4641000000000006,
+      "x": 50,
+      "y": 70
+    },
+    "/images/tanconf.jpg": {
+      "scale": 2.5937424601000023,
+      "x": 50,
+      "y": 46
+    },
+    "/images/product-9-1754156837163.jpg": {
+      "scale": 1.4349644100000007,
+      "x": 50,
+      "y": 54
     }
   },
-  "lastUpdated": "2025-08-02T06:18:22.270Z",
+  "lastUpdated": "2025-08-02T18:07:41.647Z",
   "updatedBy": "Kyle"
 }
