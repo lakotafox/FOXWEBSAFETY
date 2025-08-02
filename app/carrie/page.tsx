@@ -997,7 +997,7 @@ export default function AdminEditor() {
                   </Button>
                 </div>
               )}
-              <div className="relative h-96 md:h-[600px] overflow-hidden border-8 border-slate-700 bg-gray-100">
+              <div className="relative h-96 md:h-[500px] overflow-hidden border-8 border-slate-700">
                 {pendingGalleryImages.map((image, index) => (
                   <div
                     key={index}
@@ -1009,7 +1009,7 @@ export default function AdminEditor() {
                       src={getImageUrl(image, true)} 
                       alt={`Project ${index + 1}`} 
                       fill 
-                      className="object-contain"
+                      className="object-cover"
                       unoptimized
                     />
                   </div>
@@ -1096,12 +1096,12 @@ export default function AdminEditor() {
                     isEditMode ? "ring-2 ring-green-500" : ""
                   }`}
                 >
-                  <div className="relative h-56 group bg-gray-100">
+                  <div className="relative h-64 group">
                     <Image 
                       src={getImageUrl(product.image, false)} 
                       alt={product.title} 
                       fill 
-                      className="object-contain"
+                      className="object-cover"
                       unoptimized
                       key={product.image}
                     />
@@ -1444,7 +1444,7 @@ Colors: Available in multiple finishes"
                         src={getImageUrl(image, true)} 
                         alt={`Gallery ${index + 1}`} 
                         fill 
-                        className="object-contain"
+                        className="object-cover"
                         unoptimized
                       />
                     )}
