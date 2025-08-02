@@ -1,7 +1,9 @@
 [build]
-  # Build ONLY when content.json changes
-  # Returns 1 (build) if content.json changed, 0 (ignore) if it didn't
-  ignore = "git diff --quiet $COMMIT_REF $CACHED_COMMIT_REF -- public/content.json && echo 'No content.json changes, skipping build' || false"
+  # Only build when content.json changes
+  # git diff --quiet returns 0 if no changes (we want to ignore/skip build)
+  # git diff --quiet returns 1 if changes exist (we want to build)
+  # So we just use it directly - Netlify ignores build when command returns 0
+  ignore = "git diff --quiet $COMMIT_REF $CACHED_COMMIT_REF -- public/content.json"
 
 # Optional: Set Node version
 [build.environment]
