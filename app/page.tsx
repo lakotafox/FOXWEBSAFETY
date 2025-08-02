@@ -309,7 +309,14 @@ export default function FoxBuiltWebsite() {
                         transform: `translate(${crop.x - 50}%, ${crop.y - 50}%) scale(${crop.scale})`
                       }}
                     >
-                      <Image src={getImageUrl(image)} alt={`Project ${index + 1}`} fill className="object-cover" />
+                      <Image 
+                        src={getImageUrl(image)} 
+                        alt={`Project ${index + 1}`} 
+                        width={1000}
+                        height={600}
+                        className="w-full h-full object-contain"
+                        unoptimized
+                      />
                     </div>
                   </div>
                 )
