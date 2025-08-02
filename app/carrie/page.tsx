@@ -187,6 +187,63 @@ export default function AdminEditor() {
       })
     }
   }, [tempPreviews, galleryTempPreviews])
+  
+  // Handle arrow keys for image movement and lock scroll when editing
+  useEffect(() => {
+    if (!editingCrop) return
+    
+    // Lock body scroll
+    document.body.style.overflow = 'hidden'
+    
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!editingCrop) return
+      
+      const moveAmount = 2 // percentage to move per key press
+      const currentCrop = cropSettings[editingCrop] || { scale: 1, x: 50, y: 50 }
+      
+      switch(e.key) {
+        case 'ArrowUp':
+          e.preventDefault()
+          setCropSettings(prev => ({
+            ...prev,
+            [editingCrop]: { ...currentCrop, y: Math.max(0, currentCrop.y - moveAmount) }
+          }))
+          break
+        case 'ArrowDown':
+          e.preventDefault()
+          setCropSettings(prev => ({
+            ...prev,
+            [editingCrop]: { ...currentCrop, y: Math.min(100, currentCrop.y + moveAmount) }
+          }))
+          break
+        case 'ArrowLeft':
+          e.preventDefault()
+          setCropSettings(prev => ({
+            ...prev,
+            [editingCrop]: { ...currentCrop, x: Math.max(0, currentCrop.x - moveAmount) }
+          }))
+          break
+        case 'ArrowRight':
+          e.preventDefault()
+          setCropSettings(prev => ({
+            ...prev,
+            [editingCrop]: { ...currentCrop, x: Math.min(100, currentCrop.x + moveAmount) }
+          }))
+          break
+        case 'Escape':
+          setEditingCrop(null)
+          break
+      }
+    }
+    
+    document.addEventListener('keydown', handleKeyDown)
+    
+    return () => {
+      // Restore body scroll
+      document.body.style.overflow = ''
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [editingCrop, cropSettings])
 
   // Check if mobile and load saved data on mount
   useEffect(() => {
@@ -1081,29 +1138,11 @@ export default function AdminEditor() {
                       
                       {isEditing && isActive && (
                         <div 
-                          className="absolute inset-0 cursor-move z-20"
-                          onMouseDown={(e) => {
-                            e.preventDefault()
-                            const rect = e.currentTarget.getBoundingClientRect()
-                            
-                            const handleMouseMove = (e: MouseEvent) => {
-                              const x = ((e.clientX - rect.left) / rect.width) * 100
-                              const y = ((e.clientY - rect.top) / rect.height) * 100
-                              
-                              setCropSettings(prev => ({
-                                ...prev,
-                                [image]: { ...crop, x, y }
-                              }))
-                            }
-                            
-                            const handleMouseUp = () => {
-                              document.removeEventListener('mousemove', handleMouseMove)
-                              document.removeEventListener('mouseup', handleMouseUp)
+                          className="absolute inset-0 z-20"
+                          onClick={(e) => {
+                            if (e.target === e.currentTarget) {
                               setEditingCrop(null)
                             }
-                            
-                            document.addEventListener('mousemove', handleMouseMove)
-                            document.addEventListener('mouseup', handleMouseUp)
                           }}
                           onWheel={(e) => {
                             e.preventDefault()
@@ -1118,9 +1157,9 @@ export default function AdminEditor() {
                         >
                           <div className="absolute inset-0 flex items-center justify-center">
                             <div className="text-white text-center pointer-events-none">
-                              <p className="font-bold text-xl mb-2 drop-shadow-lg">Click and drag to move</p>
+                              <p className="font-bold text-xl mb-2 drop-shadow-lg">Use arrow keys to move</p>
                               <p className="text-lg drop-shadow-lg">Scroll to zoom in/out</p>
-                              <p className="text-sm mt-2 drop-shadow-lg">Release to save</p>
+                              <p className="text-sm mt-2 drop-shadow-lg">Click anywhere to save</p>
                             </div>
                           </div>
                         </div>
@@ -1263,29 +1302,11 @@ export default function AdminEditor() {
                           
                           {isEditing && (
                             <div 
-                              className="absolute inset-0 cursor-move"
-                              onMouseDown={(e) => {
-                                e.preventDefault()
-                                const rect = e.currentTarget.getBoundingClientRect()
-                                
-                                const handleMouseMove = (e: MouseEvent) => {
-                                  const x = ((e.clientX - rect.left) / rect.width) * 100
-                                  const y = ((e.clientY - rect.top) / rect.height) * 100
-                                  
-                                  setCropSettings(prev => ({
-                                    ...prev,
-                                    [product.image]: { ...crop, x, y }
-                                  }))
-                                }
-                                
-                                const handleMouseUp = () => {
-                                  document.removeEventListener('mousemove', handleMouseMove)
-                                  document.removeEventListener('mouseup', handleMouseUp)
+                              className="absolute inset-0"
+                              onClick={(e) => {
+                                if (e.target === e.currentTarget) {
                                   setEditingCrop(null)
                                 }
-                                
-                                document.addEventListener('mousemove', handleMouseMove)
-                                document.addEventListener('mouseup', handleMouseUp)
                               }}
                               onWheel={(e) => {
                                 e.preventDefault()
@@ -1300,9 +1321,9 @@ export default function AdminEditor() {
                             >
                               <div className="absolute inset-0 flex items-center justify-center">
                                 <div className="text-white text-center pointer-events-none">
-                                  <p className="font-bold text-lg mb-2 drop-shadow-lg">Click and drag to move</p>
+                                  <p className="font-bold text-lg mb-2 drop-shadow-lg">Use arrow keys to move</p>
                                   <p className="text-sm drop-shadow-lg">Scroll to zoom in/out</p>
-                                  <p className="text-xs mt-2 drop-shadow-lg">Release to save</p>
+                                  <p className="text-xs mt-2 drop-shadow-lg">Click anywhere to save</p>
                                 </div>
                               </div>
                             </div>
