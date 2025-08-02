@@ -519,12 +519,12 @@ export default function FoxBuiltWebsite() {
                     <div className="flex items-center justify-center space-x-4">
                       <MapPin className="w-6 h-6 text-white" />
                       <a 
-                        href="https://maps.apple.com/?address=420+W+Commerce+Dr+Building+LL,+Pleasant+Grove,+UT+84062"
+                        href="https://maps.apple.com/?address=420+W+Industrial+Dr+Building+LL,+Pleasant+Grove,+UT+84062"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="hover:text-zinc-200 transition-colors"
                       >
-                        <p className="text-xl font-bold">420 W Commerce Dr Building LL</p>
+                        <p className="text-xl font-bold">420 W Industrial Dr Building LL</p>
                         <p className="text-xl font-bold">Pleasant Grove, UT 84062</p>
                       </a>
                     </div>
@@ -549,8 +549,8 @@ export default function FoxBuiltWebsite() {
       {/* Contact Section */}
       <section id="contact" className="py-20 bg-slate-900 text-white">
         <div className="container mx-auto px-4">
-          <h2 className="text-5xl font-black text-center mb-16 tracking-tight">
-            GET IN <span className="text-red-500">TOUCH</span>
+          <h2 className="text-5xl font-black text-center text-white mb-16 tracking-tight">
+            CONTACT US
           </h2>
 
           <div className="grid md:grid-cols-2 gap-16 max-w-5xl mx-auto">
@@ -576,19 +576,19 @@ export default function FoxBuiltWebsite() {
                     <MapPin className="w-6 h-6 text-white" />
                   </div>
                   <a 
-                    href="https://maps.apple.com/?address=420+W+Commerce+Dr+Building+LL,+Pleasant+Grove,+UT+84062"
+                    href="https://maps.apple.com/?address=420+W+Industrial+Dr+Building+LL,+Pleasant+Grove,+UT+84062"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-red-400 transition-colors"
                   >
-                    <p className="text-xl font-bold">420 W Commerce Dr Building LL</p>
+                    <p className="text-xl font-bold">420 W Industrial Dr Building LL</p>
                     <p className="text-xl font-bold">Pleasant Grove, UT 84062</p>
                   </a>
                 </div>
               </div>
 
               <div className="mt-12">
-                <h4 className="text-2xl font-black mb-6 tracking-wide">HOURS OF OPERATION</h4>
+                <h4 className="text-2xl font-black mb-6 tracking-wide">STORE HOURS</h4>
                 <div className="space-y-3 text-zinc-300">
                   <p className="text-lg font-bold">Monday–Friday: 10:00am–5:00pm</p>
                   <p className="text-lg font-bold">Saturday–Sunday: By Appointment</p>
@@ -597,7 +597,6 @@ export default function FoxBuiltWebsite() {
             </div>
 
             <div>
-              <h3 className="text-3xl font-black mb-8 tracking-wide">REQUEST QUOTE</h3>
               <form className="space-y-6" onSubmit={handleFormSubmit}>
                 <div>
                   <input
@@ -661,7 +660,7 @@ export default function FoxBuiltWebsite() {
               <p className="font-bold">&copy; 2025, FOXBUILT. ESTABLISHED 1999. BUILT IN AMERICA.</p>
             </div>
             <div className="text-center">
-              <p className="text-sm font-bold">420 W Commerce Dr Building LL, Pleasant Grove, UT 84062</p>
+              <p className="text-sm font-bold">420 W Industrial Dr Building LL, Pleasant Grove, UT 84062</p>
               <p className="text-sm font-bold">+1-(801)-899-9406</p>
             </div>
           </div>
