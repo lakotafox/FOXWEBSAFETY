@@ -250,15 +250,15 @@ export default function FoxBuiltWebsite() {
 
         <div className="container mx-auto px-4 text-center relative z-10">
           <h1 className="text-6xl md:text-8xl font-black text-white mb-8 tracking-tight">
-            AMERICAN MADE
+            FOXBUILT
             <br />
-            <span className="text-red-500">WORKSPACE</span>
+            <span className="text-red-500">OFFICE</span>
             <br />
-            <span className="text-blue-400">SOLUTIONS</span>
+            <span className="text-blue-400">FURNITURE</span>
           </h1>
           <div className="mb-8">
             <span className="inline-block bg-red-600 text-white px-6 py-3 text-sm font-black uppercase tracking-widest border-4 border-white">
-              🇺🇸 27 YEARS STRONG 🇺🇸
+              🇺 27 YEARS STRONG 🇺
             </span>
           </div>
           <p className="text-xl text-zinc-300 mb-10 max-w-3xl mx-auto font-bold leading-relaxed">
