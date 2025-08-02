@@ -1779,15 +1779,15 @@ Colors: Available in multiple finishes"
       {/* Floating Help Button */}
       <button
         onClick={() => setShowHelp(true)}
-        className="fixed bottom-8 right-8 w-16 h-16 bg-blue-600 rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300 z-50 flex items-center justify-center group"
+        className="fixed top-8 left-8 w-16 h-16 hover:scale-110 transition-all duration-300 z-50 flex items-center justify-center"
         style={{ position: 'fixed' }}
       >
         <Image
           src="/questionmark.png"
           alt="Help"
-          width={40}
-          height={40}
-          className="group-hover:scale-110 transition-transform"
+          width={64}
+          height={64}
+          className="drop-shadow-lg hover:drop-shadow-xl transition-all"
         />
       </button>
 
