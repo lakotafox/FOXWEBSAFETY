@@ -1457,13 +1457,6 @@ export default function AdminEditor() {
                     )}
 
                     {/* Price */}
-                    {/* DEBUG: Red test button */}
-                    <div className="mb-4">
-                      <button className="w-full bg-red-600 text-white font-bold py-2 px-4 rounded">
-                        TEST BUTTON - SPECS SHOULD BE BELOW
-                      </button>
-                    </div>
-                    
                     <div className="flex justify-between items-center">
                       {isEditMode ? (
                         <input
@@ -1492,16 +1485,15 @@ export default function AdminEditor() {
                           {product.price}
                         </span>
                       )}
-                      <Button 
-                        variant="outline" 
-                        className="border-2 border-slate-700 font-bold"
+                      <button 
+                        className="px-4 py-2 border-2 border-slate-700 font-bold bg-transparent hover:bg-gray-100 text-slate-900 rounded"
                         onClick={() => {
                           setSelectedProduct(product)
                           setShowSpecsModal(true)
                         }}
                       >
                         SPECS
-                      </Button>
+                      </button>
                     </div>
                   </CardContent>
                 </Card>
