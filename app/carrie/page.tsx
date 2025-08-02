@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import Image from "next/image"
-import { ChevronLeft, ChevronRight, Phone, Mail, MapPin, FileText, Save, Edit2, X, Check } from "lucide-react"
+import { ChevronLeft, ChevronRight, Phone, Mail, MapPin, FileText, Save, Edit2, X, Check, Move, ZoomIn, ZoomOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { getProducts, saveProducts, defaultProducts } from "@/lib/products-data"
@@ -86,6 +86,10 @@ export default function AdminEditor() {
   // Temporary preview storage for blob URLs
   const [tempPreviews, setTempPreviews] = useState<{[key: string]: string}>({})
   const [galleryTempPreviews, setGalleryTempPreviews] = useState<{[key: string]: string}>({})
+  
+  // Image crop settings
+  const [imageCropSettings, setImageCropSettings] = useState<{[key: string]: {scale: number, x: number, y: number}}>({})
+  const [editingImageCrop, setEditingImageCrop] = useState<string | null>(null)
 
   // Gallery images
   const defaultGalleryImages = [
@@ -215,6 +219,17 @@ export default function AdminEditor() {
         if (data.products) {
           setFeaturedProducts(data.products)
           saveProducts(data.products)
+          
+          // Extract crop settings from products
+          const cropSettings: {[key: string]: {scale: number, x: number, y: number}} = {}
+          Object.keys(data.products).forEach(category => {
+            data.products[category].forEach((product: any) => {
+              if (product.imageCrop && product.image) {
+                cropSettings[product.image] = product.imageCrop
+              }
+            })
+          })
+          setImageCropSettings(cropSettings)
         }
         if (data.gallery) {
           setGalleryImages(data.gallery)
@@ -311,6 +326,23 @@ export default function AdminEditor() {
       newProducts[category][productIndex][field] = value
       setFeaturedProducts(newProducts)
     }
+  }
+  
+  // Update image crop settings
+  const updateImageCrop = (imagePath: string, settings: {scale: number, x: number, y: number}) => {
+    setImageCropSettings(prev => ({
+      ...prev,
+      [imagePath]: settings
+    }))
+    
+    // Find and update the product with this image
+    Object.keys(featuredProducts).forEach(category => {
+      featuredProducts[category].forEach((product, index) => {
+        if (product.image === imagePath) {
+          updateProduct(category, product.id, 'imageCrop', settings)
+        }
+      })
+    })
   }
 
   // Add image to upload queue
@@ -1096,43 +1128,133 @@ export default function AdminEditor() {
                     isEditMode ? "ring-2 ring-green-500" : ""
                   }`}
                 >
-                  <div className="relative h-56 group">
-                    <Image 
-                      src={getImageUrl(product.image, false)} 
-                      alt={product.title} 
-                      fill 
-                      className="object-cover"
-                      unoptimized
-                      key={product.image}
-                    />
-                    {isEditMode && (
-                      <label className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer flex items-center justify-center">
-                        <div className="text-white text-center">
-                          <Edit2 className="w-8 h-8 mx-auto mb-2" />
-                          <span>Click to change image</span>
-                        </div>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0]
-                            if (file) handleImageUpload(featuredCategory, product.id, file)
-                          }}
-                        />
-                      </label>
-                    )}
-                    <div
-                      className={`absolute top-4 right-4 text-white px-3 py-1 font-black text-sm ${
-                        featuredCategory === "new"
-                          ? "bg-red-600"
-                          : featuredCategory === "battleTested"
-                            ? "bg-blue-600"
-                            : "bg-green-600"
-                      }`}
-                    >
-                      {featuredCategory === "new" ? "NEW" : featuredCategory === "battleTested" ? "PROVEN" : "COMFORT"}
-                    </div>
+                  <div className="relative h-56 group overflow-hidden">
+                    {/* Get crop settings for this image */}
+                    {(() => {
+                      const cropSettings = product.imageCrop || imageCropSettings[product.image] || { scale: 1, x: 50, y: 50 }
+                      const isEditingThisImage = editingImageCrop === product.image
+                      
+                      return (
+                        <>
+                          <div 
+                            className="absolute inset-0"
+                            style={{
+                              transform: `scale(${cropSettings.scale})`,
+                              transformOrigin: `${cropSettings.x}% ${cropSettings.y}%`
+                            }}
+                          >
+                            <Image 
+                              src={getImageUrl(product.image, false)} 
+                              alt={product.title} 
+                              fill 
+                              className="object-cover"
+                              unoptimized
+                              key={product.image}
+                            />
+                          </div>
+                          
+                          {isEditMode && !isEditingThisImage && (
+                            <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-50 transition-opacity flex items-center justify-center opacity-0 hover:opacity-100">
+                              <div className="flex gap-2">
+                                <label className="bg-white/90 hover:bg-white text-black px-4 py-2 rounded cursor-pointer flex items-center gap-2">
+                                  <Edit2 className="w-4 h-4" />
+                                  <span className="font-bold">Change</span>
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={(e) => {
+                                      const file = e.target.files?.[0]
+                                      if (file) handleImageUpload(featuredCategory, product.id, file)
+                                    }}
+                                  />
+                                </label>
+                                <button
+                                  onClick={() => setEditingImageCrop(product.image)}
+                                  className="bg-white/90 hover:bg-white text-black px-4 py-2 rounded flex items-center gap-2 font-bold"
+                                >
+                                  <Move className="w-4 h-4" />
+                                  Adjust
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                          
+                          {isEditingThisImage && (
+                            <div className="absolute inset-0 bg-black/75 flex flex-col items-center justify-center p-4">
+                              <div className="bg-white rounded p-4 space-y-3">
+                                <div className="flex items-center gap-2">
+                                  <ZoomOut className="w-4 h-4" />
+                                  <input
+                                    type="range"
+                                    min="0.5"
+                                    max="2"
+                                    step="0.1"
+                                    value={cropSettings.scale}
+                                    onChange={(e) => updateImageCrop(product.image, {...cropSettings, scale: parseFloat(e.target.value)})}
+                                    className="w-32"
+                                  />
+                                  <ZoomIn className="w-4 h-4" />
+                                </div>
+                                <div className="text-sm text-gray-600 text-center">
+                                  Click and drag image to reposition
+                                </div>
+                                <button
+                                  onClick={() => setEditingImageCrop(null)}
+                                  className="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-bold"
+                                >
+                                  Done
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                          
+                          <div
+                            className={`absolute top-4 right-4 text-white px-3 py-1 font-black text-sm ${
+                              featuredCategory === "new"
+                                ? "bg-red-600"
+                                : featuredCategory === "battleTested"
+                                  ? "bg-blue-600"
+                                  : "bg-green-600"
+                            }`}
+                          >
+                            {featuredCategory === "new" ? "NEW" : featuredCategory === "battleTested" ? "PROVEN" : "COMFORT"}
+                          </div>
+                          
+                          {/* Drag handler for repositioning */}
+                          {isEditingThisImage && (
+                            <div 
+                              className="absolute inset-0 cursor-move"
+                              onMouseDown={(e) => {
+                                const rect = e.currentTarget.getBoundingClientRect()
+                                const startX = e.clientX
+                                const startY = e.clientY
+                                const startPosX = cropSettings.x
+                                const startPosY = cropSettings.y
+                                
+                                const handleMouseMove = (e: MouseEvent) => {
+                                  const deltaX = (e.clientX - startX) / rect.width * 100
+                                  const deltaY = (e.clientY - startY) / rect.height * 100
+                                  
+                                  const newX = Math.max(0, Math.min(100, startPosX + deltaX))
+                                  const newY = Math.max(0, Math.min(100, startPosY + deltaY))
+                                  
+                                  updateImageCrop(product.image, {...cropSettings, x: newX, y: newY})
+                                }
+                                
+                                const handleMouseUp = () => {
+                                  document.removeEventListener('mousemove', handleMouseMove)
+                                  document.removeEventListener('mouseup', handleMouseUp)
+                                }
+                                
+                                document.addEventListener('mousemove', handleMouseMove)
+                                document.addEventListener('mouseup', handleMouseUp)
+                              }}
+                            />
+                          )}
+                        </>
+                      )
+                    })()}
                   </div>
                   <CardContent className="p-6">
                     {/* Title */}
