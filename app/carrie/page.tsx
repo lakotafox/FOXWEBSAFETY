@@ -82,6 +82,8 @@ export default function AdminEditor() {
   const [showPasswordScreen, setShowPasswordScreen] = useState(false)
   const [showPublishConfirm, setShowPublishConfirm] = useState(false)
   const [expandedSpecs, setExpandedSpecs] = useState<number | null>(null)
+  const [showSpecsModal, setShowSpecsModal] = useState(false)
+  const [selectedProduct, setSelectedProduct] = useState<any>(null)
   
   // Temporary preview storage for blob URLs
   const [tempPreviews, setTempPreviews] = useState<{[key: string]: string}>({})
@@ -1483,34 +1485,17 @@ export default function AdminEditor() {
                           {product.price}
                         </span>
                       )}
-                      {isEditMode && (
-                        <Button 
-                          variant="outline" 
-                          className="border-2 border-slate-700 font-bold"
-                          onClick={() => {
-                            setExpandedSpecs(expandedSpecs === product.id ? null : product.id)
-                          }}
-                        >
-                          SPECS
-                        </Button>
-                      )}
+                      <Button 
+                        variant="outline" 
+                        className="border-2 border-slate-700 font-bold"
+                        onClick={() => {
+                          setSelectedProduct(product)
+                          setShowSpecsModal(true)
+                        }}
+                      >
+                        SPECS
+                      </Button>
                     </div>
-                    
-                    {/* Inline specs editor for edit mode */}
-                    {isEditMode && expandedSpecs === product.id && (
-                      <div className="mt-4 bg-slate-100 p-4 rounded-lg">
-                        <h3 className="font-bold text-lg mb-3 text-slate-800">Specifications:</h3>
-                        <textarea
-                          value={product.specs || ""}
-                          onChange={(e) => updateProduct(featuredCategory, product.id, 'specs', e.target.value)}
-                          className="w-full h-32 p-3 border-2 border-gray-300 rounded font-mono text-sm"
-                          placeholder="Dimensions: 60&quot;W x 30&quot;D x 29&quot;H
-Weight: 120 lbs
-Material: Laminate surface with metal frame
-Colors: Available in multiple finishes"
-                        />
-                      </div>
-                    )}
                   </CardContent>
                 </Card>
               ))}
@@ -1857,6 +1842,56 @@ Colors: Available in multiple finishes"
                   Got it! 👍
                 </Button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Specs Modal */}
+      {showSpecsModal && selectedProduct && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-[70] flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-lg w-full p-6">
+            <div className="flex justify-between items-start mb-4">
+              <h2 className="text-2xl font-black text-slate-900">
+                {selectedProduct.title}
+              </h2>
+              <button
+                onClick={() => setShowSpecsModal(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <div className="bg-slate-100 p-4 rounded-lg">
+              <h3 className="font-bold text-lg mb-3 text-slate-800">Specifications:</h3>
+              {isEditMode ? (
+                <textarea
+                  value={selectedProduct.specs || ""}
+                  onChange={(e) => {
+                    updateProduct(featuredCategory, selectedProduct.id, 'specs', e.target.value)
+                    setSelectedProduct({...selectedProduct, specs: e.target.value})
+                  }}
+                  className="w-full h-32 p-3 border-2 border-gray-300 rounded font-mono text-sm"
+                  placeholder="Dimensions: 60&quot;W x 30&quot;D x 29&quot;H
+Weight: 120 lbs
+Material: Laminate surface with metal frame
+Colors: Available in multiple finishes"
+                />
+              ) : (
+                <pre className="whitespace-pre-wrap font-sans text-slate-700">
+                  {selectedProduct.specs || "Specifications coming soon..."}
+                </pre>
+              )}
+            </div>
+            
+            <div className="mt-6 flex justify-end">
+              <Button 
+                onClick={() => setShowSpecsModal(false)}
+                className="bg-slate-900 hover:bg-slate-800"
+              >
+                Close
+              </Button>
             </div>
           </div>
         </div>
