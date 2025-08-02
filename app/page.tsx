@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Image from "next/image"
-import { ChevronLeft, ChevronRight, Phone, FileText } from "lucide-react"
+import { ChevronLeft, ChevronRight, Phone, MapPin, FileText } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -488,7 +488,7 @@ export default function FoxBuiltWebsite() {
                 <div>
                   <h3 className="text-3xl font-black text-white mb-6 tracking-wide">KYLE FOX - FOUNDER</h3>
                   <blockquote className="text-xl text-zinc-300 italic mb-6 font-bold">
-                    "You need a desk? I actually know a great guy, He deserves your business" That's our marketing.
+                    "You need a desk? I actually know a great guy, he deserves your business" That's our marketing.
                   </blockquote>
                   <p className="text-zinc-300 leading-relaxed text-lg font-semibold">
                     Started with nothing but a van, a dream, and American determination. Built this company from the
@@ -517,17 +517,9 @@ export default function FoxBuiltWebsite() {
                 <div className="mt-8 bg-white/10 border-4 border-white p-6 text-center">
                   <div className="space-y-4">
                     <div className="flex items-center justify-center space-x-4">
-                      <div className="w-6 h-6 relative flex-shrink-0">
-                        <Image 
-                          src="/mapsimage.png" 
-                          alt="Location" 
-                          width={24} 
-                          height={24}
-                          className="w-full h-full object-contain"
-                        />
-                      </div>
+                      <MapPin className="w-6 h-6 text-white" />
                       <a 
-                        href="https://maps.apple.com/?address=420+W+Industrial+Dr+Building+LL,+Pleasant+Grove,+UT+84062"
+                        href="https://www.google.com/maps/search/?api=1&query=420+W+Industrial+Dr+Building+LL+Pleasant+Grove+UT+84062"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="hover:text-zinc-200 transition-colors"
@@ -574,17 +566,11 @@ export default function FoxBuiltWebsite() {
                   </span>
                 </a>
                 <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 relative flex-shrink-0">
-                    <Image 
-                      src="/mapsimage.png" 
-                      alt="Location" 
-                      width={48} 
-                      height={48}
-                      className="w-full h-full object-contain"
-                    />
+                  <div className="w-12 h-12 bg-red-600 flex items-center justify-center">
+                    <MapPin className="w-6 h-6 text-white" />
                   </div>
                   <a 
-                    href="https://maps.apple.com/?address=420+W+Industrial+Dr+Building+LL,+Pleasant+Grove,+UT+84062"
+                    href="https://www.google.com/maps/search/?api=1&query=420+W+Industrial+Dr+Building+LL+Pleasant+Grove+UT+84062"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-red-400 transition-colors"
