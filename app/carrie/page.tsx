@@ -356,7 +356,7 @@ export default function AdminEditor() {
   useEffect(() => {
     if (!isEditMode) {
       const timer = setInterval(() => {
-        setCurrentSlide((prev) => (prev + 1) % galleryImages.length)
+        setCurrentSlide((prev) => (prev + 1) % pendingGalleryImages.length)
       }, 4000)
       return () => clearInterval(timer)
     }
@@ -1171,13 +1171,13 @@ export default function AdminEditor() {
 
               <button
                 onClick={prevSlide}
-                className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-red-600 hover:bg-red-700 p-4 border-4 border-white shadow-xl transition-all"
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-red-600 hover:bg-red-700 p-4 border-4 border-white shadow-xl transition-all z-30"
               >
                 <ChevronLeft className="w-8 h-8 text-white" />
               </button>
               <button
                 onClick={nextSlide}
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-red-600 hover:bg-red-700 p-4 border-4 border-white shadow-xl transition-all"
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-red-600 hover:bg-red-700 p-4 border-4 border-white shadow-xl transition-all z-30"
               >
                 <ChevronRight className="w-8 h-8 text-white" />
               </button>
