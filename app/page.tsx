@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Image from "next/image"
-import { ChevronLeft, ChevronRight, Phone, Mail, MapPin, FileText } from "lucide-react"
+import { ChevronLeft, ChevronRight, Phone, MapPin, FileText } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -564,12 +564,6 @@ export default function FoxBuiltWebsite() {
                   <a href="tel:+18018999406" className="text-xl font-bold hover:text-red-400 transition-colors">
                     (801) 899-9406
                   </a>
-                </div>
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-blue-600 flex items-center justify-center">
-                    <Mail className="w-6 h-6 text-white" />
-                  </div>
-                  <span className="text-xl font-bold">Foxbuilt@gmail.com</span>
                 </div>
                 <div className="flex items-start space-x-4">
                   <div className="w-12 h-12 bg-red-600 flex items-center justify-center">
