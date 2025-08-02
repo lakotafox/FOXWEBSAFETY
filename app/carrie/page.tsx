@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import Image from "next/image"
-import { ChevronLeft, ChevronRight, Phone, Mail, MapPin, FileText, Save, Edit2, X, Check } from "lucide-react"
+import { ChevronLeft, ChevronRight, Phone, Mail, MapPin, FileText, Save, Edit2, X, Check, Maximize2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { getProducts, saveProducts, defaultProducts } from "@/lib/products-data"
@@ -86,6 +86,10 @@ export default function AdminEditor() {
   // Temporary preview storage for blob URLs
   const [tempPreviews, setTempPreviews] = useState<{[key: string]: string}>({})
   const [galleryTempPreviews, setGalleryTempPreviews] = useState<{[key: string]: string}>({})
+  
+  // Simple crop state
+  const [cropSettings, setCropSettings] = useState<{[key: string]: {scale: number, x: number, y: number}}>({})
+  const [editingCrop, setEditingCrop] = useState<string | null>(null)
 
   // Gallery images
   const defaultGalleryImages = [
@@ -215,6 +219,17 @@ export default function AdminEditor() {
         if (data.products) {
           setFeaturedProducts(data.products)
           saveProducts(data.products)
+          
+          // Load crop settings from products
+          const crops: {[key: string]: {scale: number, x: number, y: number}} = {}
+          Object.keys(data.products).forEach(category => {
+            data.products[category].forEach((product: any) => {
+              if (product.imageCrop && product.image) {
+                crops[product.image] = product.imageCrop
+              }
+            })
+          })
+          setCropSettings(crops)
         }
         if (data.gallery) {
           setGalleryImages(data.gallery)
@@ -592,7 +607,15 @@ export default function AdminEditor() {
       }
       
       // No conversion needed - images already use GitHub paths
-      const convertedProducts = featuredProducts
+      // But we need to add crop settings to products
+      const convertedProducts = JSON.parse(JSON.stringify(featuredProducts))
+      Object.keys(convertedProducts).forEach(category => {
+        convertedProducts[category].forEach((product: any) => {
+          if (cropSettings[product.image]) {
+            product.imageCrop = cropSettings[product.image]
+          }
+        })
+      })
       const convertedGallery = pendingGalleryImages
       
       
@@ -1096,43 +1119,117 @@ export default function AdminEditor() {
                     isEditMode ? "ring-2 ring-green-500" : ""
                   }`}
                 >
-                  <div className="relative h-64 group">
-                    <Image 
-                      src={getImageUrl(product.image, false)} 
-                      alt={product.title} 
-                      fill 
-                      className="object-cover"
-                      unoptimized
-                      key={product.image}
-                    />
-                    {isEditMode && (
-                      <label className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer flex items-center justify-center">
-                        <div className="text-white text-center">
-                          <Edit2 className="w-8 h-8 mx-auto mb-2" />
-                          <span>Click to change image</span>
-                        </div>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0]
-                            if (file) handleImageUpload(featuredCategory, product.id, file)
-                          }}
-                        />
-                      </label>
-                    )}
-                    <div
-                      className={`absolute top-4 right-4 text-white px-3 py-1 font-black text-sm ${
-                        featuredCategory === "new"
-                          ? "bg-red-600"
-                          : featuredCategory === "battleTested"
-                            ? "bg-blue-600"
-                            : "bg-green-600"
-                      }`}
-                    >
-                      {featuredCategory === "new" ? "NEW" : featuredCategory === "battleTested" ? "PROVEN" : "COMFORT"}
-                    </div>
+                  <div className="relative h-64 group overflow-hidden">
+                    {(() => {
+                      const crop = cropSettings[product.image] || { scale: 1, x: 50, y: 50 }
+                      const isEditing = editingCrop === product.image
+                      
+                      return (
+                        <>
+                          <div 
+                            className="absolute inset-0"
+                            style={{
+                              transform: `scale(${crop.scale})`,
+                              transformOrigin: `${crop.x}% ${crop.y}%`,
+                              transition: isEditing ? 'none' : 'transform 0.3s'
+                            }}
+                          >
+                            <Image 
+                              src={getImageUrl(product.image, false)} 
+                              alt={product.title} 
+                              fill 
+                              className="object-cover"
+                              unoptimized
+                              key={product.image}
+                            />
+                          </div>
+                          
+                          {isEditMode && !isEditing && (
+                            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-opacity opacity-0 group-hover:opacity-100 flex items-center justify-center gap-3">
+                              <label className="bg-white hover:bg-gray-100 text-black px-4 py-2 rounded cursor-pointer flex items-center gap-2 font-bold">
+                                <Edit2 className="w-4 h-4" />
+                                Change
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0]
+                                    if (file) handleImageUpload(featuredCategory, product.id, file)
+                                  }}
+                                />
+                              </label>
+                              <button
+                                onClick={() => setEditingCrop(product.image)}
+                                className="bg-white hover:bg-gray-100 text-black px-4 py-2 rounded flex items-center gap-2 font-bold"
+                              >
+                                <Maximize2 className="w-4 h-4" />
+                                Resize
+                              </button>
+                            </div>
+                          )}
+                          
+                          {isEditing && (
+                            <div 
+                              className="absolute inset-0 cursor-move"
+                              onMouseDown={(e) => {
+                                e.preventDefault()
+                                const rect = e.currentTarget.getBoundingClientRect()
+                                
+                                const handleMouseMove = (e: MouseEvent) => {
+                                  const x = ((e.clientX - rect.left) / rect.width) * 100
+                                  const y = ((e.clientY - rect.top) / rect.height) * 100
+                                  
+                                  setCropSettings(prev => ({
+                                    ...prev,
+                                    [product.image]: { ...crop, x, y }
+                                  }))
+                                }
+                                
+                                const handleMouseUp = () => {
+                                  document.removeEventListener('mousemove', handleMouseMove)
+                                  document.removeEventListener('mouseup', handleMouseUp)
+                                  setEditingCrop(null)
+                                }
+                                
+                                document.addEventListener('mousemove', handleMouseMove)
+                                document.addEventListener('mouseup', handleMouseUp)
+                              }}
+                              onWheel={(e) => {
+                                e.preventDefault()
+                                const delta = e.deltaY > 0 ? 0.9 : 1.1
+                                const newScale = Math.max(0.5, Math.min(3, crop.scale * delta))
+                                
+                                setCropSettings(prev => ({
+                                  ...prev,
+                                  [product.image]: { ...crop, scale: newScale }
+                                }))
+                              }}
+                            >
+                              <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                                <div className="text-white text-center pointer-events-none">
+                                  <p className="font-bold text-lg mb-2">Click and drag to move</p>
+                                  <p className="text-sm">Scroll to zoom in/out</p>
+                                  <p className="text-xs mt-2">Release to save</p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                          
+                          <div
+                            className={`absolute top-4 right-4 text-white px-3 py-1 font-black text-sm ${
+                              featuredCategory === "new"
+                                ? "bg-red-600"
+                                : featuredCategory === "battleTested"
+                                  ? "bg-blue-600"
+                                  : "bg-green-600"
+                            }`}
+                          >
+                            {featuredCategory === "new" ? "NEW" : featuredCategory === "battleTested" ? "PROVEN" : "COMFORT"}
+                          </div>
+                        </>
+                      )
+                    })()}
                   </div>
                   <CardContent className="p-6">
                     {/* Title */}
