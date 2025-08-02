@@ -1148,42 +1148,52 @@ export default function AdminEditor() {
                       </div>
                       
                       {isEditMode && isActive && !isEditing && (
-                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-opacity opacity-0 group-hover:opacity-100 flex items-center justify-center z-10">
+                        <div className="absolute top-2 right-2 z-10">
                           <button
                             onClick={() => setEditingCrop(image)}
-                            className="bg-white hover:bg-gray-100 text-black px-6 py-3 rounded flex items-center gap-2 font-bold shadow-lg"
+                            className="hover:scale-110 transition-transform"
                           >
-                            <Maximize2 className="w-5 h-5" />
-                            Resize Image
+                            <Image
+                              src="/locked.jpeg"
+                              alt="Resize"
+                              width={48}
+                              height={48}
+                              className="drop-shadow-lg"
+                            />
                           </button>
                         </div>
                       )}
                       
                       {isEditing && isActive && (
-                        <div 
-                          className="absolute inset-0 z-20"
-                          onClick={() => {
-                            setEditingCrop(null)
-                          }}
-                          onWheel={(e) => {
-                            e.preventDefault()
-                            const delta = e.deltaY > 0 ? 0.9 : 1.1
-                            const newScale = Math.max(0.17, Math.min(9, crop.scale * delta))
-                            
-                            setCropSettings(prev => ({
-                              ...prev,
-                              [image]: { ...crop, scale: newScale }
-                            }))
-                          }}
-                        >
-                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                            <div className="text-white text-center">
-                              <p className="font-bold text-xl mb-2 drop-shadow-lg">Use arrow keys to move</p>
-                              <p className="text-lg drop-shadow-lg">Scroll to zoom in/out</p>
-                              <p className="text-sm mt-2 drop-shadow-lg">Click anywhere to save</p>
-                            </div>
+                        <>
+                          <div 
+                            className="absolute inset-0 z-20"
+                            onWheel={(e) => {
+                              e.preventDefault()
+                              const delta = e.deltaY > 0 ? 0.9 : 1.1
+                              const newScale = Math.max(0.17, Math.min(9, crop.scale * delta))
+                              
+                              setCropSettings(prev => ({
+                                ...prev,
+                                [image]: { ...crop, scale: newScale }
+                              }))
+                            }}
+                          />
+                          <div className="absolute top-2 right-2 z-30">
+                            <button
+                              onClick={() => setEditingCrop(null)}
+                              className="hover:scale-110 transition-transform"
+                            >
+                              <Image
+                                src="/unlocked.jpeg"
+                                alt="Save"
+                                width={48}
+                                height={48}
+                                className="drop-shadow-lg"
+                              />
+                            </button>
                           </div>
-                        </div>
+                        </>
                       )}
                     </div>
                   )
@@ -1296,11 +1306,11 @@ export default function AdminEditor() {
                           </div>
                           
                           {isEditMode && !isEditing && (
-                            <div className="absolute inset-0 flex items-end justify-center pb-4 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                              <div className="flex gap-2">
+                            <>
+                              <div className="absolute inset-0 flex items-end justify-center pb-4 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                                 <label className="bg-white hover:bg-gray-100 text-black px-4 py-2 rounded cursor-pointer flex items-center gap-2 font-bold shadow-lg">
                                   <Edit2 className="w-4 h-4" />
-                                  Change
+                                  Change Image
                                   <input
                                     type="file"
                                     accept="image/*"
@@ -1311,42 +1321,54 @@ export default function AdminEditor() {
                                     }}
                                   />
                                 </label>
+                              </div>
+                              <div className="absolute top-2 right-2 z-10">
                                 <button
                                   onClick={() => setEditingCrop(product.image)}
-                                  className="bg-white hover:bg-gray-100 text-black px-4 py-2 rounded flex items-center gap-2 font-bold shadow-lg"
+                                  className="hover:scale-110 transition-transform"
                                 >
-                                  <Maximize2 className="w-4 h-4" />
-                                  Resize
+                                  <Image
+                                    src="/locked.jpeg"
+                                    alt="Resize"
+                                    width={48}
+                                    height={48}
+                                    className="drop-shadow-lg"
+                                  />
                                 </button>
                               </div>
-                            </div>
+                            </>
                           )}
                           
                           {isEditing && (
-                            <div 
-                              className="absolute inset-0 z-20"
-                              onClick={() => {
-                                setEditingCrop(null)
-                              }}
-                              onWheel={(e) => {
-                                e.preventDefault()
-                                const delta = e.deltaY > 0 ? 0.9 : 1.1
-                                const newScale = Math.max(0.17, Math.min(9, crop.scale * delta))
-                                
-                                setCropSettings(prev => ({
-                                  ...prev,
-                                  [product.image]: { ...crop, scale: newScale }
-                                }))
-                              }}
-                            >
-                              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                <div className="text-white text-center">
-                                  <p className="font-bold text-lg mb-2 drop-shadow-lg">Use arrow keys to move</p>
-                                  <p className="text-sm drop-shadow-lg">Scroll to zoom in/out</p>
-                                  <p className="text-xs mt-2 drop-shadow-lg">Click anywhere to save</p>
-                                </div>
+                            <>
+                              <div 
+                                className="absolute inset-0 z-20"
+                                onWheel={(e) => {
+                                  e.preventDefault()
+                                  const delta = e.deltaY > 0 ? 0.9 : 1.1
+                                  const newScale = Math.max(0.17, Math.min(9, crop.scale * delta))
+                                  
+                                  setCropSettings(prev => ({
+                                    ...prev,
+                                    [product.image]: { ...crop, scale: newScale }
+                                  }))
+                                }}
+                              />
+                              <div className="absolute top-2 right-2 z-30">
+                                <button
+                                  onClick={() => setEditingCrop(null)}
+                                  className="hover:scale-110 transition-transform"
+                                >
+                                  <Image
+                                    src="/unlocked.jpeg"
+                                    alt="Save"
+                                    width={48}
+                                    height={48}
+                                    className="drop-shadow-lg"
+                                  />
+                                </button>
                               </div>
-                            </div>
+                            </>
                           )}
                           
                           <div
