@@ -1148,7 +1148,7 @@ export default function AdminEditor() {
                           onWheel={(e) => {
                             e.preventDefault()
                             const delta = e.deltaY > 0 ? 0.9 : 1.1
-                            const newScale = Math.max(0.5, Math.min(3, crop.scale * delta))
+                            const newScale = Math.max(0.17, Math.min(9, crop.scale * delta))
                             
                             setCropSettings(prev => ({
                               ...prev,
@@ -1311,7 +1311,7 @@ export default function AdminEditor() {
                               onWheel={(e) => {
                                 e.preventDefault()
                                 const delta = e.deltaY > 0 ? 0.9 : 1.1
-                                const newScale = Math.max(0.5, Math.min(3, crop.scale * delta))
+                                const newScale = Math.max(0.17, Math.min(9, crop.scale * delta))
                                 
                                 setCropSettings(prev => ({
                                   ...prev,
