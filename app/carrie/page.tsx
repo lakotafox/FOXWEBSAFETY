@@ -1038,7 +1038,7 @@ export default function AdminEditor() {
                   </Button>
                 </div>
               )}
-              <div className="relative h-96 md:h-[500px] overflow-hidden border-8 border-slate-700 group">
+              <div className="relative h-96 md:h-[500px] overflow-hidden border-8 border-slate-700 group bg-gray-100">
                 {pendingGalleryImages.map((image, index) => {
                   const crop = cropSettings[image] || { scale: 1, x: 50, y: 50 }
                   const isEditing = editingCrop === image
@@ -1063,7 +1063,7 @@ export default function AdminEditor() {
                           src={getImageUrl(image, true)} 
                           alt={`Project ${index + 1}`} 
                           fill 
-                          className="object-cover"
+                          className={isEditing ? "object-contain" : "object-cover"}
                           unoptimized
                         />
                       </div>
@@ -1211,7 +1211,7 @@ export default function AdminEditor() {
                     isEditMode ? "ring-2 ring-green-500" : ""
                   }`}
                 >
-                  <div className="relative h-64 group overflow-hidden">
+                  <div className="relative h-64 group overflow-hidden bg-gray-100">
                     {(() => {
                       const crop = cropSettings[product.image] || { scale: 1, x: 50, y: 50 }
                       const isEditing = editingCrop === product.image
@@ -1230,7 +1230,7 @@ export default function AdminEditor() {
                               src={getImageUrl(product.image, false)} 
                               alt={product.title} 
                               fill 
-                              className="object-cover"
+                              className={isEditing ? "object-contain" : "object-cover"}
                               unoptimized
                               key={product.image}
                             />
