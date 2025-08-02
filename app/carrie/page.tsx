@@ -655,23 +655,6 @@ export default function AdminEditor() {
   }
 
 
-  // Revert to V1.0
-  const revertToV1 = () => {
-    if (confirm("Are you sure you want to revert to V1.0? This will reset all products and gallery images to their original state.")) {
-      setFeaturedProducts(defaultProducts)
-      saveProducts(defaultProducts)
-      setGalleryImages(defaultGalleryImages)
-      setPendingGalleryImages(defaultGalleryImages)
-      localStorage.setItem('foxbuilt-gallery', JSON.stringify(defaultGalleryImages))
-      
-      // Images will reload after build
-      
-      showMessage("🔄 Reverted to V1.0! All products and gallery reset to original.", 5000)
-      
-      // Trigger storage event for main page
-      window.dispatchEvent(new Event('storage'))
-    }
-  }
 
   // Save all changes (publish live)
   const saveAllChanges = async () => {
@@ -977,13 +960,6 @@ export default function AdminEditor() {
               <span className="font-bold text-sm sm:text-base">ADMIN EDIT MODE</span>
             </div>
             <div className="flex gap-2 flex-wrap justify-center">
-              <Button
-                onClick={revertToV1}
-                size="sm"
-                className="bg-red-600 text-white hover:bg-red-700 font-bold"
-              >
-                🔄 Revert to V1.0
-              </Button>
               <Button
                 onClick={saveAllChanges}
                 size="lg"
