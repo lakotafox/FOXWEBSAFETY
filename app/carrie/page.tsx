@@ -1061,14 +1061,10 @@ export default function AdminEditor() {
               </div>
             </div>
 
-            <div
-              className={`hidden md:flex items-center space-x-2 transition-all duration-500 ${isScrolled ? "scale-75" : "scale-100"}`}
-            >
-              <Phone className={`text-red-500 ${isScrolled ? "w-4 h-4" : "w-5 h-5"}`} />
-              <span className={`text-white font-black tracking-wide ${isScrolled ? "text-sm" : "text-lg"}`}>
-                (801) 899-9406
-              </span>
-            </div>
+            {/* Centered FOXBUILT OFFICE FURNITURE text - Desktop only */}
+            <h1 className="hidden md:block text-2xl font-black text-white tracking-tight absolute left-1/2 transform -translate-x-1/2">
+              FOXBUILT <span className="text-red-600">OFFICE</span> <span className="text-blue-400">FURNITURE</span>
+            </h1>
 
             <div className="flex items-center space-x-4">
               <Button
@@ -1102,23 +1098,11 @@ export default function AdminEditor() {
           </div>
 
           <div className="container mx-auto px-4 text-center relative z-10">
-            <h1 className="text-6xl md:text-8xl font-black text-white mb-8 tracking-tight">
-              AMERICAN MADE
-              <br />
-              <span className="text-red-500">WORKSPACE</span>
-              <br />
-              <span className="text-blue-400">SOLUTIONS</span>
-            </h1>
             <div className="mb-8">
               <span className="inline-block bg-red-600 text-white px-6 py-3 text-sm font-black uppercase tracking-widest border-4 border-white">
                 🇺🇸 27 YEARS STRONG 🇺🇸
               </span>
             </div>
-            <p className="text-xl text-zinc-300 mb-10 max-w-3xl mx-auto font-bold leading-relaxed">
-              BUILT TOUGH. BUILT RIGHT. BUILT TO LAST.
-              <br />
-              From executive offices to heavy-duty workstations - we outfit America's workforce.
-            </p>
             <div className="flex flex-col sm:flex-row gap-6 justify-center">
               <Button
                 size="lg"
