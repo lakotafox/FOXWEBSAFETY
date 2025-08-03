@@ -427,36 +427,6 @@ export default function FoxBuiltWebsite() {
             </div>
           </div>
 
-          {/* Column Headers */}
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-4">
-            <div className="text-center">
-              <span className={`inline-block px-4 py-2 font-black text-white ${
-                featuredCategory === "new" ? "bg-red-600" : 
-                featuredCategory === "battleTested" ? "bg-blue-600" : 
-                "bg-green-600"
-              }`}>
-                {featuredCategory === "new" ? "NEW" : featuredCategory === "battleTested" ? "PRE-OWNED" : "COMFORT"}
-              </span>
-            </div>
-            <div className="text-center hidden md:block">
-              <span className={`inline-block px-4 py-2 font-black text-white ${
-                featuredCategory === "new" ? "bg-red-600" : 
-                featuredCategory === "battleTested" ? "bg-blue-600" : 
-                "bg-green-600"
-              }`}>
-                {featuredCategory === "new" ? "NEW" : featuredCategory === "battleTested" ? "PRE-OWNED" : "COMFORT"}
-              </span>
-            </div>
-            <div className="text-center hidden md:block">
-              <span className={`inline-block px-4 py-2 font-black text-white ${
-                featuredCategory === "new" ? "bg-red-600" : 
-                featuredCategory === "battleTested" ? "bg-blue-600" : 
-                "bg-green-600"
-              }`}>
-                {featuredCategory === "new" ? "NEW" : featuredCategory === "battleTested" ? "PRE-OWNED" : "COMFORT"}
-              </span>
-            </div>
-          </div>
 
           {/* Product Grid */}
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">

@@ -939,36 +939,6 @@ export default function ProductsEditorPage() {
             </div>
           </div>
 
-          {/* Column Headers */}
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-4">
-            <div className="text-center">
-              <span className={`inline-block px-4 py-2 font-black text-white ${
-                productCategory === "new" ? "bg-red-600" : 
-                productCategory === "battleTested" ? "bg-blue-600" : 
-                "bg-green-600"
-              }`}>
-                {productCategory === "new" ? "NEW" : productCategory === "battleTested" ? "PRE-OWNED" : "COMFORT"}
-              </span>
-            </div>
-            <div className="text-center hidden md:block">
-              <span className={`inline-block px-4 py-2 font-black text-white ${
-                productCategory === "new" ? "bg-red-600" : 
-                productCategory === "battleTested" ? "bg-blue-600" : 
-                "bg-green-600"
-              }`}>
-                {productCategory === "new" ? "NEW" : productCategory === "battleTested" ? "PRE-OWNED" : "COMFORT"}
-              </span>
-            </div>
-            <div className="text-center hidden md:block">
-              <span className={`inline-block px-4 py-2 font-black text-white ${
-                productCategory === "new" ? "bg-red-600" : 
-                productCategory === "battleTested" ? "bg-blue-600" : 
-                "bg-green-600"
-              }`}>
-                {productCategory === "new" ? "NEW" : productCategory === "battleTested" ? "PRE-OWNED" : "COMFORT"}
-              </span>
-            </div>
-          </div>
 
           {/* Products Grid - Show 9 products (3x3) */}
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
