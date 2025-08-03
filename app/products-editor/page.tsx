@@ -273,7 +273,6 @@ export default function ProductsEditorPage() {
     }
     return false
   })
-  const [password, setPassword] = useState("")
   const [productCategory, setProductCategory] = useState('new')
   const [products, setProducts] = useState(getProductsPageItems())
   const [editingId, setEditingId] = useState<number | null>(null)
@@ -316,18 +315,6 @@ export default function ProductsEditorPage() {
     "Final inspection..."
   ]
 
-  // Check password
-  const checkPassword = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (password === "foxbuilt2025") {
-      setIsAuthenticated(true)
-    } else if (password === "goof") {
-      window.location.href = '/games'
-    } else {
-      // Wrong password - clear it
-      setPassword("")
-    }
-  }
 
   useEffect(() => {
     // Load saved products and crop settings on mount
@@ -655,40 +642,12 @@ export default function ProductsEditorPage() {
     }
   }
 
-  // If not authenticated, show password screen
+  // If not authenticated, redirect to carrie page
   if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
-        <div className="bg-slate-800 border-8 border-red-600 p-12 max-w-md w-full">
-          <h1 className="text-4xl font-black text-white mb-8 text-center tracking-tight">
-            FOXBUILT
-            <br />
-            <span className="text-red-500">PRODUCTS EDITOR</span>
-          </h1>
-          <form onSubmit={checkPassword} className="space-y-6">
-            <div>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="ENTER PASSWORD"
-                className="w-full px-6 py-4 bg-slate-700 border-4 border-slate-600 text-white placeholder-zinc-400 font-bold text-xl focus:outline-none focus:border-red-500"
-                autoFocus
-              />
-            </div>
-            <button
-              type="submit"
-              className="w-full bg-red-600 hover:bg-red-700 text-white font-black text-xl py-4 tracking-widest border-4 border-red-600 hover:border-red-700 transition-all"
-            >
-              ENTER
-            </button>
-          </form>
-          <p className="text-zinc-400 text-center mt-8 font-bold">
-            AUTHORIZED ACCESS ONLY
-          </p>
-        </div>
-      </div>
-    )
+    if (typeof window !== 'undefined') {
+      window.location.href = '/carrie'
+    }
+    return null
   }
 
   return (
