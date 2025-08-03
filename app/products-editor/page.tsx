@@ -278,6 +278,7 @@ export default function ProductsEditorPage() {
   const [saveMessage, setSaveMessage] = useState("")
   const [showPublishConfirm, setShowPublishConfirm] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
+  const [showMobilePreviewHelp, setShowMobilePreviewHelp] = useState(false)
   const [showPublishLoadingOverlay, setShowPublishLoadingOverlay] = useState(false)
   const [publishMessage, setPublishMessage] = useState("")
   const [showWelcomeMessage, setShowWelcomeMessage] = useState(false)
@@ -683,13 +684,22 @@ export default function ProductsEditorPage() {
             <Edit2 className="w-5 h-5" />
             <span className="font-bold text-sm sm:text-base">PRODUCTS EDITOR</span>
           </div>
-          <Button
-            onClick={handlePublish}
-            size="lg"
-            className="bg-green-600 text-white hover:bg-green-700 font-bold px-8 py-3 text-lg"
-          >
-            🚀 Publish Changes
-          </Button>
+          <div className="flex gap-2 flex-wrap justify-center">
+            <Button
+              onClick={() => setShowMobilePreviewHelp(true)}
+              size="lg"
+              className="bg-blue-600 text-white hover:bg-blue-700 font-bold px-6 py-3 text-lg"
+            >
+              📱 Mobile Preview
+            </Button>
+            <Button
+              onClick={handlePublish}
+              size="lg"
+              className="bg-green-600 text-white hover:bg-green-700 font-bold px-8 py-3 text-lg"
+            >
+              🚀 Publish Changes
+            </Button>
+          </div>
         </div>
       </div>
       
@@ -1096,6 +1106,69 @@ export default function ProductsEditorPage() {
                   className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg font-bold"
                 >
                   Got it! 👍
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Mobile Preview Help Modal */}
+      {showMobilePreviewHelp && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-[80] flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto p-8">
+            <div className="flex justify-center items-center mb-6">
+              <h2 className="text-3xl font-black text-slate-900">📱 MOBILE PREVIEW GUIDE</h2>
+            </div>
+            
+            <div className="space-y-6">
+              <div className="text-center">
+                <h3 className="font-bold text-2xl mb-4">Hey Pops! 👋</h3>
+                <p className="text-xl mb-6">Quick way to check mobile view:</p>
+                <div className="bg-blue-50 border-2 border-blue-600 p-4 rounded-lg inline-block">
+                  <p className="text-2xl font-bold text-blue-900">Press Ctrl+Shift+M to toggle mobile preview mode!</p>
+                </div>
+              </div>
+
+              <div className="text-center">
+                <p className="text-lg font-bold mb-4">SELECT DIFFERENT PHONES FROM DROPDOWN!</p>
+              </div>
+
+              <div>
+                <h3 className="font-bold text-xl mb-4 text-center">Why check both mobile & desktop?! 🤔 well, let me explain..</h3>
+                <div className="space-y-3 text-gray-700">
+                  <p className="text-lg">
+                    So… the pics you upload will look different on phones vs. computers That's life…
+                  </p>
+                  <p className="text-lg">
+                    Making images look good for all devices, well it's a shite problem… even big companies struggle!
+                  </p>
+                  <p className="text-lg font-bold">
+                    So PLEASE can you check how it looks on both before publishing.
+                  </p>
+                  <p className="text-lg mt-4">
+                    Sometimes an image that looks perfect on desktop might be:
+                  </p>
+                  <ul className="list-disc list-inside text-lg ml-4 space-y-1">
+                    <li>zoomed differently</li>
+                    <li>cut off</li>
+                    <li>or not filling the shape nicely, for example.</li>
+                  </ul>
+                  <p className="text-lg mt-4">
+                    Find the way that makes it look good for both
+                  </p>
+                  <p className="text-lg mt-4 font-bold">
+                    GOODLUCK! Have fun.
+                  </p>
+                </div>
+              </div>
+
+              <div className="text-center pt-6">
+                <Button
+                  onClick={() => setShowMobilePreviewHelp(false)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg font-bold"
+                >
+                  I CAN DO THIS! 👍
                 </Button>
               </div>
             </div>

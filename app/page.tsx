@@ -181,7 +181,7 @@ export default function FoxBuiltWebsite() {
   return (
     <div className="min-h-screen bg-zinc-100">
       {/* Floating Action Buttons - Desktop Only */}
-      <div className="hidden md:flex fixed top-24 left-8 flex-col gap-3 z-50">
+      <div className="hidden md:flex fixed top-32 left-8 flex-col gap-3 z-50">
         <button
           onClick={() => window.location.href = 'tel:+18018999406'}
           className="w-16 h-16 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center transition-all hover:scale-110 shadow-lg"
