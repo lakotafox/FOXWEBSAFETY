@@ -799,7 +799,7 @@ export default function AdminEditor() {
             <div className="grid md:grid-cols-2 gap-8">
               <button
                 onClick={() => setIsAuthenticated(true)}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-black text-xl p-8 border-4 border-blue-500 hover:border-blue-600 transition-all transform hover:scale-105"
+                className="bg-green-600 hover:bg-green-700 text-white font-black text-xl p-8 border-4 border-green-500 hover:border-green-600 transition-all transform hover:scale-105"
               >
                 <div>EDIT MAIN PAGE</div>
                 <div className="text-sm mt-2 font-normal">Homepage content & featured products</div>
@@ -810,7 +810,7 @@ export default function AdminEditor() {
                   sessionStorage.setItem('foxbuilt-authenticated', 'true')
                   window.location.href = '/products-editor'
                 }}
-                className="bg-green-600 hover:bg-green-700 text-white font-black text-xl p-8 border-4 border-green-500 hover:border-green-600 transition-all transform hover:scale-105"
+                className="bg-yellow-600 hover:bg-yellow-700 text-white font-black text-xl p-8 border-4 border-yellow-500 hover:border-yellow-600 transition-all transform hover:scale-105"
               >
                 <div>EDIT PRODUCTS</div>
                 <div className="text-sm mt-2 font-normal">Full products catalog page</div>
