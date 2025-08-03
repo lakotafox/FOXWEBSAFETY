@@ -261,7 +261,7 @@ export default function FoxBuiltWebsite() {
             <Button
               size="lg"
               className="bg-red-600 hover:bg-red-700 text-white font-black text-lg px-10 py-4 border-4 border-white tracking-widest"
-              onClick={() => document.getElementById("gallery")?.scrollIntoView({ behavior: "smooth" })}
+              onClick={() => window.open('https://www.google.com/maps/search/?api=1&query=420+W+Industrial+Dr+Building+LL+Pleasant+Grove+UT+84062', '_blank')}
             >
               VISIT SHOWROOM
             </Button>
