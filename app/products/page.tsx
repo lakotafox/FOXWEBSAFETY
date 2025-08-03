@@ -482,24 +482,24 @@ export default function ProductsPage() {
       <header
         className={`fixed top-0 left-0 right-0 z-50 bg-slate-900 border-b-4 border-red-600 shadow-xl transition-all duration-500 ${
           isScrolled ? "py-0.25" : "py-1.5"
-        }`}
+        } md:py-0.25`}
       >
         <div className="container mx-auto px-4">
-          {/* Desktop Header */}
+          {/* Desktop Header - No dynamic sizing */}
           <div className="hidden md:flex items-center justify-between">
             {/* Logo on left */}
-            <div className={`transition-all duration-500 ${isScrolled ? "scale-75" : "scale-100"}`}>
+            <div>
               <Image
                 src="/images/foxbuilt-logo.png"
                 alt="FoxBuilt Logo"
-                width={isScrolled ? 120 : 160}
-                height={isScrolled ? 45 : 60}
+                width={120}
+                height={45}
                 className="h-auto"
               />
             </div>
             
             {/* Centered PRODUCTS text */}
-            <h1 className={`text-3xl font-black text-white tracking-tight absolute left-1/2 transform -translate-x-1/2 ${isScrolled ? "scale-90" : "scale-100"} transition-all duration-500`}>
+            <h1 className="text-2xl font-black text-white tracking-tight absolute left-1/2 transform -translate-x-1/2">
               <span className="text-red-600">PRODUCTS</span>
             </h1>
             
@@ -515,7 +515,10 @@ export default function ProductsPage() {
           {/* Mobile Header */}
           <div className="md:hidden flex items-center justify-between">
             {/* Logo */}
-            <div className={`transition-all duration-500 ${isScrolled ? "scale-75" : "scale-100"}`}>
+            <button 
+              onClick={() => window.location.href = '/'}
+              className={`transition-all duration-500 ${isScrolled ? "scale-75" : "scale-100"}`}
+            >
               <Image
                 src="/images/foxbuilt-logo.png"
                 alt="FoxBuilt Logo"
@@ -523,7 +526,7 @@ export default function ProductsPage() {
                 height={isScrolled ? 30 : 45}
                 className="h-auto"
               />
-            </div>
+            </button>
 
             {/* Center Title */}
             <h1 className={`font-black text-white tracking-tight ${isScrolled ? "text-xl" : "text-2xl"}`}>

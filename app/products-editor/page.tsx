@@ -259,20 +259,19 @@ function saveProductsPageItems(products: any) {
 }
 
 export default function ProductsEditorPage() {
-  // Check if already authenticated from carrie page
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+  // Always authenticated - security is handled at /carrie
+  const [isAuthenticated, setIsAuthenticated] = useState(true)
+  
+  // Check if coming from carrie to show welcome message
+  useEffect(() => {
     if (typeof window !== 'undefined') {
-      const authenticated = sessionStorage.getItem('foxbuilt-authenticated')
-      if (authenticated === 'true') {
-        // Clear the flag so it's not reused
+      const fromCarrie = sessionStorage.getItem('foxbuilt-authenticated')
+      if (fromCarrie === 'true') {
         sessionStorage.removeItem('foxbuilt-authenticated')
-        // Show welcome message when coming from carrie page
-        setTimeout(() => setShowWelcomeMessage(true), 500)
-        return true
+        setShowWelcomeMessage(true)
       }
     }
-    return false
-  })
+  }, [])
   const [productCategory, setProductCategory] = useState('new')
   const [products, setProducts] = useState(getProductsPageItems())
   const [editingId, setEditingId] = useState<number | null>(null)
@@ -642,25 +641,6 @@ export default function ProductsEditorPage() {
     }
   }
 
-  // Redirect to carrie page if not authenticated
-  useEffect(() => {
-    if (!isAuthenticated && typeof window !== 'undefined') {
-      // Small delay to ensure sessionStorage is checked first
-      const timer = setTimeout(() => {
-        window.location.href = '/carrie'
-      }, 100)
-      return () => clearTimeout(timer)
-    }
-  }, [isAuthenticated])
-
-  // Show loading while checking authentication
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-slate-800 flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
-      </div>
-    )
-  }
 
   return (
     <div className="min-h-screen bg-slate-800 relative">
