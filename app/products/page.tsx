@@ -450,41 +450,6 @@ export default function ProductsPage() {
         </button>
       </div>
 
-      {/* Floating Category Buttons - Desktop Only */}
-      {showFloatingCategories && (
-        <div className="hidden md:flex fixed top-1/2 right-4 -translate-y-1/2 flex-col gap-3 z-50">
-          <button
-            onClick={() => setProductCategory("new")}
-            className={`px-3 py-3 font-black rounded-lg shadow-lg transition-all hover:scale-105 text-sm ${
-              productCategory === "new" 
-                ? "bg-red-600 text-white" 
-                : "bg-slate-700 text-zinc-300 hover:bg-slate-600"
-            }`}
-          >
-            NEW
-          </button>
-          <button
-            onClick={() => setProductCategory("battleTested")}
-            className={`px-3 py-3 font-black rounded-lg shadow-lg transition-all hover:scale-105 text-sm ${
-              productCategory === "battleTested" 
-                ? "bg-blue-600 text-white" 
-                : "bg-slate-700 text-zinc-300 hover:bg-slate-600"
-            }`}
-          >
-            PRE-<br/>OWNED
-          </button>
-          <button
-            onClick={() => setProductCategory("seating")}
-            className={`px-3 py-3 font-black rounded-lg shadow-lg transition-all hover:scale-105 text-sm ${
-              productCategory === "seating" 
-                ? "bg-green-600 text-white" 
-                : "bg-slate-700 text-zinc-300 hover:bg-slate-600"
-            }`}
-          >
-            SEATING
-          </button>
-        </div>
-      )}
 
       {/* Header */}
       <header
@@ -611,36 +576,6 @@ export default function ProductsPage() {
             </div>
           </div>
 
-          {/* Column Headers */}
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-4">
-            <div className="text-center">
-              <span className={`inline-block px-4 py-2 font-black text-white ${
-                productCategory === "new" ? "bg-red-600" : 
-                productCategory === "battleTested" ? "bg-blue-600" : 
-                "bg-green-600"
-              }`}>
-                {productCategory === "new" ? "NEW" : productCategory === "battleTested" ? "PRE-OWNED" : "COMFORT"}
-              </span>
-            </div>
-            <div className="text-center hidden md:block">
-              <span className={`inline-block px-4 py-2 font-black text-white ${
-                productCategory === "new" ? "bg-red-600" : 
-                productCategory === "battleTested" ? "bg-blue-600" : 
-                "bg-green-600"
-              }`}>
-                {productCategory === "new" ? "NEW" : productCategory === "battleTested" ? "PRE-OWNED" : "COMFORT"}
-              </span>
-            </div>
-            <div className="text-center hidden md:block">
-              <span className={`inline-block px-4 py-2 font-black text-white ${
-                productCategory === "new" ? "bg-red-600" : 
-                productCategory === "battleTested" ? "bg-blue-600" : 
-                "bg-green-600"
-              }`}>
-                {productCategory === "new" ? "NEW" : productCategory === "battleTested" ? "PRE-OWNED" : "COMFORT"}
-              </span>
-            </div>
-          </div>
 
           {/* Products Grid - Show all products */}
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">

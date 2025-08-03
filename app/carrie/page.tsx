@@ -1407,18 +1407,6 @@ export default function AdminEditor() {
                               </div>
                             </>
                           )}
-                          
-                          <div
-                            className={`absolute top-4 right-4 text-white px-3 py-1 font-black text-sm ${
-                              featuredCategory === "new"
-                                ? "bg-red-600"
-                                : featuredCategory === "battleTested"
-                                  ? "bg-blue-600"
-                                  : "bg-green-600"
-                            }`}
-                          >
-                            {featuredCategory === "new" ? "NEW" : featuredCategory === "battleTested" ? "PROVEN" : "COMFORT"}
-                          </div>
                         </>
                       )
                     })()}
