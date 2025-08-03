@@ -311,6 +311,8 @@ export default function ProductsEditorPage() {
   // Image upload management
   const [activeUploads, setActiveUploads] = useState(0)
   const [uploadQueue, setUploadQueue] = useState<{productId: number, file: File, fileName: string}[]>([])
+  const [showLoadingOverlay, setShowLoadingOverlay] = useState(false)
+  const [loadingStartTime, setLoadingStartTime] = useState<number | null>(null)
   const [editingCrop, setEditingCrop] = useState<string | null>(null)
 
   // Construction messages for publish loading
@@ -528,6 +530,33 @@ export default function ProductsEditorPage() {
       processImageUpload(nextUpload.productId, nextUpload.file, nextUpload.fileName)
     }
   }, [uploadQueue, activeUploads])
+
+  // Manage loading overlay with 4-second minimum (same as main editor)
+  useEffect(() => {
+    const shouldShowOverlay = activeUploads > 0 || uploadQueue.length > 0
+    
+    if (shouldShowOverlay && !showLoadingOverlay) {
+      // Start showing overlay
+      setShowLoadingOverlay(true)
+      setLoadingStartTime(Date.now())
+    } else if (!shouldShowOverlay && showLoadingOverlay && loadingStartTime) {
+      // Check if 4 seconds have passed
+      const elapsed = Date.now() - loadingStartTime
+      const remaining = 4000 - elapsed
+      
+      if (remaining > 0) {
+        // Wait for remaining time
+        setTimeout(() => {
+          setShowLoadingOverlay(false)
+          setLoadingStartTime(null)
+        }, remaining)
+      } else {
+        // 4 seconds have passed, hide immediately
+        setShowLoadingOverlay(false)
+        setLoadingStartTime(null)
+      }
+    }
+  }, [activeUploads, uploadQueue.length, showLoadingOverlay, loadingStartTime])
 
   // Crop handling functions
   const handleCropChange = (imagePath: string, axis: 'scale' | 'x' | 'y', delta: number) => {
@@ -781,11 +810,12 @@ export default function ProductsEditorPage() {
 
   return (
     <div className="min-h-screen bg-slate-800 relative">
-      {/* Image Upload Loading Overlay */}
-      {activeUploads > 0 && (
-        <div className="fixed inset-0 bg-black/95 z-[100] flex flex-col items-center justify-center pointer-events-auto" style={{ pointerEvents: 'all' }}>
+      {/* Image Upload Loading Overlay - Same as main editor */}
+      {showLoadingOverlay && (
+        <div className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center pointer-events-auto" style={{ pointerEvents: 'all' }}>
+          {/* Fox loading video only */}
           <video 
-            className="w-64 h-64 mb-8"
+            className="w-64 h-64"
             autoPlay
             loop
             muted
@@ -793,10 +823,6 @@ export default function ProductsEditorPage() {
           >
             <source src="/foxloading.webm" type="video/webm" />
           </video>
-          
-          <div className="text-white text-xl font-bold animate-pulse">
-            Uploading image to GitHub...
-          </div>
         </div>
       )}
 
@@ -957,7 +983,7 @@ export default function ProductsEditorPage() {
                       : "ring-green-500"
                 }`}
               >
-                <div className="relative h-64 group overflow-hidden bg-gray-100">
+                <div className="relative h-56 group overflow-hidden bg-gray-100">
                   {(() => {
                     const crop = cropSettings[product.image] || { scale: 1, x: 50, y: 50 }
                     return (
