@@ -1,6 +1,25 @@
 "use client"
 
-// Inspired by react-hot-toast library
+// Inspired by react-hot-toast library???????????
+
+
+/*toast notification system (part of shadcn/ui components) that manages pop-up messages.
+ It's currently not being used
+  in codebase - 
+  
+  never implemented. 
+  
+  It would allow you to show temporary notification messages which the editor has ?.... (like "Success!" or "Error!")
+   that appear and disappear automatically.
+  The file sets up a state management system for these toasts with features
+   like auto-dismiss, limits on how many can show at once, and the ability
+  to update/remove specific toasts. You could use it to replace the alert()
+   calls in your contact form with nicer-looking notifications.*/
+
+
+
+
+
 import * as React from "react"
 
 import type {

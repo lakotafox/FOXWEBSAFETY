@@ -1256,7 +1256,13 @@ export default function AdminEditor() {
                 <Card
                   key={product.id}
                   className={`overflow-hidden hover:shadow-2xl transition-all border-4 border-slate-600 bg-zinc-100 ${
-                    isEditMode ? "ring-2 ring-green-500" : ""
+                    isEditMode ? `ring-2 ${
+                      featuredCategory === "new"
+                        ? "ring-red-500"
+                        : featuredCategory === "battleTested"
+                          ? "ring-blue-500"
+                          : "ring-green-500"
+                    }` : ""
                   }`}
                 >
                   <div className="relative h-64 group overflow-hidden bg-gray-100">
