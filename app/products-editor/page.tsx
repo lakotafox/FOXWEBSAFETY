@@ -307,6 +307,10 @@ export default function ProductsEditorPage() {
   
   // Simple crop state
   const [cropSettings, setCropSettings] = useState<{[key: string]: {scale: number, x: number, y: number}}>({})
+  
+  // Image upload management
+  const [activeUploads, setActiveUploads] = useState(0)
+  const [uploadQueue, setUploadQueue] = useState<{productId: number, file: File, fileName: string}[]>([])
   const [editingCrop, setEditingCrop] = useState<string | null>(null)
 
   // Construction messages for publish loading
@@ -411,32 +415,124 @@ export default function ProductsEditorPage() {
   // Handle image upload
   const handleImageUpload = async (file: File, productId: number) => {
     try {
-      // Create a temporary preview URL
-      const previewUrl = URL.createObjectURL(file)
       const timestamp = Date.now()
-      const fileName = `products-page-${productId}-${timestamp}.jpg`
+      const fileName = `product-${productId}-${timestamp}.jpg`
       const githubPath = `/images/${fileName}`
       
-      // Store the preview URL temporarily
-      setTempPreviews(prev => ({
-        ...prev,
-        [githubPath]: previewUrl
-      }))
-      
-      // Update the product with the new image path
+      // Update the product with the new image path immediately
       updateProduct(productId, 'image', githubPath)
       
-      // Store the file for later upload when publishing
-      const pendingUploads = JSON.parse(localStorage.getItem('foxbuilt-products-page-pending-uploads') || '{}')
-      pendingUploads[githubPath] = file
-      localStorage.setItem('foxbuilt-products-page-pending-uploads', JSON.stringify(pendingUploads))
+      // Initialize crop settings for the new image
+      setCropSettings(prev => ({
+        ...prev,
+        [githubPath]: { scale: 1, x: 50, y: 50 }
+      }))
       
-      showSaveMessage("Image ready to publish! Click 'Publish' to save permanently.")
+      // Create a temporary preview URL
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        if (e.target?.result) {
+          setTempPreviews(prev => ({
+            ...prev,
+            [githubPath]: e.target.result as string
+          }))
+        }
+      }
+      reader.readAsDataURL(file)
+      
+      // Add to upload queue
+      setUploadQueue(queue => [...queue, { productId, file, fileName }])
     } catch (error) {
       console.error('Error handling image:', error)
       showSaveMessage("Error preparing image")
     }
   }
+
+  // Process image upload to GitHub
+  const processImageUpload = async (productId: number, file: File, fileName: string) => {
+    setActiveUploads(count => count + 1)
+    showSaveMessage("📤 Uploading image...")
+    
+    const uploadTimeout = setTimeout(() => {
+      console.error('Upload timeout after 30 seconds')
+      showSaveMessage("❌ Upload timeout - please try again", 5000)
+      setActiveUploads(count => count - 1)
+    }, 30000)
+    
+    try {
+      const GITHUB_TOKEN = process.env.NEXT_PUBLIC_GITHUB_TOKEN || 'SET_IN_NETLIFY_ENV'
+      const OWNER = 'lakotafox'
+      const REPO = 'FOXSITE'
+      const PATH = `public/images/${fileName}`
+      
+      // Convert file to base64
+      const reader = new FileReader()
+      reader.readAsDataURL(file)
+      
+      reader.onload = async () => {
+        const base64Data = reader.result as string
+        const base64Content = base64Data.split(',')[1]
+        
+        // Upload to GitHub
+        const response = await fetch(
+          `https://api.github.com/repos/${OWNER}/${REPO}/contents/${PATH}`,
+          {
+            method: 'PUT',
+            headers: {
+              'Authorization': `token ${GITHUB_TOKEN}`,
+              'Accept': 'application/vnd.github.v3+json',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              message: `Upload product image ${fileName}`,
+              content: base64Content,
+              branch: 'main'
+            })
+          }
+        )
+        
+        clearTimeout(uploadTimeout)
+        
+        if (response.ok) {
+          showSaveMessage("✅ Image uploaded!", 3000)
+          // Remove the temp preview since the real image is now uploaded
+          const githubPath = `/images/${fileName}`
+          setTempPreviews(prev => {
+            const newPreviews = { ...prev }
+            delete newPreviews[githubPath]
+            return newPreviews
+          })
+        } else {
+          const errorData = await response.json()
+          console.error('Upload failed:', errorData)
+          showSaveMessage("❌ Upload failed", 5000)
+        }
+        
+        setActiveUploads(count => count - 1)
+      }
+      
+      reader.onerror = () => {
+        console.error('FileReader error')
+        showSaveMessage("❌ Error reading image", 3000)
+        clearTimeout(uploadTimeout)
+        setActiveUploads(count => count - 1)
+      }
+    } catch (error) {
+      console.error('Upload error:', error)
+      showSaveMessage("❌ Error uploading image", 3000)
+      clearTimeout(uploadTimeout)
+      setActiveUploads(count => count - 1)
+    }
+  }
+  
+  // Process upload queue
+  useEffect(() => {
+    if (uploadQueue.length > 0 && activeUploads === 0) {
+      const [nextUpload, ...remainingQueue] = uploadQueue
+      setUploadQueue(remainingQueue)
+      processImageUpload(nextUpload.productId, nextUpload.file, nextUpload.fileName)
+    }
+  }, [uploadQueue, activeUploads])
 
   // Crop handling functions
   const handleCropChange = (imagePath: string, axis: 'scale' | 'x' | 'y', delta: number) => {
@@ -669,8 +765,7 @@ export default function ProductsEditorPage() {
           }, 60000) // 1 minute
         }, 2000)
         
-        // Clear pending uploads
-        localStorage.removeItem('foxbuilt-products-page-pending-uploads')
+        // Clear any remaining temp previews
         setTempPreviews({})
       } else {
         const error = await updateResponse.json()
@@ -691,6 +786,25 @@ export default function ProductsEditorPage() {
 
   return (
     <div className="min-h-screen bg-slate-800 relative">
+      {/* Image Upload Loading Overlay */}
+      {activeUploads > 0 && (
+        <div className="fixed inset-0 bg-black/95 z-[100] flex flex-col items-center justify-center pointer-events-auto" style={{ pointerEvents: 'all' }}>
+          <video 
+            className="w-64 h-64 mb-8"
+            autoPlay
+            loop
+            muted
+            playsInline
+          >
+            <source src="/foxloading.webm" type="video/webm" />
+          </video>
+          
+          <div className="text-white text-xl font-bold animate-pulse">
+            Uploading image to GitHub...
+          </div>
+        </div>
+      )}
+
       {/* Publish Loading Overlay */}
       {showPublishLoadingOverlay && (
         <div className="fixed inset-0 bg-black/95 z-[100] flex flex-col items-center justify-center pointer-events-auto" style={{ pointerEvents: 'all' }}>
