@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Phone, MapPin } from 'lucide-react'
+import { Phone, MapPin, Mail } from 'lucide-react'
 
 export default function ProductsPage() {
   const [productCategory, setProductCategory] = useState('new')
@@ -398,12 +398,45 @@ export default function ProductsPage() {
 
   return (
     <div className="min-h-screen bg-slate-800">
+      {/* Floating Action Buttons */}
+      <div className="fixed top-8 left-8 flex flex-col gap-3 z-50">
+        <button
+          onClick={() => window.location.href = 'tel:+18018999406'}
+          className="w-16 h-16 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center transition-all hover:scale-110 shadow-lg"
+          aria-label="Call us"
+        >
+          <Phone className="w-8 h-8" />
+        </button>
+        <button
+          onClick={() => window.open('https://www.google.com/maps/search/?api=1&query=420+W+Industrial+Dr+Building+LL+Pleasant+Grove+UT+84062', '_blank')}
+          className="w-16 h-16 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center transition-all hover:scale-110 shadow-lg"
+          aria-label="View on map"
+        >
+          <MapPin className="w-8 h-8" />
+        </button>
+        <button
+          onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+          className="w-16 h-16 bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center justify-center transition-all hover:scale-110 shadow-lg"
+          aria-label="Send email"
+        >
+          <Mail className="w-8 h-8" />
+        </button>
+      </div>
+
       {/* Header */}
-      <div className="bg-slate-900 py-8">
+      <div className="bg-slate-900 py-8 relative">
         <div className="container mx-auto px-4">
           <h1 className="text-5xl font-black text-center text-white tracking-tight">
             OUR <span className="text-red-600">PRODUCTS</span>
           </h1>
+          
+          {/* Home button */}
+          <Button
+            onClick={() => window.location.href = '/'}
+            className="absolute top-1/2 right-8 -translate-y-1/2 bg-red-600 hover:bg-red-700 text-white font-black px-6 py-2"
+          >
+            HOME
+          </Button>
         </div>
       </div>
 
