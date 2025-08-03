@@ -645,9 +645,9 @@ export default function ProductsPage() {
             </div>
           </div>
 
-          {/* Products Grid - Show 9 products (3x3) */}
+          {/* Products Grid - Show all products */}
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {currentProducts.slice(0, 9).map((product) => (
+            {currentProducts.map((product) => (
               <Card
                 key={product.id}
                 className={`overflow-hidden hover:shadow-2xl transition-all border-4 border-slate-600 bg-zinc-100 ring-2 ${
