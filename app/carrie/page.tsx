@@ -259,14 +259,30 @@ export default function AdminEditor() {
       pressedKeys.delete(e.key)
     }
     
+    const handleWheel = (e: WheelEvent) => {
+      if (!editingCrop) return
+      e.preventDefault()
+      
+      const currentCrop = cropSettings[editingCrop] || { scale: 1, x: 50, y: 50 }
+      const delta = e.deltaY > 0 ? 0.9 : 1.1
+      const newScale = Math.max(0.17, Math.min(9, currentCrop.scale * delta))
+      
+      setCropSettings(prev => ({
+        ...prev,
+        [editingCrop]: { ...currentCrop, scale: newScale }
+      }))
+    }
+    
     document.addEventListener('keydown', handleKeyDown)
     document.addEventListener('keyup', handleKeyUp)
+    document.addEventListener('wheel', handleWheel, { passive: false })
     
     return () => {
       // Restore body scroll
       document.body.style.overflow = ''
       document.removeEventListener('keydown', handleKeyDown)
       document.removeEventListener('keyup', handleKeyUp)
+      document.removeEventListener('wheel', handleWheel)
     }
   }, [editingCrop, cropSettings])
 
@@ -1196,35 +1212,20 @@ export default function AdminEditor() {
                       )}
                       
                       {isEditing && isActive && (
-                        <>
-                          <div 
-                            className="absolute inset-0 z-20"
-                            onWheel={(e) => {
-                              e.preventDefault()
-                              const delta = e.deltaY > 0 ? 0.9 : 1.1
-                              const newScale = Math.max(0.17, Math.min(9, crop.scale * delta))
-                              
-                              setCropSettings(prev => ({
-                                ...prev,
-                                [image]: { ...crop, scale: newScale }
-                              }))
-                            }}
-                          />
-                          <div className="absolute top-2 right-2 z-30">
-                            <button
-                              onClick={() => setEditingCrop(null)}
-                              className="hover:scale-110 transition-transform"
-                            >
-                              <Image
-                                src="/unlocked.jpeg"
-                                alt="Save"
-                                width={48}
-                                height={48}
-                                className="drop-shadow-lg"
-                              />
-                            </button>
-                          </div>
-                        </>
+                        <div className="absolute top-2 right-2 z-30">
+                          <button
+                            onClick={() => setEditingCrop(null)}
+                            className="hover:scale-110 transition-transform"
+                          >
+                            <Image
+                              src="/unlocked.jpeg"
+                              alt="Save"
+                              width={48}
+                              height={48}
+                              className="drop-shadow-lg"
+                            />
+                          </button>
+                        </div>
                       )}
                     </div>
                   )
@@ -1377,35 +1378,20 @@ export default function AdminEditor() {
                           )}
                           
                           {isEditing && (
-                            <>
-                              <div 
-                                className="absolute inset-0 z-20"
-                                onWheel={(e) => {
-                                  e.preventDefault()
-                                  const delta = e.deltaY > 0 ? 0.9 : 1.1
-                                  const newScale = Math.max(0.17, Math.min(9, crop.scale * delta))
-                                  
-                                  setCropSettings(prev => ({
-                                    ...prev,
-                                    [product.image]: { ...crop, scale: newScale }
-                                  }))
-                                }}
-                              />
-                              <div className="absolute top-2 right-2 z-30">
-                                <button
-                                  onClick={() => setEditingCrop(null)}
-                                  className="hover:scale-110 transition-transform"
-                                >
-                                  <Image
-                                    src="/unlocked.jpeg"
-                                    alt="Save"
-                                    width={48}
-                                    height={48}
-                                    className="drop-shadow-lg"
-                                  />
-                                </button>
-                              </div>
-                            </>
+                            <div className="absolute top-2 right-2 z-30">
+                              <button
+                                onClick={() => setEditingCrop(null)}
+                                className="hover:scale-110 transition-transform"
+                              >
+                                <Image
+                                  src="/unlocked.jpeg"
+                                  alt="Save"
+                                  width={48}
+                                  height={48}
+                                  className="drop-shadow-lg"
+                                />
+                              </button>
+                            </div>
                           )}
                         </>
                       )
