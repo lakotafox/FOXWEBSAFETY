@@ -418,7 +418,7 @@ export default function ProductsPage() {
   return (
     <div className="min-h-screen bg-slate-800">
       {/* Floating Action Buttons - Desktop Only */}
-      <div className="hidden md:flex fixed top-8 left-8 flex-col gap-3 z-50">
+      <div className="hidden md:flex fixed top-24 left-8 flex-col gap-3 z-50">
         <button
           onClick={() => window.location.href = 'tel:+18018999406'}
           className="w-16 h-16 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center transition-all hover:scale-110 shadow-lg"
@@ -444,10 +444,10 @@ export default function ProductsPage() {
 
       {/* Floating Category Buttons - Desktop Only */}
       {showFloatingCategories && (
-        <div className="hidden md:flex fixed top-1/2 right-8 -translate-y-1/2 flex-col gap-3 z-50">
+        <div className="hidden md:flex fixed top-1/2 right-4 -translate-y-1/2 flex-col gap-3 z-50">
           <button
             onClick={() => setProductCategory("new")}
-            className={`px-6 py-3 font-black rounded-lg shadow-lg transition-all hover:scale-105 ${
+            className={`px-3 py-3 font-black rounded-lg shadow-lg transition-all hover:scale-105 text-sm ${
               productCategory === "new" 
                 ? "bg-red-600 text-white" 
                 : "bg-slate-700 text-zinc-300 hover:bg-slate-600"
@@ -457,17 +457,17 @@ export default function ProductsPage() {
           </button>
           <button
             onClick={() => setProductCategory("battleTested")}
-            className={`px-6 py-3 font-black rounded-lg shadow-lg transition-all hover:scale-105 ${
+            className={`px-3 py-3 font-black rounded-lg shadow-lg transition-all hover:scale-105 text-sm ${
               productCategory === "battleTested" 
                 ? "bg-blue-600 text-white" 
                 : "bg-slate-700 text-zinc-300 hover:bg-slate-600"
             }`}
           >
-            PRE-OWNED
+            PRE-<br/>OWNED
           </button>
           <button
             onClick={() => setProductCategory("seating")}
-            className={`px-6 py-3 font-black rounded-lg shadow-lg transition-all hover:scale-105 ${
+            className={`px-3 py-3 font-black rounded-lg shadow-lg transition-all hover:scale-105 text-sm ${
               productCategory === "seating" 
                 ? "bg-green-600 text-white" 
                 : "bg-slate-700 text-zinc-300 hover:bg-slate-600"
@@ -487,11 +487,21 @@ export default function ProductsPage() {
         <div className="container mx-auto px-4">
           {/* Desktop Header */}
           <div className="hidden md:flex items-center justify-between">
+            {/* Logo on left */}
             <div className={`transition-all duration-500 ${isScrolled ? "scale-75" : "scale-100"}`}>
-              <h1 className="text-3xl font-black text-white tracking-tight">
-                OUR <span className="text-red-600">PRODUCTS</span>
-              </h1>
+              <Image
+                src="/images/foxbuilt-logo.png"
+                alt="FoxBuilt Logo"
+                width={isScrolled ? 120 : 160}
+                height={isScrolled ? 45 : 60}
+                className="h-auto"
+              />
             </div>
+            
+            {/* Centered PRODUCTS text */}
+            <h1 className={`text-3xl font-black text-white tracking-tight absolute left-1/2 transform -translate-x-1/2 ${isScrolled ? "scale-90" : "scale-100"} transition-all duration-500`}>
+              <span className="text-red-600">PRODUCTS</span>
+            </h1>
             
             {/* Home button - Desktop */}
             <Button
