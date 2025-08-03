@@ -495,13 +495,8 @@ export default function ProductsEditorPage() {
         
         if (response.ok) {
           showSaveMessage("✅ Image uploaded!", 3000)
-          // Remove the temp preview since the real image is now uploaded
-          const githubPath = `/images/${fileName}`
-          setTempPreviews(prev => {
-            const newPreviews = { ...prev }
-            delete newPreviews[githubPath]
-            return newPreviews
-          })
+          // Keep the temp preview until deployment - image won't be available from GitHub yet
+          // The temp preview will persist until page reload or editor restart
         } else {
           const errorData = await response.json()
           console.error('Upload failed:', errorData)
