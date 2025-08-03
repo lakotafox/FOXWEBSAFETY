@@ -236,6 +236,11 @@ export default function FoxBuiltWebsite() {
             </span>
           </div>
 
+          {/* Centered FOXBUILT OFFICE FURNITURE text - Desktop only */}
+          <h1 className="hidden md:block text-2xl font-black text-white tracking-tight absolute left-1/2 transform -translate-x-1/2">
+            FOXBUILT <span className="text-red-600">OFFICE</span> <span className="text-blue-400">FURNITURE</span>
+          </h1>
+
           <div className="flex items-center space-x-4">
             {/* Desktop Buttons */}
             <div className="hidden md:flex items-center space-x-4">
@@ -298,13 +303,6 @@ export default function FoxBuiltWebsite() {
         </div>
 
         <div className="container mx-auto px-4 text-center relative z-10">
-          <h1 className="text-6xl md:text-8xl font-black text-white mb-8 tracking-tight">
-            FOXBUILT
-            <br />
-            <span className="text-red-500">OFFICE</span>
-            <br />
-            <span className="text-blue-400">FURNITURE</span>
-          </h1>
           <div className="mb-8">
             <span className="inline-block bg-red-600 text-white px-6 py-3 text-sm font-black uppercase tracking-widest border-4 border-white">
               AMERICAN MADE 1999

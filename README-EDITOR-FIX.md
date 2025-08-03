@@ -104,3 +104,14 @@ no more "why isn't the site updating???" confusion!
 ---
 
 *built by khabefox because the old system was driving everyone crazy*
+
+---
+
+## Image Display Logic (Pending Implementation)
+
+There was a discussion about implementing smart image display logic that would:
+1. Priority 1: Use Kyle's placement (the spot he put the images)
+2. Priority 2: Check if picture fills rect (fills the box they are in)
+3. Priority 3: If not, fill box/rectangle with image
+
+This implementation was deferred pending discussion with Kyle about his requirements for how images should be displayed. The current system maintains the existing display behavior.
