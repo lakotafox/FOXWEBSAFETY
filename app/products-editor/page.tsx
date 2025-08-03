@@ -1346,6 +1346,15 @@ export default function ProductsEditorPage() {
           </div>
         </div>
       )}
+
+      {/* Footer */}
+      <footer className="bg-slate-800 border-t-4 border-red-600 text-zinc-400 py-6">
+        <div className="container mx-auto px-4">
+          <p className="text-sm font-bold">&copy; 2025, FOXBUILT. ESTABLISHED 1999. BUILT IN AMERICA.</p>
+          <p className="text-xs text-zinc-500 mt-1">THIS SITE IS A PRODUCT OF LAKOTA.CODE.CO. USER ACCEPTS IT IS WHAT IT IS.</p>
+          <p className="text-xs text-yellow-500 mt-1">Want a free website? Email lakota.code@gmail.com</p>
+        </div>
+      </footer>
     </div>
   )
 }
