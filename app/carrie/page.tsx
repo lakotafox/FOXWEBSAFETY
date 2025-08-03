@@ -804,7 +804,11 @@ export default function AdminEditor() {
                 <div className="text-sm mt-2 font-normal">Homepage content & featured products</div>
               </button>
               <button
-                onClick={() => window.location.href = '/products-editor'}
+                onClick={() => {
+                  // Set a session flag that the user is already authenticated
+                  sessionStorage.setItem('foxbuilt-authenticated', 'true')
+                  window.location.href = '/products-editor'
+                }}
                 className="bg-green-600 hover:bg-green-700 text-white font-black text-xl p-8 border-4 border-green-500 hover:border-green-600 transition-all transform hover:scale-105"
               >
                 <div>EDIT PRODUCTS</div>
@@ -989,8 +993,19 @@ export default function AdminEditor() {
           </video>
           
           {/* Construction message */}
-          <div className="text-white text-xl font-bold animate-pulse">
+          <div className="text-white text-xl font-bold animate-pulse mb-8">
             {publishMessage}
+          </div>
+          
+          {/* Game prompt */}
+          <div className="text-white text-lg">
+            Want to play a game while you wait?
+            <button
+              onClick={() => window.open('/games', '_blank')}
+              className="ml-3 bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded transition-all"
+            >
+              YES
+            </button>
           </div>
         </div>
       )}

@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Save, X, Check, Maximize2 } from 'lucide-react'
+import { Save, X, Check, Maximize2, Edit2 } from 'lucide-react'
 
 // Default products for the products page (separate from featured products)
 const defaultProductsPageItems = [
@@ -259,7 +259,20 @@ function saveProductsPageItems(products: any) {
 }
 
 export default function ProductsEditorPage() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  // Check if already authenticated from carrie page
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const authenticated = sessionStorage.getItem('foxbuilt-authenticated')
+      if (authenticated === 'true') {
+        // Clear the flag so it's not reused
+        sessionStorage.removeItem('foxbuilt-authenticated')
+        // Show welcome message when coming from carrie page
+        setTimeout(() => setShowWelcomeMessage(true), 500)
+        return true
+      }
+    }
+    return false
+  })
   const [password, setPassword] = useState("")
   const [productCategory, setProductCategory] = useState('new')
   const [products, setProducts] = useState(getProductsPageItems())
@@ -267,6 +280,9 @@ export default function ProductsEditorPage() {
   const [saveMessage, setSaveMessage] = useState("")
   const [showPublishConfirm, setShowPublishConfirm] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
+  const [showPublishLoadingOverlay, setShowPublishLoadingOverlay] = useState(false)
+  const [publishMessage, setPublishMessage] = useState("")
+  const [showWelcomeMessage, setShowWelcomeMessage] = useState(false)
   const messageTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   
   // Temporary preview storage for blob URLs
@@ -275,6 +291,30 @@ export default function ProductsEditorPage() {
   // Simple crop state
   const [cropSettings, setCropSettings] = useState<{[key: string]: {scale: number, x: number, y: number}}>({})
   const [editingCrop, setEditingCrop] = useState<string | null>(null)
+
+  // Construction messages for publish loading
+  const constructionMessages = [
+    "Counting kickplates...",
+    "This truck is diesel right?",
+    "Leveling...",
+    "Measuring...",
+    "Straightening spines...",
+    "Leveling again...",
+    "Adding cantilevers...",
+    "Smacking topcaps...",
+    "Switching bits...",
+    "Cleaning tiles...",
+    "Loading the truck...",
+    "Unloading the truck...",
+    "Checking measurements twice...",
+    "Torquing bolts...",
+    "Aligning panels...",
+    "Setting locks...",
+    "Testing drawers...",
+    "Oiling hinges...",
+    "Buffing surfaces...",
+    "Final inspection..."
+  ]
 
   // Check password
   const checkPassword = (e: React.FormEvent) => {
@@ -572,8 +612,29 @@ export default function ProductsEditorPage() {
         saveProductsPageItems(convertedProducts)
         localStorage.setItem('foxbuilt-products-page-crops', JSON.stringify(cropSettings))
         
-        showSaveMessage("✅ Published successfully! Changes will be live in ~60 seconds")
-        setShowPublishConfirm(false)
+        showSaveMessage("✅ Published successfully!")
+        
+        // Show publish loading overlay for 1 minute
+        setTimeout(() => {
+          setSaveMessage("")
+          setShowPublishLoadingOverlay(true)
+          
+          // Start rotating messages
+          let messageIndex = 0
+          setPublishMessage(constructionMessages[0])
+          
+          const messageInterval = setInterval(() => {
+            messageIndex = (messageIndex + 1) % constructionMessages.length
+            setPublishMessage(constructionMessages[messageIndex])
+          }, 4000) // Change message every 4 seconds
+          
+          // Hide overlay after 60 seconds
+          setTimeout(() => {
+            clearInterval(messageInterval)
+            setShowPublishLoadingOverlay(false)
+            setPublishMessage("")
+          }, 60000) // 1 minute
+        }, 2000)
         
         // Clear pending uploads
         localStorage.removeItem('foxbuilt-products-page-pending-uploads')
@@ -632,24 +693,64 @@ export default function ProductsEditorPage() {
 
   return (
     <div className="min-h-screen bg-slate-800 relative">
-      {/* Publish and Save Message */}
-      <div className="fixed top-4 right-4 z-50 flex items-center gap-4">
-        {saveMessage && (
-          <div className="bg-green-600 text-white px-4 py-2 rounded font-bold animate-pulse">
-            {saveMessage}
+      {/* Publish Loading Overlay */}
+      {showPublishLoadingOverlay && (
+        <div className="fixed inset-0 bg-black/95 z-[100] flex flex-col items-center justify-center pointer-events-auto" style={{ pointerEvents: 'all' }}>
+          {/* Fox loading video */}
+          <video 
+            className="w-64 h-64 mb-8"
+            autoPlay
+            loop
+            muted
+            playsInline
+          >
+            <source src="/foxloading.webm" type="video/webm" />
+          </video>
+          
+          {/* Construction message */}
+          <div className="text-white text-xl font-bold animate-pulse mb-8">
+            {publishMessage}
           </div>
-        )}
-        <Button
-          onClick={() => setShowPublishConfirm(true)}
-          className="bg-green-600 hover:bg-green-700 text-white font-black"
-        >
-          <Save className="w-4 h-4 mr-2" />
-          PUBLISH
-        </Button>
+          
+          {/* Game prompt */}
+          <div className="text-white text-lg">
+            Want to play a game while you wait?
+            <button
+              onClick={() => window.open('/games', '_blank')}
+              className="ml-3 bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded transition-all"
+            >
+              YES
+            </button>
+          </div>
+        </div>
+      )}
+      
+      {/* Admin header bar - matches carrie page */}
+      <div className="fixed top-0 left-0 right-0 z-50 bg-yellow-500 text-black p-2 border-b-4 border-yellow-600">
+        <div className="container mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
+          <div className="flex items-center gap-2">
+            <Edit2 className="w-5 h-5" />
+            <span className="font-bold text-sm sm:text-base">PRODUCTS EDITOR</span>
+          </div>
+          <Button
+            onClick={handlePublish}
+            size="lg"
+            className="bg-green-600 text-white hover:bg-green-700 font-bold px-8 py-3 text-lg"
+          >
+            🚀 Publish Changes
+          </Button>
+        </div>
       </div>
+      
+      {/* Save message */}
+      {saveMessage && (
+        <div className="fixed top-0 left-0 right-0 z-[59] bg-green-500 text-white p-4 text-center font-bold">
+          {saveMessage}
+        </div>
+      )}
 
       {/* Header */}
-      <div className="bg-slate-900 py-8">
+      <div className="bg-slate-900 py-8 pt-20">
         <div className="container mx-auto px-4">
           <h1 className="text-5xl font-black text-center text-white tracking-tight">
             PRODUCTS <span className="text-red-600">EDITOR</span>
@@ -766,19 +867,22 @@ export default function ProductsEditorPage() {
                   {/* Edit Controls */}
                   {
                     <>
-                      {/* Image Upload */}
-                      <label className="absolute top-2 left-2 bg-blue-600 text-white p-2 rounded cursor-pointer hover:bg-blue-700 transition-all z-10">
-                        <input
-                          type="file"
-                          className="hidden"
-                          accept="image/*"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0]
-                            if (file) handleImageUpload(file, product.id)
-                          }}
-                        />
-                        <Maximize2 className="w-4 h-4" />
-                      </label>
+                      {/* Image Upload - appears on hover at bottom like carrie page */}
+                      <div className="absolute inset-0 flex items-end justify-center pb-4 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                        <label className="bg-white hover:bg-gray-100 text-black px-4 py-2 rounded cursor-pointer flex items-center gap-2 font-bold shadow-lg">
+                          <Edit2 className="w-4 h-4" />
+                          Change Image
+                          <input
+                            type="file"
+                            className="hidden"
+                            accept="image/*"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0]
+                              if (file) handleImageUpload(file, product.id)
+                            }}
+                          />
+                        </label>
+                      </div>
 
                       {/* Crop Controls */}
                       <div className="absolute top-2 right-2 z-10">
@@ -923,29 +1027,38 @@ export default function ProductsEditorPage() {
         </div>
       </section>
 
-      {/* Publish Confirmation Modal */}
-      {showPublishConfirm && (
-        <div className="fixed inset-0 bg-black/75 flex items-center justify-center z-50">
-          <Card className="max-w-md w-full mx-4">
-            <CardContent className="p-6">
-              <h3 className="text-2xl font-black mb-4">Publish Changes?</h3>
-              <p className="text-gray-600 mb-6">
-                This will save all your changes to the products page and make them live on the website.
-              </p>
-              <div className="flex gap-4">
+
+      {/* Welcome Message Modal */}
+      {showWelcomeMessage && (
+        <div className="fixed inset-0 bg-black/75 flex items-center justify-center z-50 p-4">
+          <Card className="max-w-2xl w-full">
+            <CardContent className="p-8">
+              <h2 className="text-3xl font-black mb-6 text-center">HEY DAD!</h2>
+              <div className="space-y-4 text-lg">
+                <p>
+                  Please test this "product editing page". You can see the live page at{' '}
+                  <a 
+                    href="https://foxbuiltstore.com/products" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:text-blue-800 underline font-bold"
+                  >
+                    https://foxbuiltstore.com/products
+                  </a>
+                </p>
+                <p>
+                  For now that page should be secret.. but this editor should update the page https://foxbuiltstore.com/products
+                </p>
+                <p>
+                  Test it out lmk... and when its all ready to go we can add a button on the main page that goes to the finished product page.
+                </p>
+              </div>
+              <div className="mt-8 text-center">
                 <Button
-                  onClick={handlePublish}
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white font-black"
+                  onClick={() => setShowWelcomeMessage(false)}
+                  className="bg-green-600 hover:bg-green-700 text-white font-black px-8 py-3"
                 >
-                  <Check className="w-4 h-4 mr-2" />
-                  PUBLISH
-                </Button>
-                <Button
-                  onClick={() => setShowPublishConfirm(false)}
-                  className="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-black"
-                >
-                  <X className="w-4 h-4 mr-2" />
-                  CANCEL
+                  GOT IT!
                 </Button>
               </div>
             </CardContent>
