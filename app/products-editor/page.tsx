@@ -228,9 +228,9 @@ const defaultProductsPageItems = [
 
 // Helper functions to get/save products page items
 async function getProductsPageItems() {
-  // First try to fetch from the published content.json file
+  // First try to fetch from the published products.json file
   try {
-    const response = await fetch('/content.json', { cache: 'no-store' })
+    const response = await fetch('/products.json', { cache: 'no-store' })
     if (response.ok) {
       const data = await response.json()
       if (data.products) {
@@ -238,7 +238,7 @@ async function getProductsPageItems() {
       }
     }
   } catch (e) {
-    console.log('No published content file, checking localStorage')
+    console.log('No published products file, checking localStorage')
   }
   
   // Fallback to localStorage
@@ -340,31 +340,17 @@ export default function ProductsEditorPage() {
       const savedProducts = await getProductsPageItems()
       setProducts(savedProducts)
       
-      // Also check content.json for crop settings
+      // Also check products.json for crop settings
       try {
-        const response = await fetch('/content.json', { cache: 'no-store' })
+        const response = await fetch('/products.json', { cache: 'no-store' })
         if (response.ok) {
           const data = await response.json()
-          if (data.galleryCrops) {
-            // Extract product-related crops from galleryCrops
-            const productCrops: any = {}
-            Object.keys(data.galleryCrops).forEach(imagePath => {
-              // Check if this image is used in any product
-              Object.values(savedProducts).forEach((categoryProducts: any) => {
-                categoryProducts.forEach((product: any) => {
-                  if (product.image === imagePath || product.imageCrop) {
-                    productCrops[imagePath] = data.galleryCrops[imagePath] || product.imageCrop
-                  }
-                })
-              })
-            })
-            if (Object.keys(productCrops).length > 0) {
-              setCropSettings(productCrops)
-            }
+          if (data.productsCrops) {
+            setCropSettings(data.productsCrops)
           }
         }
       } catch (e) {
-        console.log('Could not load crop settings from content.json')
+        console.log('Could not load crop settings from products.json')
       }
     }
     
@@ -591,11 +577,10 @@ export default function ProductsEditorPage() {
       const GITHUB_TOKEN = process.env.NEXT_PUBLIC_GITHUB_TOKEN || 'SET_IN_NETLIFY_ENV'
       const OWNER = 'lakotafox'
       const REPO = 'FOXSITE'
-      const PATH = 'public/content.json' // Changed to use content.json like carrie editor
+      const PATH = 'public/products.json' // Separate products.json file
       
-      // First, get the current content.json file to preserve gallery data and get SHA
+      // First, get the current products.json file to get SHA
       let sha = ''
-      let existingContent: any = {}
       try {
         const currentFileResponse = await fetch(
           `https://api.github.com/repos/${OWNER}/${REPO}/contents/${PATH}`,
@@ -610,12 +595,9 @@ export default function ProductsEditorPage() {
         if (currentFileResponse.ok) {
           const currentFile = await currentFileResponse.json()
           sha = currentFile.sha
-          // Decode the existing content
-          const decodedContent = atob(currentFile.content)
-          existingContent = JSON.parse(decodedContent)
         }
       } catch (e) {
-        console.error('Error fetching current content.json:', e)
+        console.error('Error fetching current products.json:', e)
       }
       
       // Prepare the products with crop settings
@@ -628,22 +610,12 @@ export default function ProductsEditorPage() {
         })
       })
       
-      // Merge with existing content (preserve gallery data)
+      // Create content for products.json
       const content = {
-        ...existingContent,  // Preserve existing data
-        products: convertedProducts,  // Update products
+        products: convertedProducts,
+        productsCrops: cropSettings,
         lastUpdated: new Date().toISOString(),
         updatedBy: "Kyle"
-      }
-      
-      // If there's existing galleryCrops, merge crop settings
-      if (existingContent.galleryCrops) {
-        content.galleryCrops = {
-          ...existingContent.galleryCrops,
-          ...cropSettings
-        }
-      } else {
-        content.galleryCrops = cropSettings
       }
       
       // Encode content to base64
