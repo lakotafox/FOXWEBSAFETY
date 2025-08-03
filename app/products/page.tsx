@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -18,6 +18,8 @@ export default function ProductsPage() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
+  const [showFloatingCategories, setShowFloatingCategories] = useState(false)
+  const categoryButtonsRef = useRef<HTMLDivElement>(null)
   
   useEffect(() => {
     // Load crop settings from localStorage
@@ -31,10 +33,16 @@ export default function ProductsPage() {
     }
   }, [])
 
-  // Handle scroll effect for header
+  // Handle scroll effects
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50)
+      
+      // Check if category buttons are out of view
+      if (categoryButtonsRef.current) {
+        const rect = categoryButtonsRef.current.getBoundingClientRect()
+        setShowFloatingCategories(rect.bottom < 0)
+      }
     }
 
     window.addEventListener("scroll", handleScroll)
@@ -434,6 +442,42 @@ export default function ProductsPage() {
         </button>
       </div>
 
+      {/* Floating Category Buttons - Desktop Only */}
+      {showFloatingCategories && (
+        <div className="hidden md:flex fixed top-1/2 right-8 -translate-y-1/2 flex-col gap-3 z-50">
+          <button
+            onClick={() => setProductCategory("new")}
+            className={`px-6 py-3 font-black rounded-lg shadow-lg transition-all hover:scale-105 ${
+              productCategory === "new" 
+                ? "bg-red-600 text-white" 
+                : "bg-slate-700 text-zinc-300 hover:bg-slate-600"
+            }`}
+          >
+            NEW
+          </button>
+          <button
+            onClick={() => setProductCategory("battleTested")}
+            className={`px-6 py-3 font-black rounded-lg shadow-lg transition-all hover:scale-105 ${
+              productCategory === "battleTested" 
+                ? "bg-blue-600 text-white" 
+                : "bg-slate-700 text-zinc-300 hover:bg-slate-600"
+            }`}
+          >
+            PRE-OWNED
+          </button>
+          <button
+            onClick={() => setProductCategory("seating")}
+            className={`px-6 py-3 font-black rounded-lg shadow-lg transition-all hover:scale-105 ${
+              productCategory === "seating" 
+                ? "bg-green-600 text-white" 
+                : "bg-slate-700 text-zinc-300 hover:bg-slate-600"
+            }`}
+          >
+            SEATING
+          </button>
+        </div>
+      )}
+
       {/* Header */}
       <header
         className={`fixed top-0 left-0 right-0 z-50 bg-slate-900 border-b-4 border-red-600 shadow-xl transition-all duration-500 ${
@@ -511,7 +555,7 @@ export default function ProductsPage() {
       <section className="py-20 bg-slate-800">
         <div className="container mx-auto px-4">
           {/* Category Buttons */}
-          <div className="flex justify-center mb-12">
+          <div ref={categoryButtonsRef} className="flex justify-center mb-12">
             <div className="bg-slate-700 border-4 border-slate-600 p-2 flex flex-wrap justify-center">
               <Button
                 className={`font-black text-sm md:text-lg px-3 md:px-6 py-2 md:py-3 tracking-wide transition-all ${
