@@ -67,6 +67,7 @@ const BouncingEmoji = ({ emoji, delay = 0 }: { emoji: string; delay?: number }) 
 
 export default function AdminEditor() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [showPageSelection, setShowPageSelection] = useState(false)
   const [password, setPassword] = useState("")
   const [isMobile, setIsMobile] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
@@ -397,7 +398,7 @@ export default function AdminEditor() {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
     if (password === "foxbuilt2025") {
-      setIsAuthenticated(true)
+      setShowPageSelection(true)
     } else if (password === "goof") {
       window.location.href = '/games'
     } else {
@@ -781,6 +782,49 @@ export default function AdminEditor() {
 
   // Login screen
   if (!isAuthenticated) {
+    // Show page selection after successful password
+    if (showPageSelection) {
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-slate-800 via-slate-900 to-zinc-900 flex items-center justify-center p-4">
+          <div className="bg-slate-800 border-8 border-red-600 p-12 max-w-2xl w-full">
+            <h1 className="text-4xl font-black text-white mb-8 text-center tracking-tight">
+              FOXBUILT
+              <br />
+              <span className="text-red-500">EDITOR SELECTION</span>
+            </h1>
+            <p className="text-xl text-zinc-300 text-center mb-12 font-bold">
+              Choose which page to edit:
+            </p>
+            <div className="grid md:grid-cols-2 gap-8">
+              <button
+                onClick={() => setIsAuthenticated(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-black text-xl p-8 border-4 border-blue-500 hover:border-blue-600 transition-all transform hover:scale-105"
+              >
+                <div>EDIT MAIN PAGE</div>
+                <div className="text-sm mt-2 font-normal">Homepage content & featured products</div>
+              </button>
+              <button
+                onClick={() => window.location.href = '/products-editor'}
+                className="bg-green-600 hover:bg-green-700 text-white font-black text-xl p-8 border-4 border-green-500 hover:border-green-600 transition-all transform hover:scale-105"
+              >
+                <div>EDIT PRODUCTS</div>
+                <div className="text-sm mt-2 font-normal">Full products catalog page</div>
+              </button>
+            </div>
+            <button
+              onClick={() => {
+                setShowPageSelection(false)
+                setPassword("")
+              }}
+              className="mt-8 text-zinc-400 hover:text-white font-bold transition-colors block mx-auto"
+            >
+              ← Back to login
+            </button>
+          </div>
+        </div>
+      )
+    }
+    
     if (!showPasswordScreen) {
       // Initial prompt screen
       return (
