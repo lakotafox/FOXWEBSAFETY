@@ -642,12 +642,24 @@ export default function ProductsEditorPage() {
     }
   }
 
-  // If not authenticated, redirect to carrie page
-  if (!isAuthenticated) {
-    if (typeof window !== 'undefined') {
-      window.location.href = '/carrie'
+  // Redirect to carrie page if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated && typeof window !== 'undefined') {
+      // Small delay to ensure sessionStorage is checked first
+      const timer = setTimeout(() => {
+        window.location.href = '/carrie'
+      }, 100)
+      return () => clearTimeout(timer)
     }
-    return null
+  }, [isAuthenticated])
+
+  // Show loading while checking authentication
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-slate-800 flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    )
   }
 
   return (
