@@ -227,9 +227,12 @@ export default function FoxBuiltWebsite() {
           </div>
 
           {/* Centered FOXBUILT OFFICE FURNITURE text - Desktop only */}
-          <h1 className="hidden md:block text-2xl font-black text-white tracking-tight absolute left-1/2 transform -translate-x-1/2">
-            FOXBUILT <span className="text-red-600">OFFICE</span> <span className="text-blue-400">FURNITURE</span>
-          </h1>
+          <div className="hidden md:block absolute left-1/2 transform -translate-x-1/2 text-center">
+            <h1 className="text-2xl font-black text-white tracking-tight">
+              FOXBUILT <span className="text-red-600">OFFICE</span> <span className="text-blue-400">FURNITURE</span>
+            </h1>
+            <p className="text-sm text-zinc-300 font-bold tracking-wider mt-1">EST.1999</p>
+          </div>
 
           <div className="flex items-center space-x-4">
             {/* Desktop Buttons */}
@@ -293,11 +296,6 @@ export default function FoxBuiltWebsite() {
         </div>
 
         <div className="container mx-auto px-4 text-center relative z-10">
-          <div className="mb-8">
-            <span className="inline-block bg-red-600 text-white px-6 py-3 text-sm font-black uppercase tracking-widest border-4 border-white">
-              AMERICAN MADE 1999
-            </span>
-          </div>
           <div className="flex flex-col sm:flex-row gap-6 justify-center">
             <Button
               size="lg"
@@ -687,17 +685,11 @@ export default function FoxBuiltWebsite() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-slate-800 border-t-4 border-red-600 text-zinc-400 py-8">
+      <footer className="bg-slate-800 border-t-4 border-red-600 text-zinc-400 py-6">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="mb-4 md:mb-0">
-              <p className="font-bold">&copy; 2025, FOXBUILT. ESTABLISHED 1999. BUILT IN AMERICA.</p>
-            </div>
-            <div className="text-center">
-              <p className="text-sm font-bold">420 W Industrial Dr Building LL, Pleasant Grove, UT 84062</p>
-              <p className="text-sm font-bold">+1-(801)-899-9406</p>
-            </div>
-          </div>
+          <p className="text-sm font-bold">&copy; 2025, FOXBUILT. ESTABLISHED 1999. BUILT IN AMERICA.</p>
+          <p className="text-xs text-zinc-500 mt-1">THIS SITE IS A PRODUCT OF LAKOTA.CODE.CO. USER ACCEPTS IT IS WHAT IT IS.</p>
+          <p className="text-xs text-yellow-500 mt-1">Want a free website? Email lakota.code@gmail.com</p>
         </div>
       </footer>
 

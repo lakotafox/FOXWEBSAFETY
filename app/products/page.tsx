@@ -450,6 +450,42 @@ export default function ProductsPage() {
         </button>
       </div>
 
+      {/* Floating Category Buttons - Desktop Only */}
+      {showFloatingCategories && (
+        <div className="hidden md:flex fixed top-1/2 right-2 -translate-y-1/2 flex-col gap-4 z-50">
+          <Button
+            className={`font-black text-sm px-3 py-3 tracking-wide transition-all shadow-lg ${
+              productCategory === "new"
+                ? "bg-red-600 text-white border-2 border-red-600"
+                : "bg-slate-700 text-zinc-300 hover:text-white border-2 border-slate-600 hover:bg-slate-600"
+            }`}
+            onClick={() => setProductCategory("new")}
+          >
+            NEW
+          </Button>
+          <Button
+            className={`font-black text-sm px-3 py-3 tracking-wide transition-all shadow-lg ${
+              productCategory === "battleTested"
+                ? "bg-blue-600 text-white border-2 border-blue-600"
+                : "bg-slate-700 text-zinc-300 hover:text-white border-2 border-slate-600 hover:bg-slate-600"
+            }`}
+            onClick={() => setProductCategory("battleTested")}
+          >
+            PRE OWN
+          </Button>
+          <Button
+            className={`font-black text-sm px-3 py-3 tracking-wide transition-all shadow-lg ${
+              productCategory === "seating"
+                ? "bg-green-600 text-white border-2 border-green-600"
+                : "bg-slate-700 text-zinc-300 hover:text-white border-2 border-slate-600 hover:bg-slate-600"
+            }`}
+            onClick={() => setProductCategory("seating")}
+          >
+            SEAT
+          </Button>
+        </div>
+      )}
+
 
       {/* Header */}
       <header
@@ -802,6 +838,15 @@ export default function ProductsPage() {
           </div>
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className="bg-slate-800 border-t-4 border-red-600 text-zinc-400 py-6">
+        <div className="container mx-auto px-4">
+          <p className="text-sm font-bold">&copy; 2025, FOXBUILT. ESTABLISHED 1999. BUILT IN AMERICA.</p>
+          <p className="text-xs text-zinc-500 mt-1">THIS SITE IS A PRODUCT OF LAKOTA.CODE.CO. USER ACCEPTS IT IS WHAT IT IS.</p>
+          <p className="text-xs text-yellow-500 mt-1">Want a free website? Email lakota.code@gmail.com</p>
+        </div>
+      </footer>
     </div>
   )
 }

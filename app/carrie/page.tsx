@@ -1122,11 +1122,6 @@ export default function AdminEditor() {
           </div>
 
           <div className="container mx-auto px-4 text-center relative z-10">
-            <div className="mb-8">
-              <span className="inline-block bg-red-600 text-white px-6 py-3 text-sm font-black uppercase tracking-widest border-4 border-white">
-                🇺🇸 27 YEARS STRONG 🇺🇸
-              </span>
-            </div>
             <div className="flex flex-col sm:flex-row gap-6 justify-center">
               <Button
                 size="lg"
@@ -1660,15 +1655,11 @@ export default function AdminEditor() {
         </section>
 
         {/* Footer */}
-        <footer className="bg-black py-10 text-center text-white">
+        <footer className="bg-slate-800 border-t-4 border-red-600 text-zinc-400 py-6">
           <div className="container mx-auto px-4">
-            <div className="flex items-center justify-center space-x-2 mb-4">
-              <span className="text-4xl">🇺🇸</span>
-              <span className="font-black text-xl tracking-widest">PROUDLY AMERICAN</span>
-              <span className="text-4xl">🇺🇸</span>
-            </div>
-            <p className="text-zinc-400 font-semibold">© 2024 FoxBuilt. All rights reserved.</p>
-            <p className="text-zinc-500 text-sm mt-2">Built strong. Built right. Built to last.</p>
+            <p className="text-sm font-bold">&copy; 2025, FOXBUILT. ESTABLISHED 1999. BUILT IN AMERICA.</p>
+            <p className="text-xs text-zinc-500 mt-1">THIS SITE IS A PRODUCT OF LAKOTA.CODE.CO. USER ACCEPTS IT IS WHAT IT IS.</p>
+            <p className="text-xs text-yellow-500 mt-1">Want a free website? Email lakota.code@gmail.com</p>
           </div>
         </footer>
       </div>
