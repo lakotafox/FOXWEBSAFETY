@@ -59,21 +59,32 @@ export default function ProductsPage() {
 
   // Helper function to get products
   async function getProductsPageItems() {
-    // First try to fetch from the published JSON file
+    // First try to fetch from the published content.json file
     try {
-      const response = await fetch('/products-page.json', { cache: 'no-store' })
+      const response = await fetch('/content.json', { cache: 'no-store' })
       if (response.ok) {
         const data = await response.json()
         if (data.products) {
-          // Also load crop settings
-          if (data.productsCrops) {
-            return { products: data.products, crops: data.productsCrops }
+          // Extract product-related crops from galleryCrops
+          const productCrops: any = {}
+          if (data.galleryCrops) {
+            Object.values(data.products).forEach((categoryProducts: any) => {
+              categoryProducts.forEach((product: any) => {
+                if (product.image && data.galleryCrops[product.image]) {
+                  productCrops[product.image] = data.galleryCrops[product.image]
+                }
+                // Also check for embedded imageCrop in product
+                if (product.imageCrop && product.image) {
+                  productCrops[product.image] = product.imageCrop
+                }
+              })
+            })
           }
-          return { products: data.products, crops: {} }
+          return { products: data.products, crops: productCrops }
         }
       }
     } catch (e) {
-      console.log('No published products file, using defaults')
+      console.log('No published content file, using defaults')
     }
     
     // Fallback to localStorage for preview

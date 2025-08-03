@@ -227,7 +227,21 @@ const defaultProductsPageItems = [
 ]
 
 // Helper functions to get/save products page items
-function getProductsPageItems() {
+async function getProductsPageItems() {
+  // First try to fetch from the published content.json file
+  try {
+    const response = await fetch('/content.json', { cache: 'no-store' })
+    if (response.ok) {
+      const data = await response.json()
+      if (data.products) {
+        return data.products
+      }
+    }
+  } catch (e) {
+    console.log('No published content file, checking localStorage')
+  }
+  
+  // Fallback to localStorage
   if (typeof window !== 'undefined') {
     const saved = localStorage.getItem('foxbuilt-products-page')
     if (saved) {
@@ -273,7 +287,11 @@ export default function ProductsEditorPage() {
     }
   }, [])
   const [productCategory, setProductCategory] = useState('new')
-  const [products, setProducts] = useState(getProductsPageItems())
+  const [products, setProducts] = useState({
+    new: defaultProductsPageItems.slice(0, 9),
+    battleTested: defaultProductsPageItems.slice(9, 18),
+    seating: defaultProductsPageItems.slice(18, 27)
+  })
   const [editingId, setEditingId] = useState<number | null>(null)
   const [saveMessage, setSaveMessage] = useState("")
   const [showPublishConfirm, setShowPublishConfirm] = useState(false)
@@ -318,10 +336,41 @@ export default function ProductsEditorPage() {
 
   useEffect(() => {
     // Load saved products and crop settings on mount
-    const savedProducts = getProductsPageItems()
-    setProducts(savedProducts)
+    const loadProducts = async () => {
+      const savedProducts = await getProductsPageItems()
+      setProducts(savedProducts)
+      
+      // Also check content.json for crop settings
+      try {
+        const response = await fetch('/content.json', { cache: 'no-store' })
+        if (response.ok) {
+          const data = await response.json()
+          if (data.galleryCrops) {
+            // Extract product-related crops from galleryCrops
+            const productCrops: any = {}
+            Object.keys(data.galleryCrops).forEach(imagePath => {
+              // Check if this image is used in any product
+              Object.values(savedProducts).forEach((categoryProducts: any) => {
+                categoryProducts.forEach((product: any) => {
+                  if (product.image === imagePath || product.imageCrop) {
+                    productCrops[imagePath] = data.galleryCrops[imagePath] || product.imageCrop
+                  }
+                })
+              })
+            })
+            if (Object.keys(productCrops).length > 0) {
+              setCropSettings(productCrops)
+            }
+          }
+        }
+      } catch (e) {
+        console.log('Could not load crop settings from content.json')
+      }
+    }
     
-    // Load crop settings from localStorage
+    loadProducts()
+    
+    // Load crop settings from localStorage as fallback
     const savedCrops = localStorage.getItem('foxbuilt-products-page-crops')
     if (savedCrops) {
       try {
@@ -542,10 +591,11 @@ export default function ProductsEditorPage() {
       const GITHUB_TOKEN = process.env.NEXT_PUBLIC_GITHUB_TOKEN || 'SET_IN_NETLIFY_ENV'
       const OWNER = 'lakotafox'
       const REPO = 'FOXSITE'
-      const PATH = 'public/products-page.json'
+      const PATH = 'public/content.json' // Changed to use content.json like carrie editor
       
-      // First, get the current file to get its SHA (if it exists)
+      // First, get the current content.json file to preserve gallery data and get SHA
       let sha = ''
+      let existingContent: any = {}
       try {
         const currentFileResponse = await fetch(
           `https://api.github.com/repos/${OWNER}/${REPO}/contents/${PATH}`,
@@ -560,12 +610,15 @@ export default function ProductsEditorPage() {
         if (currentFileResponse.ok) {
           const currentFile = await currentFileResponse.json()
           sha = currentFile.sha
+          // Decode the existing content
+          const decodedContent = atob(currentFile.content)
+          existingContent = JSON.parse(decodedContent)
         }
       } catch (e) {
-        // File might not exist yet, that's ok
+        console.error('Error fetching current content.json:', e)
       }
       
-      // Prepare the content with crop settings
+      // Prepare the products with crop settings
       const convertedProducts = JSON.parse(JSON.stringify(products))
       Object.keys(convertedProducts).forEach(category => {
         convertedProducts[category].forEach((product: any) => {
@@ -575,17 +628,28 @@ export default function ProductsEditorPage() {
         })
       })
       
+      // Merge with existing content (preserve gallery data)
       const content = {
-        products: convertedProducts,
-        productsCrops: cropSettings,
+        ...existingContent,  // Preserve existing data
+        products: convertedProducts,  // Update products
         lastUpdated: new Date().toISOString(),
         updatedBy: "Kyle"
+      }
+      
+      // If there's existing galleryCrops, merge crop settings
+      if (existingContent.galleryCrops) {
+        content.galleryCrops = {
+          ...existingContent.galleryCrops,
+          ...cropSettings
+        }
+      } else {
+        content.galleryCrops = cropSettings
       }
       
       // Encode content to base64
       const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2))))
       
-      // Update/create the file on GitHub
+      // Update the file on GitHub
       const updateResponse = await fetch(
         `https://api.github.com/repos/${OWNER}/${REPO}/contents/${PATH}`,
         {
@@ -596,7 +660,7 @@ export default function ProductsEditorPage() {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            message: `Update products page via admin panel - ${new Date().toLocaleString()}`,
+            message: `Update products via products editor - ${new Date().toLocaleString()}`,
             content: contentBase64,
             sha: sha,
             branch: 'main'
