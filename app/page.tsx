@@ -226,16 +226,6 @@ export default function FoxBuiltWebsite() {
             </div>
           </div>
 
-          {/* Phone Number - Always Visible */}
-          <div
-            className={`hidden md:flex items-center space-x-2 transition-all duration-500 ${isScrolled ? "scale-75" : "scale-100"}`}
-          >
-            <Phone className={`text-red-500 ${isScrolled ? "w-4 h-4" : "w-5 h-5"}`} />
-            <span className={`text-white font-black tracking-wide ${isScrolled ? "text-sm" : "text-lg"}`}>
-              (801) 899-9406
-            </span>
-          </div>
-
           {/* Centered FOXBUILT OFFICE FURNITURE text - Desktop only */}
           <h1 className="hidden md:block text-2xl font-black text-white tracking-tight absolute left-1/2 transform -translate-x-1/2">
             FOXBUILT <span className="text-red-600">OFFICE</span> <span className="text-blue-400">FURNITURE</span>
