@@ -1,5 +1,5 @@
 "use client"
-
+//imports obviously
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import { ChevronLeft, ChevronRight, Phone, MapPin, FileText } from "lucide-react"
@@ -28,12 +28,8 @@ export default function FoxBuiltWebsite() {
   const getImageUrl = (imagePath: string) => {
     if (!imagePath) return "/placeholder.svg"
     
-    // For any /images/ path, always use GitHub raw URL
-    if (imagePath.startsWith('/images/')) {
-      return `https://raw.githubusercontent.com/lakotafox/FOXSITE/main/public${imagePath}`
-    }
-    
-    // Default
+    // Serve images locally from Netlify CDN for better performance
+    // and to avoid GitHub rate limits for customers
     return imagePath
   }
 
@@ -375,7 +371,7 @@ export default function FoxBuiltWebsite() {
                 }`}
                 onClick={() => setFeaturedCategory("battleTested")}
               >
-                BATTLE TESTED
+                PRE-OWNED
               </Button>
               <Button
                 className={`font-black text-sm md:text-lg px-3 md:px-6 py-2 md:py-3 tracking-wide transition-all ${
@@ -390,12 +386,56 @@ export default function FoxBuiltWebsite() {
             </div>
           </div>
 
+          {/* Column Headers */}
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-4">
+            <div className="text-center">
+              <span className={`inline-block px-4 py-2 font-black text-white ${
+                featuredCategory === "new" ? "bg-red-600" : 
+                featuredCategory === "battleTested" ? "bg-blue-600" : 
+                "bg-green-600"
+              }`}>
+                {featuredCategory === "new" ? "NEW" : featuredCategory === "battleTested" ? "PRE-OWNED" : "COMFORT"}
+              </span>
+            </div>
+            <div className="text-center hidden md:block">
+              <span className={`inline-block px-4 py-2 font-black text-white ${
+                featuredCategory === "new" ? "bg-red-600" : 
+                featuredCategory === "battleTested" ? "bg-blue-600" : 
+                "bg-green-600"
+              }`}>
+                {featuredCategory === "new" ? "NEW" : featuredCategory === "battleTested" ? "PRE-OWNED" : "COMFORT"}
+              </span>
+            </div>
+            <div className="text-center hidden md:block">
+              <span className={`inline-block px-4 py-2 font-black text-white ${
+                featuredCategory === "new" ? "bg-red-600" : 
+                featuredCategory === "battleTested" ? "bg-blue-600" : 
+                "bg-green-600"
+              }`}>
+                {featuredCategory === "new" ? "NEW" : featuredCategory === "battleTested" ? "PRE-OWNED" : "COMFORT"}
+              </span>
+            </div>
+          </div>
+
           {/* Product Grid */}
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+
+             
+          {/*!!!!site has an edit mode that dynamically loads or modifies categories, 
+          TypeScript can’t guarantee that the keys in featuredProducts will only be "new" | "battleTested" | "seating" — especially if users can add custom ones.*/}
+
+
+
             {featuredProducts[featuredCategory].map((product) => (
               <Card
                 key={product.id}
-                className="overflow-hidden hover:shadow-2xl transition-all border-4 border-slate-600 bg-zinc-100"
+                className={`overflow-hidden hover:shadow-2xl transition-all border-4 border-slate-600 bg-zinc-100 ring-2 ${
+                  featuredCategory === "new"
+                    ? "ring-red-500"
+                    : featuredCategory === "battleTested"
+                      ? "ring-blue-500"
+                      : "ring-green-500"
+                }`}
               >
                 <div className="relative h-56 overflow-hidden">
                   {(() => {
@@ -418,17 +458,6 @@ export default function FoxBuiltWebsite() {
                       </div>
                     )
                   })()}
-                  <div
-                    className={`absolute top-4 right-4 text-white px-3 py-1 font-black text-sm z-10 ${
-                      featuredCategory === "new"
-                        ? "bg-red-600"
-                        : featuredCategory === "battleTested"
-                          ? "bg-blue-600"
-                          : "bg-green-600"
-                    }`}
-                  >
-                    {featuredCategory === "new" ? "NEW" : featuredCategory === "battleTested" ? "PROVEN" : "COMFORT"}
-                  </div>
                 </div>
                 <CardContent className="p-6">
                   <h3 className="text-xl font-black mb-3 tracking-wide">{product.title}</h3>
