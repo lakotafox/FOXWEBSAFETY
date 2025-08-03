@@ -430,8 +430,18 @@ export default function ProductsEditorPage() {
   const handleScroll = (e: React.WheelEvent, imagePath: string) => {
     if (editingCrop === imagePath) {
       e.preventDefault()
-      const delta = e.deltaY > 0 ? -0.05 : 0.05
-      handleCropChange(imagePath, 'scale', delta)
+      const delta = e.deltaY > 0 ? 0.9 : 1.1
+      setCropSettings(prev => {
+        const current = prev[imagePath] || { scale: 1, x: 50, y: 50 }
+        const newScale = Math.max(0.17, Math.min(9, current.scale * delta))
+        const newSettings = {
+          ...prev,
+          [imagePath]: { ...current, scale: newScale }
+        }
+        // Save to localStorage
+        localStorage.setItem('foxbuilt-products-page-crops', JSON.stringify(newSettings))
+        return newSettings
+      })
     }
   }
 
@@ -806,22 +816,31 @@ export default function ProductsEditorPage() {
                   {(() => {
                     const crop = cropSettings[product.image] || { scale: 1, x: 50, y: 50 }
                     return (
-                      <div 
-                        className="absolute inset-0"
-                        style={{
-                          transform: `translate(${crop.x - 50}%, ${crop.y - 50}%) scale(${crop.scale})`
-                        }}
-                        onWheel={(e) => handleScroll(e, product.image)}
-                      >
-                        <Image 
-                          src={getImageUrl(product.image)} 
-                          alt={product.title} 
-                          width={500}
-                          height={500}
-                          className="w-full h-full object-contain"
-                          unoptimized
-                        />
-                      </div>
+                      <>
+                        <div 
+                          className="absolute inset-0"
+                          style={{
+                            transform: `translate(${crop.x - 50}%, ${crop.y - 50}%) scale(${crop.scale})`
+                          }}
+                        >
+                          <Image 
+                            src={getImageUrl(product.image)} 
+                            alt={product.title} 
+                            width={500}
+                            height={500}
+                            className="w-full h-full object-contain"
+                            unoptimized
+                          />
+                        </div>
+                        
+                        {/* Wheel event overlay when editing */}
+                        {editingCrop === product.image && (
+                          <div 
+                            className="absolute inset-0 z-20"
+                            onWheel={(e) => handleScroll(e, product.image)}
+                          />
+                        )}
+                      </>
                     )
                   })()}
                   
@@ -846,7 +865,7 @@ export default function ProductsEditorPage() {
                       </div>
 
                       {/* Crop Controls */}
-                      <div className="absolute top-2 right-2 z-10">
+                      <div className={`absolute top-2 right-2 ${editingCrop === product.image ? 'z-30' : 'z-10'}`}>
                         <button
                           onClick={() => setEditingCrop(editingCrop === product.image ? null : product.image)}
                           className="hover:scale-110 transition-transform"
