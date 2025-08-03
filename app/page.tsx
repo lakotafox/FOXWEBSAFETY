@@ -2,7 +2,7 @@
 //imports obviously
 import { useState, useEffect } from "react"
 import Image from "next/image"
-import { ChevronLeft, ChevronRight, Phone, MapPin, FileText } from "lucide-react"
+import { ChevronLeft, ChevronRight, Phone, MapPin, FileText, Mail } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -180,6 +180,31 @@ export default function FoxBuiltWebsite() {
 
   return (
     <div className="min-h-screen bg-zinc-100">
+      {/* Floating Action Buttons - Desktop Only */}
+      <div className="hidden md:flex fixed top-24 left-8 flex-col gap-3 z-50">
+        <button
+          onClick={() => window.location.href = 'tel:+18018999406'}
+          className="w-16 h-16 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center transition-all hover:scale-110 shadow-lg"
+          aria-label="Call us"
+        >
+          <Phone className="w-8 h-8" />
+        </button>
+        <button
+          onClick={() => window.open('https://www.google.com/maps/search/?api=1&query=420+W+Industrial+Dr+Building+LL+Pleasant+Grove+UT+84062', '_blank')}
+          className="w-16 h-16 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center transition-all hover:scale-110 shadow-lg"
+          aria-label="View on map"
+        >
+          <MapPin className="w-8 h-8" />
+        </button>
+        <button
+          onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+          className="w-16 h-16 bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center justify-center transition-all hover:scale-110 shadow-lg"
+          aria-label="Send email"
+        >
+          <Mail className="w-8 h-8" />
+        </button>
+      </div>
+
       {/* Header */}
       <header
         className={`fixed top-0 left-0 right-0 z-50 bg-slate-900 border-b-4 border-red-600 shadow-xl transition-all duration-500 ${
@@ -212,26 +237,54 @@ export default function FoxBuiltWebsite() {
           </div>
 
           <div className="flex items-center space-x-4">
-            <Button
-              className={`bg-blue-600 hover:bg-blue-700 text-white font-bold tracking-wide border-2 border-blue-600 hover:border-blue-700 transition-all duration-500 ${
-                isScrolled ? "px-2 py-1 text-xs" : "px-4 py-2 text-sm"
-              }`}
-              onClick={() => {
-                window.open('/catolog no page one.pdf', '_blank')
-              }}
-            >
-              <FileText className={`${isScrolled ? "w-3 h-3 mr-1" : "w-4 h-4 mr-2"}`} />
-              CATALOG
-            </Button>
+            {/* Desktop Buttons */}
+            <div className="hidden md:flex items-center space-x-4">
+              <Button
+                className={`bg-blue-600 hover:bg-blue-700 text-white font-bold tracking-wide border-2 border-blue-600 hover:border-blue-700 transition-all duration-500 ${
+                  isScrolled ? "px-2 py-1 text-xs" : "px-4 py-2 text-sm"
+                }`}
+                onClick={() => {
+                  window.open('/catolog no page one.pdf', '_blank')
+                }}
+              >
+                <FileText className={`${isScrolled ? "w-3 h-3 mr-1" : "w-4 h-4 mr-2"}`} />
+                CATALOG
+              </Button>
 
-            <Button
-              className={`bg-red-600 hover:bg-red-700 text-white font-bold tracking-wide border-2 border-red-600 hover:border-red-700 transition-all duration-500 ${
-                isScrolled ? "px-3 py-1 text-sm" : "px-6 py-2"
-              }`}
-              onClick={() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })}
-            >
-              GET QUOTE
-            </Button>
+              <Button
+                className={`bg-red-600 hover:bg-red-700 text-white font-bold tracking-wide border-2 border-red-600 hover:border-red-700 transition-all duration-500 ${
+                  isScrolled ? "px-3 py-1 text-sm" : "px-6 py-2"
+                }`}
+                onClick={() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })}
+              >
+                GET QUOTE
+              </Button>
+            </div>
+
+            {/* Mobile Action Buttons */}
+            <div className="md:hidden flex gap-2">
+              <button
+                onClick={() => window.location.href = 'tel:+18018999406'}
+                className="w-10 h-10 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center"
+                aria-label="Call us"
+              >
+                <Phone className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => window.open('https://www.google.com/maps/search/?api=1&query=420+W+Industrial+Dr+Building+LL+Pleasant+Grove+UT+84062', '_blank')}
+                className="w-10 h-10 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center"
+                aria-label="View on map"
+              >
+                <MapPin className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+                className="w-10 h-10 bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center justify-center"
+                aria-label="Send email"
+              >
+                <Mail className="w-5 h-5" />
+              </button>
+            </div>
           </div>
         </div>
       </header>
