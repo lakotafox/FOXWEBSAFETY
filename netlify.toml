@@ -1,7 +1,8 @@
 [build]
-  # Build when either content.json OR products.json changes
-  # git diff --quiet returns 0 if no changes, 1 if changes exist
-  # We check both files and build if either has changed
+  # ONLY build when content.json OR products.json changes
+  # Returns exit 0 (skip build) if these files haven't changed
+  # Returns exit 1 (do build) if either file has changed
+  # This prevents image uploads from triggering deployments
   ignore = "git diff --quiet $COMMIT_REF $CACHED_COMMIT_REF -- public/content.json public/products.json"
 
 # Optional: Set Node version
