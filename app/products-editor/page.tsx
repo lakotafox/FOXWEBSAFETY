@@ -1019,11 +1019,6 @@ export default function ProductsEditorPage() {
                         </button>
                       </div>
 
-                      {editingCrop === product.image && (
-                        <div className="absolute bottom-2 left-2 bg-black/75 text-white text-xs p-2 rounded">
-                          Use arrow keys to move, scroll to zoom
-                        </div>
-                      )}
                     </>
                   }
                 </div>
@@ -1037,7 +1032,7 @@ export default function ProductsEditorPage() {
                       onChange={(e) => updateProduct(product.id, 'title', e.target.value)}
                       onBlur={() => setEditingId(null)}
                       onKeyPress={(e) => e.key === 'Enter' && setEditingId(null)}
-                      className="text-xl font-black mb-3 tracking-wide w-full p-2 border-2 border-red-600"
+                      className="text-xl font-black mb-3 tracking-wide w-full p-1 border rounded"
                       autoFocus
                     />
                   ) : (
@@ -1055,7 +1050,7 @@ export default function ProductsEditorPage() {
                       value={product.description}
                       onChange={(e) => updateProduct(product.id, 'description', e.target.value)}
                       onBlur={() => setEditingId(null)}
-                      className="text-slate-600 mb-4 font-semibold w-full p-2 border-2 border-red-600"
+                      className="text-slate-600 mb-4 font-semibold w-full p-1 border rounded"
                       rows={2}
                     />
                   ) : (
@@ -1092,7 +1087,7 @@ export default function ProductsEditorPage() {
                               }}
                               onBlur={() => setEditingId(null)}
                               onKeyPress={(e) => e.key === 'Enter' && setEditingId(null)}
-                              className="flex-1 p-1 border-b-2 border-red-600"
+                              className="flex-1 p-1 border-b border-gray-300"
                               autoFocus
                             />
                           ) : (
@@ -1117,12 +1112,12 @@ export default function ProductsEditorPage() {
                         onChange={(e) => updateProduct(product.id, 'price', e.target.value)}
                         onBlur={() => setEditingId(null)}
                         onKeyPress={(e) => e.key === 'Enter' && setEditingId(null)}
-                        className={`text-2xl font-black p-2 border-2 ${
+                        className={`text-2xl font-black p-1 border rounded ${
                           productCategory === "new"
-                            ? "border-red-600 text-red-600"
+                            ? "text-red-600"
                             : productCategory === "battleTested"
-                              ? "border-blue-600 text-blue-600"
-                              : "border-green-600 text-green-600"
+                              ? "text-blue-600"
+                              : "text-green-600"
                         }`}
                         autoFocus
                       />
