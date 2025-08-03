@@ -600,7 +600,7 @@ export default function ProductsEditorPage() {
     }
   }
 
-  // Global keyboard event handler for arrow keys
+  // Global keyboard and wheel event handler for arrow keys and zoom
   useEffect(() => {
     if (!editingCrop) return
     
@@ -666,14 +666,35 @@ export default function ProductsEditorPage() {
       pressedKeys.delete(e.key)
     }
     
+    const handleWheel = (e: WheelEvent) => {
+      if (!editingCrop) return
+      e.preventDefault()
+      
+      const currentCrop = cropSettings[editingCrop] || { scale: 1, x: 50, y: 50 }
+      const delta = e.deltaY > 0 ? 0.9 : 1.1
+      const newScale = Math.max(0.17, Math.min(9, currentCrop.scale * delta))
+      
+      setCropSettings(prev => {
+        const newSettings = {
+          ...prev,
+          [editingCrop]: { ...currentCrop, scale: newScale }
+        }
+        // Save to localStorage
+        localStorage.setItem('foxbuilt-products-page-crops', JSON.stringify(newSettings))
+        return newSettings
+      })
+    }
+    
     document.addEventListener('keydown', handleKeyDown)
     document.addEventListener('keyup', handleKeyUp)
+    document.addEventListener('wheel', handleWheel, { passive: false })
     
     return () => {
       // Restore body scroll
       document.body.style.overflow = ''
       document.removeEventListener('keydown', handleKeyDown)
       document.removeEventListener('keyup', handleKeyUp)
+      document.removeEventListener('wheel', handleWheel)
     }
   }, [editingCrop, cropSettings])
 
@@ -974,13 +995,6 @@ export default function ProductsEditorPage() {
                           />
                         </div>
                         
-                        {/* Wheel event overlay when editing */}
-                        {editingCrop === product.image && (
-                          <div 
-                            className="absolute inset-0 z-20"
-                            onWheel={(e) => handleScroll(e, product.image)}
-                          />
-                        )}
                       </>
                     )
                   })()}
@@ -989,21 +1003,23 @@ export default function ProductsEditorPage() {
                   {
                     <>
                       {/* Image Upload - appears on hover at bottom like carrie page */}
-                      <div className="absolute inset-0 flex items-end justify-center pb-4 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                        <label className="bg-white hover:bg-gray-100 text-black px-4 py-2 rounded cursor-pointer flex items-center gap-2 font-bold shadow-lg">
-                          <Edit2 className="w-4 h-4" />
-                          Change Image
-                          <input
-                            type="file"
-                            className="hidden"
-                            accept="image/*"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0]
-                              if (file) handleImageUpload(file, product.id)
-                            }}
-                          />
-                        </label>
-                      </div>
+                      {editingCrop !== product.image && (
+                        <div className="absolute inset-0 flex items-end justify-center pb-4 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                          <label className="bg-white hover:bg-gray-100 text-black px-4 py-2 rounded cursor-pointer flex items-center gap-2 font-bold shadow-lg">
+                            <Edit2 className="w-4 h-4" />
+                            Change Image
+                            <input
+                              type="file"
+                              className="hidden"
+                              accept="image/*"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0]
+                                if (file) handleImageUpload(file, product.id)
+                              }}
+                            />
+                          </label>
+                        </div>
+                      )}
 
                       {/* Crop Controls */}
                       <div className={`absolute top-2 right-2 ${editingCrop === product.image ? 'z-30' : 'z-10'}`}>
