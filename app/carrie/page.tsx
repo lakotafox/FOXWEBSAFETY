@@ -1434,15 +1434,24 @@ export default function AdminEditor() {
                     )}
 
                     {/* Description */}
-                    {isEditMode ? (
+                    {isEditMode && editingId === -product.id ? (
                       <textarea
                         value={product.description}
                         onChange={(e) => updateProduct(featuredCategory, product.id, 'description', e.target.value)}
                         className="text-slate-600 mb-4 font-semibold w-full p-1 border rounded resize-none"
                         rows={2}
+                        onBlur={() => setEditingId(null)}
+                        autoFocus
                       />
                     ) : (
-                      <p className="text-slate-600 mb-4 font-semibold">{product.description}</p>
+                      <p 
+                        className={`text-slate-600 mb-4 font-semibold ${
+                          isEditMode ? "cursor-pointer hover:bg-yellow-100 p-1 rounded" : ""
+                        }`}
+                        onClick={() => isEditMode && setEditingId(-product.id)}
+                      >
+                        {product.description}
+                      </p>
                     )}
 
                     {/* Features */}
@@ -1459,7 +1468,7 @@ export default function AdminEditor() {
                                     : "bg-green-600"
                               }`}
                             ></span>
-                            {isEditMode ? (
+                            {isEditMode && editingId === product.id * 1000 + index ? (
                               <input
                                 type="text"
                                 value={feature}
@@ -1468,10 +1477,18 @@ export default function AdminEditor() {
                                   newFeatures[index] = e.target.value
                                   updateProduct(featuredCategory, product.id, 'features', newFeatures)
                                 }}
+                                onBlur={() => setEditingId(null)}
+                                onKeyPress={(e) => e.key === 'Enter' && setEditingId(null)}
                                 className="flex-1 p-1 border rounded text-sm"
+                                autoFocus
                               />
                             ) : (
-                              feature
+                              <span 
+                                className={isEditMode ? "cursor-pointer hover:bg-yellow-100 p-1 rounded" : ""}
+                                onClick={() => isEditMode && setEditingId(product.id * 1000 + index)}
+                              >
+                                {feature}
+                              </span>
                             )}
                           </li>
                         ))}
@@ -1480,11 +1497,13 @@ export default function AdminEditor() {
 
                     {/* Price */}
                     <div className="flex justify-between items-center">
-                      {isEditMode ? (
+                      {isEditMode && editingId === product.id * 10000 ? (
                         <input
                           type="text"
                           value={product.price}
                           onChange={(e) => updateProduct(featuredCategory, product.id, 'price', e.target.value)}
+                          onBlur={() => setEditingId(null)}
+                          onKeyPress={(e) => e.key === 'Enter' && setEditingId(null)}
                           className={`text-2xl font-black p-1 border rounded ${
                             featuredCategory === "new"
                               ? "text-red-600"
@@ -1493,6 +1512,7 @@ export default function AdminEditor() {
                                 : "text-green-600"
                           }`}
                           placeholder="e.g., $1,299"
+                          autoFocus
                         />
                       ) : (
                         <span
@@ -1502,7 +1522,8 @@ export default function AdminEditor() {
                               : featuredCategory === "battleTested"
                                 ? "text-blue-600"
                                 : "text-green-600"
-                          }`}
+                          } ${isEditMode ? "cursor-pointer hover:bg-yellow-100 p-1 rounded" : ""}`}
+                          onClick={() => isEditMode && setEditingId(product.id * 10000)}
                         >
                           {product.price}
                         </span>
