@@ -1646,7 +1646,7 @@ export default function AdminEditor() {
                     className="w-full px-6 py-4 bg-slate-800 border-2 border-slate-700 text-white placeholder-zinc-400 font-bold"
                   />
                   <Button className="w-full bg-red-600 hover:bg-red-700 text-white font-black text-lg py-4 border-4 border-red-500">
-                    SEND MESSAGE
+                    SEND A MESSAGE
                   </Button>
                 </form>
               </div>

@@ -831,7 +831,7 @@ export default function ProductsPage() {
                   disabled={isSubmitting}
                   className="w-full bg-red-600 hover:bg-red-700 py-4 font-black text-lg tracking-widest border-4 border-red-600 disabled:opacity-50"
                 >
-                  {isSubmitting ? "SENDING..." : "SEND MESSAGE"}
+                  {isSubmitting ? "SENDING..." : "SEND A MESSAGE"}
                 </Button>
               </form>
             </div>
