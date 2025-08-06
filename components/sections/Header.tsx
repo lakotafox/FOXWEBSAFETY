@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { FileText, Phone, MapPin, Mail } from 'lucide-react'
+import { Phone, MapPin, Mail } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 interface HeaderProps {
@@ -58,12 +58,9 @@ export default function Header({ showAddress, setShowAddress }: HeaderProps) {
               className={`bg-blue-600 hover:bg-blue-700 text-white font-bold tracking-wide border-2 border-blue-600 hover:border-blue-700 transition-all duration-500 ${
                 isScrolled ? "px-2 py-1 text-xs" : "px-4 py-2 text-sm"
               }`}
-              onClick={() => {
-                window.open('/catolog no page one.pdf', '_blank')
-              }}
+              onClick={() => document.getElementById("featured-products")?.scrollIntoView({ behavior: "smooth" })}
             >
-              <FileText className={`${isScrolled ? "w-3 h-3 mr-1" : "w-4 h-4 mr-2"}`} />
-              CATALOG
+              FURNITURE
             </Button>
 
             <Button
