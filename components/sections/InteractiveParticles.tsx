@@ -136,10 +136,10 @@ export default function InteractiveParticles() {
         className="absolute inset-0 w-full h-full"
       />
       
-      {/* WE OFFER SPACE PLANNING AND DESIGN text overlay */}
+      {/* SPACE DESIGN AND PLANNING SERVICES text overlay */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-        <h2 className="text-4xl md:text-6xl font-thin text-white tracking-[0.2em] uppercase text-center px-4">
-          WE OFFER SPACE PLANNING AND DESIGN
+        <h2 className="text-3xl md:text-5xl font-thin text-white tracking-[0.2em] uppercase text-center px-4">
+          SPACE DESIGN AND PLANNING SERVICES
         </h2>
       </div>
     </section>
