@@ -150,20 +150,20 @@
     ]
   },
   "gallery": [
-    "/images/gallery-0-1754156159270.jpg",
-    "/images/gallery-1-1754503257651.jpg",
-    "/images/gallery-2-1754156249548.jpg",
-    "/images/showfacinggarage.jpg",
-    "/images/tanconf.jpg",
-    "/images/reception tan.jpg"
+    "/images/gallery-0-1754508457495.jpg",
+    "/images/gallery-1-1754508469350.jpg",
+    "/images/gallery-2-1754508839063.jpg",
+    "/images/gallery-3-1754508887026.jpg",
+    "/images/gallery-4-1754508870049.jpg",
+    "/images/gallery-5-1754509016435.jpg"
   ],
   "mobileGallery": [
-    "/images/gallery-0-1754508279996.jpg",
-    "/images/gallery-1-1754503330341.jpg",
-    "/images/gallery-2-1754503810158.jpg",
-    "/images/gallery-3-1754508379713.jpg",
-    "/images/tanconf.jpg",
-    "/images/reception tan.jpg"
+    "/images/gallery-0-1754509083286.jpg",
+    "/images/gallery-1-1754509114698.jpg",
+    "/images/gallery-2-1754509156470.jpg",
+    "/images/gallery-3-1754509172684.jpg",
+    "/images/gallery-4-1754509214668.jpg",
+    "/images/gallery-5-1754509229348.jpg"
   ],
   "galleryCrops": {
     "/images/Showroomwglassboard.jpg": {
@@ -198,8 +198,8 @@
     },
     "/images/reception tan.jpg": {
       "scale": 2.5937424601000023,
-      "x": 53,
-      "y": 20
+      "x": 50,
+      "y": 22
     },
     "/images/showroom-2.jpg": {
       "scale": 2.3333442148503076,
@@ -219,7 +219,7 @@
     "/images/gallery-2-1754156249548.jpg": {
       "scale": 2.0799220787541923,
       "x": 50,
-      "y": 40
+      "y": 35.5
     },
     "/images/gallery-1-1754503257651.jpg": {
       "scale": 1.8706722757351608,
@@ -236,17 +236,112 @@
       "x": 52,
       "y": 60
     },
-    "/images/gallery-0-1754508279996.jpg": {
-      "scale": 1.262418434253762,
-      "x": 52.5,
+    "/images/gallery-0-1754508457495.jpg": {
+      "scale": 1.6084372494752261,
+      "x": 50,
+      "y": 40.5
+    },
+    "/images/gallery-1-1754508469350.jpg": {
+      "scale": 1.636672475433056,
+      "x": 50,
+      "y": 28.5
+    },
+    "/images/gallery-3-1754508488219.jpg": {
+      "scale": 1,
+      "x": 50,
       "y": 50
     },
-    "/images/gallery-3-1754508379713.jpg": {
-      "scale": 1.2936066304537963,
-      "x": 42,
+    "/images/gallery-4-1754508500194.jpg": {
+      "scale": 1.5768992641913981,
+      "x": 25,
+      "y": 37
+    },
+    "/images/gallery-4-1754508676098.jpg": {
+      "scale": 1.3591235401233117,
+      "x": 49.5,
+      "y": 47
+    },
+    "/images/gallery-5-1754508739879.jpg": {
+      "scale": 1.3991214500956979,
+      "x": 49,
+      "y": 39
+    },
+    "/images/gallery-2-1754508790115.jpg": {
+      "scale": 1.6084372494752261,
+      "x": 50,
+      "y": 54
+    },
+    "/images/gallery-2-1754508839063.jpg": {
+      "scale": 1.266213824878731,
+      "x": 50,
+      "y": 50
+    },
+    "/images/gallery-3-1754508857046.jpg": {
+      "scale": 1,
+      "x": 50,
+      "y": 50
+    },
+    "/images/gallery-4-1754508870049.jpg": {
+      "scale": 1.3194787630628724,
+      "x": 50,
+      "y": 42.5
+    },
+    "/images/gallery-3-1754508887026.jpg": {
+      "scale": 1.3553225578228416,
+      "x": 50,
+      "y": 50
+    },
+    "/images/gallery-5-1754508902813.jpg": {
+      "scale": 1,
+      "x": 50,
+      "y": 50
+    },
+    "/images/gallery-5-1754508915400.jpg": {
+      "scale": 1.1207687160845752,
+      "x": 50,
+      "y": 43.5
+    },
+    "/images/gallery-5-1754509016435.jpg": {
+      "scale": 1.2155853287105676,
+      "x": 50,
+      "y": 43.5
+    },
+    "/images/gallery-0-1754509068913.jpg": {
+      "scale": 1,
+      "x": 50,
+      "y": 50
+    },
+    "/images/gallery-0-1754509083286.jpg": {
+      "scale": 1.4711590292425234,
+      "x": 50,
+      "y": 50
+    },
+    "/images/gallery-1-1754509114698.jpg": {
+      "scale": 1.4987822313590051,
+      "x": 50,
+      "y": 50
+    },
+    "/images/gallery-2-1754509156470.jpg": {
+      "scale": 1.847588815785422,
+      "x": 38,
+      "y": 50
+    },
+    "/images/gallery-3-1754509172684.jpg": {
+      "scale": 1.741024206173928,
+      "x": 47.5,
+      "y": 50
+    },
+    "/images/gallery-4-1754509214668.jpg": {
+      "scale": 1.4282462475762734,
+      "x": 50,
+      "y": 44
+    },
+    "/images/gallery-5-1754509229348.jpg": {
+      "scale": 1,
+      "x": 50,
       "y": 50
     }
   },
-  "lastUpdated": "2025-08-06T19:27:07.254Z",
+  "lastUpdated": "2025-08-06T19:43:30.791Z",
   "updatedBy": "Kyle"
 }
