@@ -154,8 +154,8 @@
     "/images/gallery-1-1754508469350.jpg",
     "/images/gallery-2-1754508839063.jpg",
     "/images/gallery-3-1754508887026.jpg",
-    "/images/gallery-4-1754508870049.jpg",
-    "/images/gallery-5-1754509016435.jpg"
+    "/images/gallery-4-1754520005338.jpg",
+    "/images/gallery-5-1754520092717.jpg"
   ],
   "mobileGallery": [
     "/images/gallery-0-1754509083286.jpg",
@@ -340,8 +340,18 @@
       "scale": 1,
       "x": 50,
       "y": 50
+    },
+    "/images/gallery-4-1754520005338.jpg": {
+      "scale": 1.6084372494752261,
+      "x": 50,
+      "y": 38
+    },
+    "/images/gallery-5-1754520092717.jpg": {
+      "scale": 1.262167608741212,
+      "x": 50,
+      "y": 42
     }
   },
-  "lastUpdated": "2025-08-06T19:43:30.791Z",
+  "lastUpdated": "2025-08-06T22:43:10.817Z",
   "updatedBy": "Kyle"
 }
