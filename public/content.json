@@ -163,7 +163,7 @@
     "/images/gallery-2-1754509156470.jpg",
     "/images/gallery-3-1754509172684.jpg",
     "/images/gallery-4-1754509214668.jpg",
-    "/images/gallery-5-1754509229348.jpg"
+    "/images/gallery-5-1754522654145.jpg"
   ],
   "galleryCrops": {
     "/images/Showroomwglassboard.jpg": {
@@ -350,8 +350,13 @@
       "scale": 1.262167608741212,
       "x": 50,
       "y": 42
+    },
+    "/images/gallery-5-1754522654145.jpg": {
+      "scale": 1.4853530170199636,
+      "x": 41.5,
+      "y": 51.5
     }
   },
-  "lastUpdated": "2025-08-06T22:43:10.817Z",
+  "lastUpdated": "2025-08-06T23:24:46.006Z",
   "updatedBy": "Kyle"
 }
