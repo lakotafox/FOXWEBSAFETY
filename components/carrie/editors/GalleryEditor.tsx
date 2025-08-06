@@ -49,8 +49,8 @@ export default function GalleryEditor({
           <div className="bg-gray-100 p-1 rounded-lg flex gap-1">
             <Button
               onClick={() => onViewModeChange('desktop')}
-              className={`px-4 py-2 ${viewMode === 'desktop' ? 'bg-white shadow-sm' : 'bg-transparent hover:bg-gray-200'}`}
-              variant={viewMode === 'desktop' ? 'default' : 'ghost'}
+              className={`px-4 py-2 ${viewMode === 'desktop' ? 'bg-black text-white hover:bg-gray-800' : 'bg-transparent hover:bg-gray-200'}`}
+              variant="ghost"
               size="sm"
             >
               <Monitor className="w-4 h-4 mr-2" />
@@ -58,8 +58,8 @@ export default function GalleryEditor({
             </Button>
             <Button
               onClick={() => onViewModeChange('mobile')}
-              className={`px-4 py-2 ${viewMode === 'mobile' ? 'bg-white shadow-sm' : 'bg-transparent hover:bg-gray-200'}`}
-              variant={viewMode === 'mobile' ? 'default' : 'ghost'}
+              className={`px-4 py-2 ${viewMode === 'mobile' ? 'bg-black text-white hover:bg-gray-800' : 'bg-transparent hover:bg-gray-200'}`}
+              variant="ghost"
               size="sm"
             >
               <Smartphone className="w-4 h-4 mr-2" />

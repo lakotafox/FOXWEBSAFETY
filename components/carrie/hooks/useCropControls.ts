@@ -39,7 +39,7 @@ export function useCropControls({
       // Only process movement if exactly one arrow key is pressed
       if (pressedArrows.length !== 1) return
       
-      const moveAmount = 2 // percentage to move per key press
+      const moveAmount = 0.5 // percentage to move per key press - much more precise
       const currentCrop = cropSettings[editingCrop] || { scale: 1, x: 50, y: 50 }
       
       switch(e.key) {
@@ -87,7 +87,7 @@ export function useCropControls({
       e.preventDefault()
       
       const currentCrop = cropSettings[editingCrop] || { scale: 1, x: 50, y: 50 }
-      const delta = e.deltaY > 0 ? 0.9 : 1.1
+      const delta = e.deltaY > 0 ? 0.98 : 1.02 // Much slower zoom for fine control
       const newScale = Math.max(0.17, Math.min(9, currentCrop.scale * delta))
       
       setCropSettings(prev => ({

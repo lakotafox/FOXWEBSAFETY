@@ -26,7 +26,7 @@ export function useCropControls({
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!editingCrop) return
       
-      const moveAmount = 2 // percentage to move per key press
+      const moveAmount = 0.5 // percentage to move per key press - much more precise
       const currentCrop = cropSettings[editingCrop] || { scale: 1, x: 50, y: 50 }
       
       switch(e.key) {
@@ -69,7 +69,7 @@ export function useCropControls({
       e.preventDefault()
       
       const currentCrop = cropSettings[editingCrop] || { scale: 1, x: 50, y: 50 }
-      const delta = e.deltaY > 0 ? 0.9 : 1.1
+      const delta = e.deltaY > 0 ? 0.98 : 1.02 // Much slower zoom for fine control
       const newScale = Math.max(0.1, Math.min(10, currentCrop.scale * delta))
       
       setCropSettings(prev => ({
