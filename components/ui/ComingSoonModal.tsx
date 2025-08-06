@@ -14,7 +14,7 @@ export default function ComingSoonModal({ isOpen, onClose }: ComingSoonModalProp
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-black text-center">COMING SOON</DialogTitle>
+          <DialogTitle className="text-2xl font-black text-center">COMING SOON!</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col items-center space-y-6 py-6">
           <p className="text-lg text-center font-semibold">
