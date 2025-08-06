@@ -131,15 +131,15 @@ export default function InteractiveParticles() {
     }
   }, [isClient])
 
-  if (!isClient) return null
-
   return (
     <section className="relative w-full h-[600px] bg-slate-900 overflow-hidden">
-      <canvas
-        ref={canvasRef}
-        className="absolute inset-0 w-full h-full"
-        style={{ width: '100%', height: '100%' }}
-      />
+      {isClient && (
+        <canvas
+          ref={canvasRef}
+          className="absolute inset-0 w-full h-full"
+          style={{ width: '100%', height: '100%' }}
+        />
+      )}
       
       {/* WE OFFER SPACE PLANNING AND DESIGN text overlay */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
