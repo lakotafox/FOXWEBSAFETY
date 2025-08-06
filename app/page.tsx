@@ -7,6 +7,7 @@ import { getProducts, defaultProducts } from "@/lib/products-data"
 import FloatingActionButtons from "@/components/sections/FloatingActionButtons"
 import Header from "@/components/sections/Header"
 import HeroSection from "@/components/sections/HeroSection"
+import InteractiveParticles from "@/components/sections/InteractiveParticles"
 import GallerySection from "@/components/sections/GallerySection"
 import FeaturedProducts from "@/components/sections/FeaturedProducts"
 import AboutSection from "@/components/sections/AboutSection"
@@ -32,17 +33,9 @@ export default function FoxBuiltWebsite() {
     return imagePath
   }
 
-  // Gallery images
-  const defaultGalleryImages = [
-    "/images/showroom-1.jpg",
-    "/images/showroom-2.jpg",
-    "/images/Showroomwglassboard.jpg",
-    "/images/showfacinggarage.jpg",
-    "/images/tanconf.jpg",
-    "/images/reception tan.jpg",
-  ]
-  const [galleryImages, setGalleryImages] = useState(defaultGalleryImages)
-  const [mobileGalleryImages, setMobileGalleryImages] = useState(defaultGalleryImages)
+  // Gallery images - start empty to prevent flash
+  const [galleryImages, setGalleryImages] = useState<string[]>([])
+  const [mobileGalleryImages, setMobileGalleryImages] = useState<string[]>([])
   const [isMobile, setIsMobile] = useState(false)
 
   // Detect mobile device
@@ -116,6 +109,7 @@ export default function FoxBuiltWebsite() {
         cropSettings={cropSettings}
         getImageUrl={getImageUrl}
       />
+      <InteractiveParticles />
       <AboutSection 
         showAddress={showAddress}
         setShowAddress={setShowAddress}
