@@ -45,7 +45,7 @@ export default function ProductCard({
     <Card
       className={`overflow-hidden hover:shadow-2xl transition-all border-4 border-slate-600 bg-zinc-100 ring-2 ${getCategoryColor(productCategory, 'ring')}`}
     >
-      <div className="relative h-56 group overflow-hidden bg-gray-100">
+      <div className="relative h-56 group overflow-hidden bg-black">
         <div 
           className="absolute inset-0"
           style={{ transform: getImageTransform(product.image, cropSettings) }}

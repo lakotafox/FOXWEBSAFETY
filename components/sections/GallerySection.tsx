@@ -38,7 +38,7 @@ export default function GallerySection({
     <section id="gallery" className="py-20 bg-zinc-100">
       <div className="container mx-auto px-4">
         <div className="relative max-w-6xl mx-auto">
-          <div className="relative h-96 md:h-[500px] overflow-hidden border-8 border-slate-700">
+          <div className="relative h-96 md:h-[500px] overflow-hidden border-8 border-slate-700 bg-black">
             {galleryImages.map((image, index) => {
               const crop = galleryCrops[image] || { scale: 1, x: 50, y: 50 }
               return (

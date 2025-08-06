@@ -74,7 +74,7 @@ export default function GalleryEditor({
               <label className="block text-sm font-medium">
                 Image {index + 1}
               </label>
-              <div className="relative aspect-video bg-gray-100 rounded border-2 border-dashed border-gray-300 overflow-hidden group">
+              <div className="relative aspect-video bg-black rounded border-2 border-dashed border-gray-300 overflow-hidden group">
                 {image && (
                   <Image 
                     src={getImageUrl(image, true)} 

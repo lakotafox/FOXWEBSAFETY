@@ -79,7 +79,7 @@ export default function FeaturedProducts({
                     : "ring-green-500"
               }`}
             >
-              <div className="relative h-56 overflow-hidden">
+              <div className="relative h-56 overflow-hidden bg-black">
                 {(() => {
                   const crop = cropSettings[product.image] || { scale: 1, x: 50, y: 50 }
                   return (

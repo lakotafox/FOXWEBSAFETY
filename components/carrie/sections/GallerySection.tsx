@@ -46,7 +46,7 @@ export default function GallerySection({
               </Button>
             </div>
           )}
-          <div className="relative h-96 md:h-[500px] overflow-hidden border-8 border-slate-700 group bg-gray-100">
+          <div className="relative h-96 md:h-[500px] overflow-hidden border-8 border-slate-700 group bg-black">
             {pendingGalleryImages.map((image, index) => {
               const crop = cropSettings[image] || { scale: 1, x: 50, y: 50 }
               const isEditing = editingCrop === image

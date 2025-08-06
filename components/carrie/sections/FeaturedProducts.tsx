@@ -105,7 +105,7 @@ export default function FeaturedProducts({
                 }` : ""
               }`}
             >
-              <div className="relative h-56 group overflow-hidden bg-gray-100">
+              <div className="relative h-56 group overflow-hidden bg-black">
                 {(() => {
                   const crop = cropSettings[product.image] || { scale: 1, x: 50, y: 50 }
                   const isEditing = editingCrop === product.image
