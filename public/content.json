@@ -38,7 +38,12 @@
           "Metal VA Legs available",
           "Modern design"
         ],
-        "specs": "Dimensions: 72\"W x 36\"D x 30\"H\nWeight: 150 lbs\nMaterial: Premium wood veneer\nOptions: Multiple leg styles"
+        "specs": "Dimensions: 72\"W x 36\"D x 30\"H\nWeight: 150 lbs\nMaterial: Premium wood veneer\nOptions: Multiple leg styles",
+        "imageCrop": {
+          "scale": 2.357947691000002,
+          "x": 100,
+          "y": 54
+        }
       }
     ],
     "battleTested": [
@@ -73,9 +78,9 @@
         ],
         "specs": "Height Range: 24\" - 50\"\nWidth Options: 48\", 60\", 72\"\nDepth: 30\"\nWeight Capacity: 265 lbs\nMotor: Dual motor system",
         "imageCrop": {
-          "scale": 1.4641000000000006,
-          "x": 50,
-          "y": 70
+          "scale": 1.9970884181829347,
+          "x": 44,
+          "y": 50
         }
       },
       {
@@ -119,9 +124,9 @@
         ],
         "specs": "Dimensions: 36\"W x 18\"D x 28\"H\nDrawers: 3 or 4 drawer options\nLock: Central locking system\nWeight: 75-90 lbs",
         "imageCrop": {
-          "scale": 1.4349644100000007,
+          "scale": 1.9874117654832348,
           "x": 50,
-          "y": 66
+          "y": 46
         }
       },
       {
@@ -152,16 +157,39 @@
     "/images/tanconf.jpg",
     "/images/reception tan.jpg"
   ],
+  "mobileGallery": [
+    "/images/showroom-1.jpg",
+    "/images/showroom-2.jpg",
+    "/images/Showroomwglassboard.jpg",
+    "/images/showfacinggarage.jpg",
+    "/images/tanconf.jpg",
+    "/images/reception tan.jpg"
+  ],
   "galleryCrops": {
+    "/images/tanconf.jpg": {
+      "scale": 2.5937424601000023,
+      "x": 50,
+      "y": 46
+    },
+    "/images/showfacinggarage.jpg": {
+      "scale": 1.9970884181829347,
+      "x": 44,
+      "y": 50
+    },
+    "/images/showroom-1.jpg": {
+      "scale": 1.9874117654832348,
+      "x": 50,
+      "y": 46
+    },
+    "/images/product-9-1754156837163.jpg": {
+      "scale": 1.4349644100000007,
+      "x": 50,
+      "y": 54
+    },
     "/images/product-9-1754115312078.jpg": {
       "scale": 0.42780603780514015,
       "x": 48,
       "y": 56
-    },
-    "/images/showroom-1.jpg": {
-      "scale": 1.4349644100000007,
-      "x": 50,
-      "y": 66
     },
     "/images/reception tan.jpg": {
       "scale": 2.5937424601000023,
@@ -169,8 +197,8 @@
       "y": 22
     },
     "/images/showroom-2.jpg": {
-      "scale": 1.2100000000000002,
-      "x": 52,
+      "scale": 2.3333442148503076,
+      "x": 40,
       "y": 50
     },
     "/images/gallery-0-1754156159270.jpg": {
@@ -179,31 +207,21 @@
       "y": 30
     },
     "/images/gallery-1-1754156223796.jpg": {
-      "scale": 1,
+      "scale": 3.104956726528866,
       "x": 50,
-      "y": 50
+      "y": 82
     },
     "/images/gallery-2-1754156249548.jpg": {
       "scale": 2.0799220787541923,
       "x": 50,
       "y": 42
     },
-    "/images/showfacinggarage.jpg": {
-      "scale": 1.4641000000000006,
-      "x": 50,
-      "y": 70
-    },
-    "/images/tanconf.jpg": {
-      "scale": 2.5937424601000023,
-      "x": 50,
-      "y": 46
-    },
-    "/images/product-9-1754156837163.jpg": {
-      "scale": 1.4349644100000007,
-      "x": 50,
+    "/images/Showroomwglassboard.jpg": {
+      "scale": 2.357947691000002,
+      "x": 100,
       "y": 54
     }
   },
-  "lastUpdated": "2025-08-02T18:07:41.647Z",
+  "lastUpdated": "2025-08-06T17:55:55.739Z",
   "updatedBy": "Kyle"
 }
