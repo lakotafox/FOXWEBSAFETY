@@ -1,17 +1,12 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 
 export default function InteractiveParticles() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
-    setIsClient(true)
-  }, [])
-
-  useEffect(() => {
-    if (!isClient || !canvasRef.current) return
+    if (!canvasRef.current) return
 
     const canvas = canvasRef.current
     const ctx = canvas.getContext('2d')
@@ -129,21 +124,22 @@ export default function InteractiveParticles() {
       canvas.removeEventListener('mousemove', handleMouseMove)
       window.removeEventListener('resize', handleResize)
     }
-  }, [isClient])
+  }, [])
 
   return (
     <section className="relative w-full h-[600px] bg-slate-900 overflow-hidden">
-      {isClient && (
-        <canvas
-          ref={canvasRef}
-          className="absolute inset-0 w-full h-full"
-          style={{ width: '100%', height: '100%' }}
-        />
-      )}
+      {/* Fallback background gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-800 to-slate-950" />
+      
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 w-full h-full"
+        style={{ width: '100%', height: '100%' }}
+      />
       
       {/* WE OFFER SPACE PLANNING AND DESIGN text overlay */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <h2 className="text-4xl md:text-6xl font-thin text-white tracking-[0.2em] uppercase text-center">
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+        <h2 className="text-4xl md:text-6xl font-thin text-white tracking-[0.2em] uppercase text-center px-4">
           WE OFFER SPACE PLANNING AND DESIGN
         </h2>
       </div>
