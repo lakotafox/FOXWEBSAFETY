@@ -16,21 +16,26 @@ export default function GallerySection({
   getImageUrl 
 }: GallerySectionProps) {
   const [currentSlide, setCurrentSlide] = useState(0)
+  const [isUserControlled, setIsUserControlled] = useState(false)
 
-  // Auto-slide gallery every 4 seconds
+  // Auto-slide gallery every 4 seconds (only if user hasn't manually navigated)
   useEffect(() => {
+    if (isUserControlled) return
+    
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % galleryImages.length)
     }, 4000)
 
     return () => clearInterval(interval)
-  }, [galleryImages])
+  }, [galleryImages, isUserControlled])
 
   const nextSlide = () => {
+    setIsUserControlled(true)
     setCurrentSlide((prev) => (prev + 1) % galleryImages.length)
   }
 
   const prevSlide = () => {
+    setIsUserControlled(true)
     setCurrentSlide((prev) => (prev - 1 + galleryImages.length) % galleryImages.length)
   }
 
@@ -87,7 +92,10 @@ export default function GallerySection({
             {galleryImages.map((_, index) => (
               <button
                 key={index}
-                onClick={() => setCurrentSlide(index)}
+                onClick={() => {
+                  setIsUserControlled(true)
+                  setCurrentSlide(index)
+                }}
                 className={`w-4 h-4 border-2 border-white transition-all ${
                   index === currentSlide ? "bg-red-600" : "bg-slate-600"
                 }`}

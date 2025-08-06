@@ -56,6 +56,7 @@ export default function AdminEditor() {
   const [selectedProduct, setSelectedProduct] = useState<any>(null)
   const [showMobilePreviewHelp, setShowMobilePreviewHelp] = useState(false)
   const [galleryViewMode, setGalleryViewMode] = useState<'desktop' | 'mobile'>('desktop')
+  const [isGalleryUserControlled, setIsGalleryUserControlled] = useState(false)
   
   // Temporary preview storage for blob URLs
   const [tempPreviews, setTempPreviews] = useState<{[key: string]: string}>({})
@@ -287,21 +288,23 @@ export default function AdminEditor() {
     }
   }, [activeUploads, uploadQueue.length, showLoadingOverlay, loadingStartTime])
 
-  // Auto-slide gallery (only when not in edit mode)
+  // Auto-slide gallery (only when not in edit mode and user hasn't manually navigated)
   useEffect(() => {
-    if (!isEditMode) {
+    if (!isEditMode && !isGalleryUserControlled) {
       const timer = setInterval(() => {
         setCurrentSlide((prev) => (prev + 1) % pendingGalleryImages.length)
       }, 4000)
       return () => clearInterval(timer)
     }
-  }, [pendingGalleryImages.length, isEditMode])
+  }, [pendingGalleryImages.length, isEditMode, isGalleryUserControlled])
 
   const nextSlide = () => {
+    setIsGalleryUserControlled(true)
     setCurrentSlide((prev) => (prev + 1) % pendingGalleryImages.length)
   }
 
   const prevSlide = () => {
+    setIsGalleryUserControlled(true)
     setCurrentSlide((prev) => (prev - 1 + pendingGalleryImages.length) % pendingGalleryImages.length)
   }
 
@@ -500,7 +503,10 @@ export default function AdminEditor() {
           cropSettings={cropSettings}
           editingCrop={editingCrop}
           onEditGallery={() => setShowGalleryEditor(true)}
-          onSetCurrentSlide={setCurrentSlide}
+          onSetCurrentSlide={(index) => {
+            setIsGalleryUserControlled(true)
+            setCurrentSlide(index)
+          }}
           onSetEditingCrop={setEditingCrop}
           onNextSlide={nextSlide}
           onPrevSlide={prevSlide}
