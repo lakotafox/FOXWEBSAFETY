@@ -7,8 +7,8 @@ import GoogleAnalytics from './google-analytics'
 export const metadata: Metadata = {
   metadataBase: new URL('https://foxbuiltstore.com'),
   title: 'FoxBuilt - Custom Office Furniture | Utah County & Salt Lake County',
-  description: 'Handcrafted American office furniture serving businesses in Salt Lake City, Provo, Orem, Lehi, Pleasant Grove and surrounding areas. Proudly serving Utah County and Salt Lake County since 1999. Executive desks, conference tables, and custom workspace solutions.',
-  keywords: 'office furniture Utah, custom office furniture, executive desks, conference tables, ergonomic workstations, American made furniture, office furniture showroom, Utah County furniture, Salt Lake County furniture',
+  description: 'Handcrafted American office furniture serving businesses in Salt Lake City, Provo, Orem, Lehi, Pleasant Grove and surrounding areas. Proudly serving Utah County and Salt Lake County since 1999. Executive desks, office chairs, conference tables, executive chairs, and custom workspace solutions.',
+  keywords: 'office furniture Utah, custom office furniture, executive desks, conference tables, office chair, desk chair, swivel office chair, executive chair, ergonomic workstations, American made furniture, office furniture showroom, Utah County furniture, Salt Lake County furniture',
   icons: {
     icon: [
       { url: '/favicon.png', type: 'image/png' },

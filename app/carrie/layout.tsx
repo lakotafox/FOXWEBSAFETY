@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Carrie Editor - FoxBuilt',
+  title: 'Main Page Editor - FoxBuilt',
   robots: {
     index: false,
     follow: false,
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   },
 }
 
-export default function CarrieLayout({
+export default function MainPageEditorLayout({
   children,
 }: {
   children: React.ReactNode

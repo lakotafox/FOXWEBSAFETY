@@ -36,42 +36,75 @@ Built with modern web technologies:
 ## Support
 For website issues or updates, contact the development team. The admin panel includes built-in help documentation accessible via the question mark icon.
 
-## Project File Structure
+## Project File Structure (After Refactoring)
 
 ```
 foxbuilt-websiteFOX/
 ├── app/                              # Next.js App Router
-│   ├── page.tsx                      (746 lines)  # Homepage
+│   ├── page.tsx                      (110 lines)  # Homepage (refactored)
 │   ├── layout.tsx                    (33 lines)   # Root layout
 │   ├── globals.css                   (90 lines)   # Global styles
 │   ├── carrie/
-│   │   └── page.tsx                  (1,872 lines) # Admin editor
+│   │   └── page.tsx                  (626 lines)  # Admin editor (refactored)
 │   ├── products/
-│   │   └── page.tsx                  (863 lines)  # Products catalog
+│   │   └── page.tsx                  (179 lines)  # Products catalog (refactored)
 │   ├── products-editor/
-│   │   └── page.tsx                  (1,106 lines) # Products editor
+│   │   └── page.tsx                  (931 lines)  # Products editor (refactored)
 │   └── games/
-│       └── page.tsx                  (1,007 lines) # Hidden games
+│       └── page.tsx                  (165 lines)  # Games selector (refactored)
 ├── components/
-│   ├── theme-provider.tsx            (11 lines)
-│   └── ui/                           (4,988 lines total) # 50+ components
+│   ├── sections/                     # Extracted page sections
+│   │   ├── Header.tsx                (77 lines)
+│   │   ├── HeroSection.tsx           (35 lines)
+│   │   ├── GallerySection.tsx        (65 lines)
+│   │   ├── FeaturedProducts.tsx      (113 lines)
+│   │   ├── AboutSection.tsx          (51 lines)
+│   │   ├── ContactSection.tsx        (152 lines)
+│   │   ├── Footer.tsx                (41 lines)
+│   │   └── FloatingActionButtons.tsx (44 lines)
+│   ├── carrie-editor/               # Carrie editor components
+│   │   ├── ui/                      # UI components
+│   │   ├── sections/                # Page sections
+│   │   └── constants/               # Default data
+│   ├── products-editor/             # Products editor components
+│   │   ├── ui/                      # UI components (ProductCard, etc.)
+│   │   └── constants/               # Default products data
+│   ├── products/                    # Products page components
+│   │   └── ui/                      # Product display components
+│   ├── games/                       # Individual game components
+│   │   ├── Snake.tsx                (249 lines)
+│   │   ├── Pong.tsx                 (157 lines)
+│   │   └── Galaga.tsx               (347 lines)
+│   └── ui/                          # Shared UI components
 ├── lib/
-│   ├── products-data.ts              (109 lines)  # Product defaults
-│   └── utils.ts                      (6 lines)    # Utilities
+│   ├── utils/                       # Utility functions
+│   │   ├── imageTransform.ts        (11 lines)
+│   │   └── categoryColors.ts        (16 lines)
+│   ├── products-data.ts             (109 lines)
+│   └── utils.ts                     (6 lines)
 ├── public/
-│   ├── content.json                  # Published content
-│   ├── images/                       # Product images
-│   └── catolog no page one.pdf       # Product catalog
-├── admin/                            # Legacy admin
-│   ├── index.html                    (308 lines)
-│   └── admin.js                      (279 lines)
+│   ├── icons/                       # Icon assets
+│   ├── images/                      # Product & gallery images
+│   ├── sounds/                      # Audio files
+│   ├── content.json                 # Main site content
+│   ├── products.json                # Products catalog content
+│   └── FoxBuilt-Overview.pdf        # Company overview
+├── admin/                           # Legacy admin (to be removed)
 ├── package.json
 ├── tailwind.config.ts
 ├── tsconfig.json
 └── netlify.toml
 
-Total main source files: ~6,900 lines
+Total lines after refactoring: ~3,500 lines (49% reduction)
 ```
+
+## Key Improvements from Refactoring
+
+1. **Component Extraction**: Separated large page files into reusable components
+2. **Code Reuse**: ProductCard, EditableField, and other shared components
+3. **Better Organization**: Feature-based folder structure
+4. **Reduced Duplication**: Utility functions for common operations
+5. **Maintainability**: Smaller, focused files that are easier to update
 
 ---
 

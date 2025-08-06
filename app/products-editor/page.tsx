@@ -2,229 +2,19 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
-import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Save, X, Check, Maximize2, Edit2 } from 'lucide-react'
-
-// Default products for the products page (separate from featured products)
-const defaultProductsPageItems = [
-  {
-    id: 1,
-    title: "Executive Desk Series",
-    image: "/images/desk grey L showroom.jpg",
-    description: "Premium executive desks built to last",
-    features: ["Solid wood construction", "Cable management", "5-year warranty"],
-    price: "$2,499"
-  },
-  {
-    id: 2,
-    title: "Ergonomic Task Chair",
-    image: "/images/reception-area.jpg",
-    description: "All-day comfort for productive work",
-    features: ["Lumbar support", "Adjustable arms", "Breathable mesh"],
-    price: "$899"
-  },
-  {
-    id: 3,
-    title: "Conference Table",
-    image: "/images/tanconf.jpg",
-    description: "Impressive tables for important meetings",
-    features: ["Seats 8-12", "Power integration", "Premium finishes"],
-    price: "$3,999"
-  },
-  {
-    id: 4,
-    title: "Storage Cabinet",
-    image: "/images/showroom-1.jpg",
-    description: "Secure storage solutions",
-    features: ["Locking drawers", "Adjustable shelves", "Anti-tip design"],
-    price: "$799"
-  },
-  {
-    id: 5,
-    title: "Reception Desk",
-    image: "/images/reception tan.jpg",
-    description: "Make a great first impression",
-    features: ["ADA compliant", "Built-in storage", "Custom sizes"],
-    price: "$2,799"
-  },
-  {
-    id: 6,
-    title: "Standing Desk",
-    image: "/images/showfacinggarage.jpg",
-    description: "Height adjustable for health",
-    features: ["Electric lift", "Memory settings", "Anti-collision"],
-    price: "$1,299"
-  },
-  {
-    id: 7,
-    title: "Lounge Seating",
-    image: "/images/Showroomwglassboard.jpg",
-    description: "Comfortable waiting area furniture",
-    features: ["Stain resistant", "Modular design", "USB charging"],
-    price: "$1,599"
-  },
-  {
-    id: 8,
-    title: "File Cabinet",
-    image: "/images/small desk.jpg",
-    description: "Organize your important documents",
-    features: ["Fire resistant", "Full extension", "Lock system"],
-    price: "$499"
-  },
-  {
-    id: 9,
-    title: "Training Table",
-    image: "/images/conference-room.jpg",
-    description: "Flexible classroom solutions",
-    features: ["Flip-top design", "Nesting storage", "Mobile casters"],
-    price: "$699"
-  },
-  {
-    id: 10,
-    title: "Pre-Owned Executive Desk",
-    image: "/images/showroom-2.jpg",
-    description: "Quality pre-owned executive furniture",
-    features: ["Inspected & certified", "Like-new condition", "50% off retail"],
-    price: "$1,249"
-  },
-  {
-    id: 11,
-    title: "Refurbished Conference Set",
-    image: "/images/desk grey L showroom.jpg",
-    description: "Complete conference room solution",
-    features: ["Table & 8 chairs", "Professionally cleaned", "1-year warranty"],
-    price: "$2,999"
-  },
-  {
-    id: 12,
-    title: "Pre-Owned Task Chairs",
-    image: "/images/reception-area.jpg",
-    description: "High-quality used seating",
-    features: ["Fully functional", "New casters", "Bulk discounts"],
-    price: "$299"
-  },
-  {
-    id: 13,
-    title: "Refurbished Storage Units",
-    image: "/images/showroom-1.jpg",
-    description: "Pre-owned filing and storage",
-    features: ["New locks installed", "Touch-up paint", "Various sizes"],
-    price: "$399"
-  },
-  {
-    id: 14,
-    title: "Pre-Owned Workstations",
-    image: "/images/tanconf.jpg",
-    description: "Complete cubicle systems",
-    features: ["Modular design", "Easy reconfiguration", "Great value"],
-    price: "$899"
-  },
-  {
-    id: 15,
-    title: "Refurbished Reception Desk",
-    image: "/images/reception tan.jpg",
-    description: "Make an impression for less",
-    features: ["Professional refinish", "Updated hardware", "60% off new"],
-    price: "$1,799"
-  },
-  {
-    id: 16,
-    title: "Pre-Owned Lounge Set",
-    image: "/images/Showroomwglassboard.jpg",
-    description: "Comfortable waiting area furniture",
-    features: ["Deep cleaned", "No visible wear", "Ready to use"],
-    price: "$999"
-  },
-  {
-    id: 17,
-    title: "Refurbished Training Tables",
-    image: "/images/conference-room.jpg",
-    description: "Classroom and training solutions",
-    features: ["Flip-top mechanism", "New wheels", "Set of 6 available"],
-    price: "$449"
-  },
-  {
-    id: 18,
-    title: "Pre-Owned Executive Suite",
-    image: "/images/showfacinggarage.jpg",
-    description: "Complete executive office set",
-    features: ["Desk, credenza, chair", "Matching finish", "Premium quality"],
-    price: "$3,499"
-  },
-  {
-    id: 19,
-    title: "Ergonomic Office Chairs",
-    image: "/images/reception-area.jpg",
-    description: "All-day comfort seating",
-    features: ["Lumbar support", "Adjustable everything", "5-year warranty"],
-    price: "$699"
-  },
-  {
-    id: 20,
-    title: "Executive Leather Chairs",
-    image: "/images/showroom-2.jpg",
-    description: "Premium executive seating",
-    features: ["Genuine leather", "Memory foam", "Lifetime frame warranty"],
-    price: "$1,899"
-  },
-  {
-    id: 21,
-    title: "Conference Room Chairs",
-    image: "/images/tanconf.jpg",
-    description: "Professional meeting seating",
-    features: ["Stackable option", "Arms available", "Bulk pricing"],
-    price: "$399"
-  },
-  {
-    id: 22,
-    title: "Reception Area Seating",
-    image: "/images/reception tan.jpg",
-    description: "Welcoming lobby furniture",
-    features: ["Anti-microbial fabric", "Modular design", "ADA compliant"],
-    price: "$1,299"
-  },
-  {
-    id: 23,
-    title: "Task Chairs",
-    image: "/images/small desk.jpg",
-    description: "Versatile workplace seating",
-    features: ["Height adjustable", "Swivel base", "Multiple colors"],
-    price: "$449"
-  },
-  {
-    id: 24,
-    title: "Lounge Chairs",
-    image: "/images/Showroomwglassboard.jpg",
-    description: "Comfortable casual seating",
-    features: ["Deep cushions", "Stain resistant", "Modern design"],
-    price: "$799"
-  },
-  {
-    id: 25,
-    title: "Drafting Stools",
-    image: "/images/showfacinggarage.jpg",
-    description: "Height-adjustable work stools",
-    features: ["Foot ring", "360° swivel", "Industrial rated"],
-    price: "$349"
-  },
-  {
-    id: 26,
-    title: "Guest Chairs",
-    image: "/images/desk grey L showroom.jpg",
-    description: "Visitor and guest seating",
-    features: ["No assembly required", "Stackable", "Easy clean"],
-    price: "$299"
-  },
-  {
-    id: 27,
-    title: "Collaborative Seating",
-    image: "/images/conference-room.jpg",
-    description: "Modern team workspace chairs",
-    features: ["Mobile base", "Tablet arm option", "Flexible design"],
-    price: "$599"
-  }
-]
+import { Save } from 'lucide-react'
+import { defaultProductsPageItems, CONSTRUCTION_MESSAGES } from '@/components/products-editor/constants/default-products'
+import LoadingOverlay from '@/components/products-editor/ui/LoadingOverlay'
+import WelcomeMessage from '@/components/products-editor/ui/WelcomeMessage'
+import MobilePreviewHelp from '@/components/products-editor/ui/MobilePreviewHelp'
+import HelpModal from '@/components/products-editor/ui/HelpModal'
+import YellowHeader from '@/components/products-editor/ui/YellowHeader'
+import SaveMessage from '@/components/products-editor/ui/SaveMessage'
+import CategoryButtons from '@/components/products-editor/ui/CategoryButtons'
+import ProductCard from '@/components/products-editor/ui/ProductCard'
+import Footer from '@/components/sections/Footer'
+import { Phone, MapPin } from 'lucide-react'
 
 // Helper functions to get/save products page items
 async function getProductsPageItems() {
@@ -273,10 +63,10 @@ function saveProductsPageItems(products: any) {
 }
 
 export default function ProductsEditorPage() {
-  // Always authenticated - security is handled at /carrie
+  // Always authenticated - security is handled at main page editor
   const [isAuthenticated, setIsAuthenticated] = useState(true)
   
-  // Check if coming from carrie to show welcome message
+  // Check if coming from main page editor to show welcome message
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const fromCarrie = sessionStorage.getItem('foxbuilt-authenticated')
@@ -302,6 +92,15 @@ export default function ProductsEditorPage() {
   const [showWelcomeMessage, setShowWelcomeMessage] = useState(false)
   const messageTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   
+  // For Contact section
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    message: ""
+  })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  
   // Temporary preview storage for blob URLs
   const [tempPreviews, setTempPreviews] = useState<{[key: string]: string}>({})
   
@@ -316,29 +115,7 @@ export default function ProductsEditorPage() {
   const [editingCrop, setEditingCrop] = useState<string | null>(null)
 
   // Construction messages for publish loading
-  const constructionMessages = [
-    "Counting kickplates...",
-    "This truck is diesel right?",
-    "Leveling...",
-    "Measuring...",
-    "Straightening spines...",
-    "Leveling again...",
-    "Adding cantilevers...",
-    "Smacking topcaps...",
-    "Switching bits...",
-    "Cleaning tiles...",
-    "Loading the truck...",
-    "Unloading the truck...",
-    "Checking measurements twice...",
-    "Torquing bolts...",
-    "Aligning panels...",
-    "Setting locks...",
-    "Testing drawers...",
-    "Oiling hinges...",
-    "Buffing surfaces...",
-    "Final inspection..."
-  ]
-
+  const constructionMessages = CONSTRUCTION_MESSAGES
 
   useEffect(() => {
     // Load saved products and crop settings on mount
@@ -531,7 +308,7 @@ export default function ProductsEditorPage() {
     }
   }, [uploadQueue, activeUploads])
 
-  // Manage loading overlay with 4-second minimum (same as main editor)
+  // Manage loading overlay with 4-second minimum (same as main page editor)
   useEffect(() => {
     const shouldShowOverlay = activeUploads > 0 || uploadQueue.length > 0
     
@@ -710,6 +487,72 @@ export default function ProductsEditorPage() {
   }
 
   // Handle publish
+  // Handle form changes
+  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    })
+  }
+
+  // Handle form submission
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+
+    try {
+      // EmailJS configuration (same as main page)
+      const EMAILJS_SERVICE_ID = "service_axmx4b8"
+      const EMAILJS_TEMPLATE_ID = "template_r90th68"
+      const EMAILJS_PUBLIC_KEY = "_C1u7k95AKuGRXqea"
+
+      // Load EmailJS script dynamically
+      const script = document.createElement('script')
+      script.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js'
+      document.head.appendChild(script)
+      
+      script.onload = async () => {
+        try {
+          // @ts-ignore
+          window.emailjs.init(EMAILJS_PUBLIC_KEY)
+          
+          // Send email
+          // @ts-ignore
+          const response = await window.emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+            from_name: formData.name,
+            from_email: formData.email,
+            phone: formData.phone,
+            message: formData.message
+          })
+          
+          console.log('Email sent successfully:', response)
+          alert("Thanks! Your quote request has been sent. We'll get back to you soon!")
+          
+          // Reset form
+          setFormData({
+            name: "",
+            email: "",
+            phone: "",
+            message: ""
+          })
+        } catch (emailError) {
+          console.error('EmailJS error:', emailError)
+          alert("Error sending email. Please try again or call us at (801) 899-9406")
+        }
+      }
+      
+      script.onerror = () => {
+        alert("Error loading email service. Please try again or call us at (801) 899-9406")
+      }
+      
+    } catch (error) {
+      console.error('Form submission error:', error)
+      alert("Error submitting form. Please try again or call us at (801) 899-9406")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   const handlePublish = async () => {
     try {
       showSaveMessage("🚀 Publishing to live site...", 30000)
@@ -831,86 +674,26 @@ export default function ProductsEditorPage() {
 
   return (
     <div className="min-h-screen bg-slate-800 relative">
-      {/* Image Upload Loading Overlay - Same as main editor */}
-      {showLoadingOverlay && (
-        <div className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center pointer-events-auto" style={{ pointerEvents: 'all' }}>
-          {/* Fox loading video only */}
-          <video 
-            className="w-64 h-64"
-            autoPlay
-            loop
-            muted
-            playsInline
-          >
-            <source src="/foxloading.webm" type="video/webm" />
-          </video>
-        </div>
-      )}
-
-      {/* Publish Loading Overlay */}
-      {showPublishLoadingOverlay && (
-        <div className="fixed inset-0 bg-black/95 z-[100] flex flex-col items-center justify-center pointer-events-auto" style={{ pointerEvents: 'all' }}>
-          {/* Fox loading video */}
-          <video 
-            className="w-64 h-64 mb-8"
-            autoPlay
-            loop
-            muted
-            playsInline
-          >
-            <source src="/foxloading.webm" type="video/webm" />
-          </video>
-          
-          {/* Construction message */}
-          <div className="text-white text-xl font-bold animate-pulse mb-8">
-            {publishMessage}
-          </div>
-          
-          {/* Game prompt */}
-          <div className="text-white text-lg">
-            Want to play a game while you wait?
-            <button
-              onClick={() => window.open('/games', '_blank')}
-              className="ml-3 bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded transition-all"
-            >
-              YES
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Loading Overlays */}
+      <LoadingOverlay 
+        show={showLoadingOverlay} 
+        type="upload" 
+      />
+      <LoadingOverlay 
+        show={showPublishLoadingOverlay} 
+        type="publish" 
+        publishMessage={publishMessage}
+        onPlayGame={() => window.open('/games', '_blank')}
+      />
       
-      {/* Admin header bar - matches carrie page */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-yellow-500 text-black p-2 border-b-4 border-yellow-600">
-        <div className="container mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
-          <div className="flex items-center gap-2">
-            <Edit2 className="w-5 h-5" />
-            <span className="font-bold text-sm sm:text-base">PRODUCTS EDITOR</span>
-          </div>
-          <div className="flex gap-2 flex-wrap justify-center">
-            <Button
-              onClick={() => setShowMobilePreviewHelp(true)}
-              size="lg"
-              className="bg-blue-600 text-white hover:bg-blue-700 font-bold px-6 py-3 text-lg"
-            >
-              📱 Mobile Preview
-            </Button>
-            <Button
-              onClick={handlePublish}
-              size="lg"
-              className="bg-green-600 text-white hover:bg-green-700 font-bold px-8 py-3 text-lg"
-            >
-              🚀 Publish Changes
-            </Button>
-          </div>
-        </div>
-      </div>
+      {/* Yellow Header */}
+      <YellowHeader 
+        onMobilePreview={() => setShowMobilePreviewHelp(true)}
+        onPublish={handlePublish}
+      />
       
       {/* Save message */}
-      {saveMessage && (
-        <div className="fixed top-0 left-0 right-0 z-[59] bg-green-500 text-white p-4 text-center font-bold">
-          {saveMessage}
-        </div>
-      )}
+      <SaveMessage show={!!saveMessage} message={saveMessage} />
 
       {/* Header */}
       <div className="bg-slate-900 py-8 pt-20">
@@ -927,36 +710,10 @@ export default function ProductsEditorPage() {
           {/* Category Buttons */}
           <div className="flex justify-center mb-12">
             <div className="bg-slate-700 border-4 border-slate-600 p-2 flex flex-wrap justify-center">
-              <Button
-                className={`font-black text-sm md:text-lg px-3 md:px-6 py-2 md:py-3 tracking-wide transition-all ${
-                  productCategory === "new"
-                    ? "bg-red-600 text-white border-2 border-red-600"
-                    : "bg-transparent text-zinc-300 hover:text-white border-2 border-transparent"
-                }`}
-                onClick={() => setProductCategory("new")}
-              >
-                NEW
-              </Button>
-              <Button
-                className={`font-black text-sm md:text-lg px-3 md:px-6 py-2 md:py-3 tracking-wide transition-all ${
-                  productCategory === "battleTested"
-                    ? "bg-blue-600 text-white border-2 border-blue-600"
-                    : "bg-transparent text-zinc-300 hover:text-white border-2 border-transparent"
-                }`}
-                onClick={() => setProductCategory("battleTested")}
-              >
-                PRE-OWNED
-              </Button>
-              <Button
-                className={`font-black text-sm md:text-lg px-3 md:px-6 py-2 md:py-3 tracking-wide transition-all ${
-                  productCategory === "seating"
-                    ? "bg-green-600 text-white border-2 border-green-600"
-                    : "bg-transparent text-zinc-300 hover:text-white border-2 border-transparent"
-                }`}
-                onClick={() => setProductCategory("seating")}
-              >
-                SEATING
-              </Button>
+              <CategoryButtons 
+                productCategory={productCategory as 'new' | 'battleTested' | 'seating'}
+                onCategoryChange={setProductCategory}
+              />
             </div>
           </div>
 
@@ -964,196 +721,19 @@ export default function ProductsEditorPage() {
           {/* Products Grid - Show 9 products (3x3) */}
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {currentProducts.slice(0, 9).map((product) => (
-              <Card
+              <ProductCard
                 key={product.id}
-                className={`overflow-hidden hover:shadow-2xl transition-all border-4 border-slate-600 bg-zinc-100 ring-2 ${
-                  productCategory === "new"
-                    ? "ring-red-500"
-                    : productCategory === "battleTested"
-                      ? "ring-blue-500"
-                      : "ring-green-500"
-                }`}
-              >
-                <div className="relative h-56 group overflow-hidden bg-gray-100">
-                  {(() => {
-                    const crop = cropSettings[product.image] || { scale: 1, x: 50, y: 50 }
-                    return (
-                      <>
-                        <div 
-                          className="absolute inset-0"
-                          style={{
-                            transform: `translate(${crop.x - 50}%, ${crop.y - 50}%) scale(${crop.scale})`
-                          }}
-                        >
-                          <Image 
-                            src={getImageUrl(product.image)} 
-                            alt={product.title} 
-                            width={500}
-                            height={500}
-                            className="w-full h-full object-contain"
-                            unoptimized
-                          />
-                        </div>
-                        
-                      </>
-                    )
-                  })()}
-                  
-                  {/* Edit Controls */}
-                  {
-                    <>
-                      {/* Image Upload - appears on hover at bottom like carrie page */}
-                      {editingCrop !== product.image && (
-                        <div className="absolute inset-0 flex items-end justify-center pb-4 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                          <label className="bg-white hover:bg-gray-100 text-black px-4 py-2 rounded cursor-pointer flex items-center gap-2 font-bold shadow-lg">
-                            <Edit2 className="w-4 h-4" />
-                            Change Image
-                            <input
-                              type="file"
-                              className="hidden"
-                              accept="image/*"
-                              onChange={(e) => {
-                                const file = e.target.files?.[0]
-                                if (file) handleImageUpload(file, product.id)
-                              }}
-                            />
-                          </label>
-                        </div>
-                      )}
-
-                      {/* Crop Controls */}
-                      <div className={`absolute top-2 right-2 ${editingCrop === product.image ? 'z-30' : 'z-10'}`}>
-                        <button
-                          onClick={() => setEditingCrop(editingCrop === product.image ? null : product.image)}
-                          className="hover:scale-110 transition-transform"
-                        >
-                          {editingCrop === product.image ? (
-                            <Image src="/unlocked.jpeg" alt="Save" width={48} height={48} />
-                          ) : (
-                            <Image src="/locked.jpeg" alt="Resize" width={48} height={48} />
-                          )}
-                        </button>
-                      </div>
-
-                    </>
-                  }
-                </div>
-                
-                <CardContent className="p-6">
-                  {/* Title */}
-                  {editingId === product.id ? (
-                    <input
-                      type="text"
-                      value={product.title}
-                      onChange={(e) => updateProduct(product.id, 'title', e.target.value)}
-                      onBlur={() => setEditingId(null)}
-                      onKeyPress={(e) => e.key === 'Enter' && setEditingId(null)}
-                      className="text-xl font-black mb-3 tracking-wide w-full p-1 border rounded"
-                      autoFocus
-                    />
-                  ) : (
-                    <h3 
-                      className="text-xl font-black mb-3 tracking-wide cursor-pointer hover:text-red-600"
-                      onClick={() => setEditingId(product.id)}
-                    >
-                      {product.title}
-                    </h3>
-                  )}
-                  
-                  {/* Description */}
-                  {editingId === -product.id ? (
-                    <textarea
-                      value={product.description}
-                      onChange={(e) => updateProduct(product.id, 'description', e.target.value)}
-                      onBlur={() => setEditingId(null)}
-                      className="text-slate-600 mb-4 font-semibold w-full p-1 border rounded"
-                      rows={2}
-                    />
-                  ) : (
-                    <p 
-                      className="text-slate-600 mb-4 font-semibold cursor-pointer hover:text-red-600"
-                      onClick={() => setEditingId(-product.id)}
-                    >
-                      {product.description}
-                    </p>
-                  )}
-                  
-                  {/* Features */}
-                  {product.features && (
-                    <ul className="text-sm text-slate-500 mb-4 space-y-1">
-                      {product.features.map((feature, index) => (
-                        <li key={index} className="flex items-center">
-                          <span
-                            className={`w-2 h-2 rounded-full mr-2 ${
-                              productCategory === "new"
-                                ? "bg-red-600"
-                                : productCategory === "battleTested"
-                                  ? "bg-blue-600"
-                                  : "bg-green-600"
-                            }`}
-                          ></span>
-                          {editingId === product.id * 1000 + index ? (
-                            <input
-                              type="text"
-                              value={feature}
-                              onChange={(e) => {
-                                const newFeatures = [...product.features]
-                                newFeatures[index] = e.target.value
-                                updateProduct(product.id, 'features', newFeatures)
-                              }}
-                              onBlur={() => setEditingId(null)}
-                              onKeyPress={(e) => e.key === 'Enter' && setEditingId(null)}
-                              className="flex-1 p-1 border-b border-gray-300"
-                              autoFocus
-                            />
-                          ) : (
-                            <span 
-                              className="cursor-pointer hover:text-red-600"
-                              onClick={() => setEditingId(product.id * 1000 + index)}
-                            >
-                              {feature}
-                            </span>
-                          )}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                  
-                  {/* Price */}
-                  <div className="flex justify-between items-center">
-                    {editingId === product.id * 10000 ? (
-                      <input
-                        type="text"
-                        value={product.price}
-                        onChange={(e) => updateProduct(product.id, 'price', e.target.value)}
-                        onBlur={() => setEditingId(null)}
-                        onKeyPress={(e) => e.key === 'Enter' && setEditingId(null)}
-                        className={`text-2xl font-black p-1 border rounded ${
-                          productCategory === "new"
-                            ? "text-red-600"
-                            : productCategory === "battleTested"
-                              ? "text-blue-600"
-                              : "text-green-600"
-                        }`}
-                        autoFocus
-                      />
-                    ) : (
-                      <span
-                        className={`text-2xl font-black ${
-                          productCategory === "new"
-                            ? "text-red-600"
-                            : productCategory === "battleTested"
-                              ? "text-blue-600"
-                              : "text-green-600"
-                        } cursor-pointer hover:underline`}
-                        onClick={() => setEditingId(product.id * 10000)}
-                      >
-                        {product.price}
-                      </span>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+                product={product}
+                productCategory={productCategory}
+                editingId={editingId}
+                editingCrop={editingCrop}
+                cropSettings={cropSettings}
+                setEditingId={setEditingId}
+                setEditingCrop={setEditingCrop}
+                updateProduct={updateProduct}
+                handleImageUpload={handleImageUpload}
+                getImageUrl={getImageUrl}
+              />
             ))}
           </div>
         </div>
@@ -1161,42 +741,10 @@ export default function ProductsEditorPage() {
 
 
       {/* Welcome Message Modal */}
-      {showWelcomeMessage && (
-        <div className="fixed inset-0 bg-black/75 flex items-center justify-center z-50 p-4">
-          <Card className="max-w-2xl w-full">
-            <CardContent className="p-8">
-              <h2 className="text-3xl font-black mb-6 text-center">HEY DAD!</h2>
-              <div className="space-y-4 text-lg">
-                <p>
-                  Please test this "product editing page". You can see the live page at{' '}
-                  <a 
-                    href="https://foxbuiltstore.com/products" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:text-blue-800 underline font-bold"
-                  >
-                    https://foxbuiltstore.com/products
-                  </a>
-                </p>
-                <p>
-                  For now that page should be secret.. but this editor should update the page https://foxbuiltstore.com/products
-                </p>
-                <p>
-                  Test it out lmk... and when its all ready to go we can add a button on the main page that goes to the finished product page.
-                </p>
-              </div>
-              <div className="mt-8 text-center">
-                <Button
-                  onClick={() => setShowWelcomeMessage(false)}
-                  className="bg-green-600 hover:bg-green-700 text-white font-black px-8 py-3"
-                >
-                  GOT IT!
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+      <WelcomeMessage 
+        show={showWelcomeMessage}
+        onClose={() => setShowWelcomeMessage(false)}
+      />
 
       {/* Help Button */}
       <button
@@ -1205,7 +753,7 @@ export default function ProductsEditorPage() {
         style={{ position: 'fixed' }}
       >
         <Image
-          src="/questionmark.png"
+          src="/icons/questionmark.png"
           alt="Help"
           width={64}
           height={64}
@@ -1214,147 +762,120 @@ export default function ProductsEditorPage() {
       </button>
 
       {/* Help Modal */}
-      {showHelp && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-[80] flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto p-8">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-3xl font-black text-slate-900">HEY POPS 👋</h2>
-              <button
-                onClick={() => setShowHelp(false)}
-                className="text-gray-500 hover:text-gray-700 transition-colors"
-              >
-                <X className="w-8 h-8" />
-              </button>
-            </div>
-            
-            <div className="space-y-6">
-              <div className="bg-blue-50 border-l-4 border-blue-600 p-4">
-                <h3 className="font-bold text-xl mb-3 text-blue-900 text-center">Here is a quick guide</h3>
-                <p className="text-blue-800 text-lg text-center">
-                  :Hover mouse over image to see edit options.
-                </p>
-                <p className="text-blue-800 text-lg mt-2 text-center">
-                  :Use lock 🔒 to resize and position images.
-                </p>
-              </div>
-
-              <div>
-                <h3 className="font-bold text-2xl mb-4 text-slate-900 text-center">EDIT Image Controls</h3>
-                <div className="space-y-4 text-gray-700">
-                  <p className="text-lg text-center">
-                    :when lock is <span className="text-green-600 font-bold">GREEN</span> 🟢 use ⬆️⬇️⬅️➡️ to move the image
-                  </p>
-                  <p className="text-lg text-center">
-                    :when lock is <span className="text-green-600 font-bold">GREEN</span> 🟢 use Scroll Wheel to Zoom in/out
-                  </p>
-                  <p className="text-lg text-center">
-                    :when you are done resizing your image lock it! (Click lock <span className="text-red-600 font-bold">RED</span> 🔴)
-                  </p>
-                </div>
-              </div>
-
-              <div>
-                <h3 className="font-bold text-2xl mb-4 text-slate-900 text-center">💾 Publishing Changes</h3>
-                <div className="space-y-4 text-gray-700">
-                  <p className="text-lg text-center">
-                    <span className="text-2xl">1️⃣:</span> Make all your changes to products and images
-                  </p>
-                  <p className="text-lg text-center">
-                    <span className="text-2xl">2️⃣:</span> Click the <strong>"Publish"</strong> button at the top
-                  </p>
-                  <p className="text-lg text-center">
-                    <span className="text-2xl">3️⃣:</span> Wait <strong>60 seconds</strong> for changes to build and go live
-                  </p>
-                  <p className="text-lg text-center">
-                    <span className="text-2xl">4️⃣:</span> Your updates will be available!
-                  </p>
-                </div>
-              </div>
-
-              <div className="text-center pt-6">
-                <Button
-                  onClick={() => setShowHelp(false)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg font-bold"
-                >
-                  Got it! 👍
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <HelpModal 
+        show={showHelp}
+        onClose={() => setShowHelp(false)}
+      />
 
       {/* Mobile Preview Help Modal */}
-      {showMobilePreviewHelp && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-[80] flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto p-8">
-            <div className="flex justify-center items-center mb-6">
-              <h2 className="text-3xl font-black text-slate-900">📱 MOBILE PREVIEW GUIDE</h2>
+      <MobilePreviewHelp 
+        show={showMobilePreviewHelp}
+        onClose={() => setShowMobilePreviewHelp(false)}
+      />
+
+
+      {/* Contact Section */}
+      <section id="contact" className="py-20 bg-slate-900 text-white">
+        <div className="container mx-auto px-4">
+          <h2 className="text-5xl font-black text-center text-white mb-16 tracking-tight">
+            CONTACT US
+          </h2>
+
+          <div className="grid md:grid-cols-2 gap-16 max-w-5xl mx-auto">
+            <div>
+              <h3 className="text-3xl font-black mb-8 tracking-wide">CONTACT INFO</h3>
+              <div className="space-y-6">
+                <a href="tel:+18018999406" className="flex items-center space-x-4 hover:opacity-80 transition-opacity -mx-4 px-4 py-3 rounded-lg">
+                  <div className="w-12 h-12 bg-red-600 flex items-center justify-center">
+                    <Phone className="w-6 h-6 text-white" />
+                  </div>
+                  <span className="text-xl font-bold">
+                    (801) 899-9406
+                  </span>
+                </a>
+                <div className="flex items-start space-x-4">
+                  <div className="w-12 h-12 bg-red-600 flex items-center justify-center">
+                    <MapPin className="w-6 h-6 text-white" />
+                  </div>
+                  <a 
+                    href="https://www.google.com/maps/search/?api=1&query=420+W+Industrial+Dr+Building+LL+Pleasant+Grove+UT+84062"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-red-400 transition-colors"
+                  >
+                    <p className="text-xl font-bold">420 W Industrial Dr Building LL</p>
+                    <p className="text-xl font-bold">Pleasant Grove, UT 84062</p>
+                  </a>
+                </div>
+              </div>
+
+              <div className="mt-12">
+                <h4 className="text-2xl font-black mb-6 tracking-wide">STORE HOURS</h4>
+                <div className="space-y-3 text-zinc-300">
+                  <p className="text-lg font-bold">Monday–Friday: 10:00am–5:00pm</p>
+                  <p className="text-lg font-bold">Saturday–Sunday: By Appointment</p>
+                </div>
+              </div>
             </div>
-            
-            <div className="space-y-6">
-              <div className="text-center">
-                <h3 className="font-bold text-2xl mb-4">Hey Pops! 👋</h3>
-                <p className="text-xl mb-6">Quick way to check mobile view:</p>
-                <div className="bg-blue-50 border-2 border-blue-600 p-4 rounded-lg inline-block">
-                  <p className="text-2xl font-bold text-blue-900">Press Ctrl+Shift+M to toggle mobile preview mode!</p>
+
+            <div>
+              <form className="space-y-6" onSubmit={handleFormSubmit}>
+                <div>
+                  <input
+                    type="text"
+                    name="name"
+                    placeholder="NAME"
+                    value={formData.name}
+                    onChange={handleFormChange}
+                    className="w-full px-6 py-4 bg-slate-800 border-4 border-slate-700 text-white placeholder-zinc-400 font-bold focus:outline-none focus:border-red-500"
+                  />
                 </div>
-              </div>
-
-              <div className="text-center">
-                <p className="text-lg font-bold mb-4">SELECT DIFFERENT PHONES FROM DROPDOWN!</p>
-              </div>
-
-              <div>
-                <h3 className="font-bold text-xl mb-4 text-center">Why check both mobile & desktop?! 🤔 well, let me explain..</h3>
-                <div className="space-y-3 text-gray-700">
-                  <p className="text-lg">
-                    So… the pics you upload will look different on phones vs. computers That's life…
-                  </p>
-                  <p className="text-lg">
-                    Making images look good for all devices, well it's a shite problem… even big companies struggle!
-                  </p>
-                  <p className="text-lg font-bold">
-                    So PLEASE can you check how it looks on both before publishing.
-                  </p>
-                  <p className="text-lg mt-4">
-                    Sometimes an image that looks perfect on desktop might be:
-                  </p>
-                  <ul className="list-disc list-inside text-lg ml-4 space-y-1">
-                    <li>zoomed differently</li>
-                    <li>cut off</li>
-                    <li>or not filling the shape nicely, for example.</li>
-                  </ul>
-                  <p className="text-lg mt-4">
-                    Find the way that makes it look good for both
-                  </p>
-                  <p className="text-lg mt-4 font-bold">
-                    GOODLUCK! Have fun.
-                  </p>
+                <div>
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="EMAIL *"
+                    required
+                    value={formData.email}
+                    onChange={handleFormChange}
+                    className="w-full px-6 py-4 bg-slate-800 border-4 border-slate-700 text-white placeholder-zinc-400 font-bold focus:outline-none focus:border-red-500"
+                  />
                 </div>
-              </div>
-
-              <div className="text-center pt-6">
-                <Button
-                  onClick={() => setShowMobilePreviewHelp(false)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg font-bold"
+                <div>
+                  <input
+                    type="tel"
+                    name="phone"
+                    placeholder="PHONE"
+                    value={formData.phone}
+                    onChange={handleFormChange}
+                    className="w-full px-6 py-4 bg-slate-800 border-4 border-slate-700 text-white placeholder-zinc-400 font-bold focus:outline-none focus:border-red-500"
+                  />
+                </div>
+                <div>
+                  <textarea
+                    name="message"
+                    placeholder="TELL US WHAT YOU NEED"
+                    rows={4}
+                    value={formData.message}
+                    onChange={handleFormChange}
+                    className="w-full px-6 py-4 bg-slate-800 border-4 border-slate-700 text-white placeholder-zinc-400 font-bold focus:outline-none focus:border-red-500"
+                  />
+                </div>
+                <Button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="w-full bg-red-600 hover:bg-red-700 py-4 font-black text-lg tracking-widest border-4 border-red-600 disabled:opacity-50"
                 >
-                  I CAN DO THIS! 👍
+                  {isSubmitting ? "SENDING..." : "SEND A MESSAGE"}
                 </Button>
-              </div>
+              </form>
             </div>
           </div>
         </div>
-      )}
+      </section>
 
       {/* Footer */}
-      <footer className="bg-slate-800 border-t-4 border-red-600 text-zinc-400 py-6">
-        <div className="container mx-auto px-4">
-          <p className="text-sm font-bold">&copy; 2025, FOXBUILT. ESTABLISHED 1999. BUILT IN AMERICA.</p>
-          <p className="text-xs text-zinc-500 mt-1">THIS SITE IS A PRODUCT OF LAKOTA.CODE.CO. USER ACCEPTS IT IS WHAT IT IS.</p>
-          <p className="text-xs text-yellow-500 mt-1">Want a free website? Email lakota.code@gmail.com</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }

@@ -2,74 +2,43 @@
 
 import { useState, useEffect, useRef } from "react"
 import Image from "next/image"
-import { ChevronLeft, ChevronRight, Phone, Mail, MapPin, FileText, Save, Edit2, X, Check, Maximize2 } from "lucide-react"
+import { ChevronLeft, ChevronRight, FileText, Save, Edit2, X, Check, Maximize2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { getProducts, saveProducts, defaultProducts } from "@/lib/products-data"
 
-// DVD Bouncing emoji component
-const BouncingEmoji = ({ emoji, delay = 0 }: { emoji: string; delay?: number }) => {
-  const [position, setPosition] = useState({ x: 50, y: 50 })
-  const [velocity, setVelocity] = useState({ x: 0.3, y: 0.3 })
-  const [isInitialized, setIsInitialized] = useState(false)
+// Import our extracted components
+import BouncingEmoji from '@/components/carrie/ui/BouncingEmoji'
+import PasswordScreen from '@/components/carrie/auth/PasswordScreen'
+import PageSelector from '@/components/carrie/ui/PageSelector'
+import InitialPrompt from '@/components/carrie/ui/InitialPrompt'
+import LoadingOverlay from '@/components/carrie/ui/LoadingOverlay'
+import AdminControls from '@/components/carrie/ui/AdminControls'
+import HelpModal from '@/components/carrie/ui/HelpModal'
+import PublishConfirmation from '@/components/carrie/ui/PublishConfirmation'
+import MobilePreviewHelp from '@/components/carrie/ui/MobilePreviewHelp'
+import GalleryEditor from '@/components/carrie/editors/GalleryEditor'
+import { publishToGitHub } from '@/components/carrie/services/github-publish'
+import { 
+  processProductImageUpload, 
+  processGalleryImageUpload, 
+  handleImageUpload as handleImageUploadService, 
+  handleGalleryImageUpload as handleGalleryImageUploadService 
+} from '@/components/carrie/services/image-upload'
+import { CONSTRUCTION_MESSAGES, DEFAULT_GALLERY_IMAGES, DEFAULT_MOBILE_GALLERY_IMAGES } from '@/components/carrie/constants/editor-constants'
+import { useCropControls } from '@/components/carrie/hooks/useCropControls'
+import HeroSection from '@/components/carrie/sections/HeroSection'
+import GallerySection from '@/components/carrie/sections/GallerySection'
+import FeaturedProducts from '@/components/carrie/sections/FeaturedProducts'
+import AboutSection from '@/components/carrie/sections/AboutSection'
+import ContactSection from '@/components/carrie/sections/ContactSection'
+import Footer from '@/components/carrie/sections/Footer'
 
-  useEffect(() => {
-    // Initialize with random values after mount to avoid hydration issues
-    setPosition({ x: Math.random() * 80, y: Math.random() * 80 })
-    setVelocity({ 
-      x: (Math.random() - 0.5) * 0.5, 
-      y: (Math.random() - 0.5) * 0.5 
-    })
-    setIsInitialized(true)
-  }, [])
-
-  useEffect(() => {
-    if (!isInitialized) return
-
-    const interval = setInterval(() => {
-      setPosition(prev => {
-        let newX = prev.x + velocity.x
-        let newY = prev.y + velocity.y
-        let newVelX = velocity.x
-        let newVelY = velocity.y
-
-        // Bounce off edges
-        if (newX <= 0 || newX >= 90) {
-          newVelX = -velocity.x
-          newX = newX <= 0 ? 0 : 90
-        }
-        if (newY <= 0 || newY >= 90) {
-          newVelY = -velocity.y
-          newY = newY <= 0 ? 0 : 90
-        }
-
-        setVelocity({ x: newVelX, y: newVelY })
-        return { x: newX, y: newY }
-      })
-    }, 50)
-
-    return () => clearInterval(interval)
-  }, [velocity, isInitialized])
-
-  return (
-    <div 
-      className="absolute text-6xl transition-all duration-50"
-      style={{ 
-        left: `${position.x}%`, 
-        top: `${position.y}%`,
-        animationDelay: `${delay}s`
-      }}
-    >
-      {emoji}
-    </div>
-  )
-}
 
 export default function AdminEditor() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [showPageSelection, setShowPageSelection] = useState(false)
   const [password, setPassword] = useState("")
-  const [isMobile, setIsMobile] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [currentSlide, setCurrentSlide] = useState(0)
   const [featuredCategory, setFeaturedCategory] = useState("new")
@@ -85,6 +54,8 @@ export default function AdminEditor() {
   const [expandedSpecs, setExpandedSpecs] = useState<number | null>(null)
   const [showSpecsModal, setShowSpecsModal] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState<any>(null)
+  const [showMobilePreviewHelp, setShowMobilePreviewHelp] = useState(false)
+  const [galleryViewMode, setGalleryViewMode] = useState<'desktop' | 'mobile'>('desktop')
   
   // Temporary preview storage for blob URLs
   const [tempPreviews, setTempPreviews] = useState<{[key: string]: string}>({})
@@ -95,16 +66,10 @@ export default function AdminEditor() {
   const [editingCrop, setEditingCrop] = useState<string | null>(null)
 
   // Gallery images
-  const defaultGalleryImages = [
-    "/images/showroom-1.jpg",
-    "/images/showroom-2.jpg",
-    "/images/Showroomwglassboard.jpg",
-    "/images/showfacinggarage.jpg",
-    "/images/tanconf.jpg",
-    "/images/reception tan.jpg",
-  ]
-  const [galleryImages, setGalleryImages] = useState(defaultGalleryImages)
-  const [pendingGalleryImages, setPendingGalleryImages] = useState(defaultGalleryImages)
+  const [galleryImages, setGalleryImages] = useState(DEFAULT_GALLERY_IMAGES)
+  const [pendingGalleryImages, setPendingGalleryImages] = useState(DEFAULT_GALLERY_IMAGES)
+  const [mobileGalleryImages, setMobileGalleryImages] = useState(DEFAULT_MOBILE_GALLERY_IMAGES)
+  const [pendingMobileGalleryImages, setPendingMobileGalleryImages] = useState(DEFAULT_MOBILE_GALLERY_IMAGES)
   
   // Upload queue management
   const [uploadQueue, setUploadQueue] = useState<Array<{type: 'product' | 'gallery', file: File, category?: string, productId?: number, index?: number, fileName?: string}>>([])
@@ -115,7 +80,6 @@ export default function AdminEditor() {
   const [showPublishLoadingOverlay, setShowPublishLoadingOverlay] = useState(false)
   const [publishMessage, setPublishMessage] = useState("")
   const [showHelp, setShowHelp] = useState(false)
-  const [showMobilePreviewHelp, setShowMobilePreviewHelp] = useState(false)
   
   // Construction messages for publish loading
   const constructionMessages = [
@@ -133,8 +97,7 @@ export default function AdminEditor() {
     "Unloading the truck...",
     "Checking measurements twice...",
     "Torquing bolts to spec...",
-    "Applying finish coat...",
-    "Quality control inspection..."
+    "Applying finish coat..."
   ]
   
   // Helper function to get displayable image URL
@@ -194,107 +157,16 @@ export default function AdminEditor() {
   }, [tempPreviews, galleryTempPreviews])
   
   // Handle arrow keys for image movement and lock scroll when editing
-  useEffect(() => {
-    if (!editingCrop) return
-    
-    // Lock body scroll
-    document.body.style.overflow = 'hidden'
-    
-    // Track currently pressed keys
-    const pressedKeys = new Set<string>()
-    
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (!editingCrop) return
-      
-      // Add key to pressed set
-      pressedKeys.add(e.key)
-      
-      // Count how many arrow keys are pressed
-      const arrowKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']
-      const pressedArrows = arrowKeys.filter(key => pressedKeys.has(key))
-      
-      // Only process movement if exactly one arrow key is pressed
-      if (pressedArrows.length !== 1) return
-      
-      const moveAmount = 2 // percentage to move per key press
-      const currentCrop = cropSettings[editingCrop] || { scale: 1, x: 50, y: 50 }
-      
-      switch(e.key) {
-        case 'ArrowUp':
-          e.preventDefault()
-          setCropSettings(prev => ({
-            ...prev,
-            [editingCrop]: { ...currentCrop, y: Math.max(0, currentCrop.y - moveAmount) }
-          }))
-          break
-        case 'ArrowDown':
-          e.preventDefault()
-          setCropSettings(prev => ({
-            ...prev,
-            [editingCrop]: { ...currentCrop, y: Math.min(100, currentCrop.y + moveAmount) }
-          }))
-          break
-        case 'ArrowLeft':
-          e.preventDefault()
-          setCropSettings(prev => ({
-            ...prev,
-            [editingCrop]: { ...currentCrop, x: Math.max(0, currentCrop.x - moveAmount) }
-          }))
-          break
-        case 'ArrowRight':
-          e.preventDefault()
-          setCropSettings(prev => ({
-            ...prev,
-            [editingCrop]: { ...currentCrop, x: Math.min(100, currentCrop.x + moveAmount) }
-          }))
-          break
-        case 'Escape':
-          setEditingCrop(null)
-          break
-      }
-    }
-    
-    const handleKeyUp = (e: KeyboardEvent) => {
-      // Remove key from pressed set
-      pressedKeys.delete(e.key)
-    }
-    
-    const handleWheel = (e: WheelEvent) => {
-      if (!editingCrop) return
-      e.preventDefault()
-      
-      const currentCrop = cropSettings[editingCrop] || { scale: 1, x: 50, y: 50 }
-      const delta = e.deltaY > 0 ? 0.9 : 1.1
-      const newScale = Math.max(0.17, Math.min(9, currentCrop.scale * delta))
-      
-      setCropSettings(prev => ({
-        ...prev,
-        [editingCrop]: { ...currentCrop, scale: newScale }
-      }))
-    }
-    
-    document.addEventListener('keydown', handleKeyDown)
-    document.addEventListener('keyup', handleKeyUp)
-    document.addEventListener('wheel', handleWheel, { passive: false })
-    
-    return () => {
-      // Restore body scroll
-      document.body.style.overflow = ''
-      document.removeEventListener('keydown', handleKeyDown)
-      document.removeEventListener('keyup', handleKeyUp)
-      document.removeEventListener('wheel', handleWheel)
-    }
-  }, [editingCrop, cropSettings])
+  useCropControls({
+    editingCrop,
+    cropSettings,
+    setCropSettings,
+    setEditingCrop
+  })
 
   // Check if mobile and load saved data on mount
   useEffect(() => {
     // Check if mobile
-    const checkMobile = () => {
-      const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera
-      const isMobileDevice = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent.toLowerCase())
-      setIsMobile(isMobileDevice)
-    }
-    checkMobile()
     
     // Load from localStorage only - no automatic draft loading
     const savedGallery = localStorage.getItem('foxbuilt-gallery')
@@ -305,6 +177,17 @@ export default function AdminEditor() {
         setPendingGalleryImages(images)
       } catch (e) {
         console.error('Error loading gallery images:', e)
+      }
+    }
+    
+    const savedMobileGallery = localStorage.getItem('foxbuilt-mobile-gallery')
+    if (savedMobileGallery) {
+      try {
+        const images = JSON.parse(savedMobileGallery)
+        setMobileGalleryImages(images)
+        setPendingMobileGalleryImages(images)
+      } catch (e) {
+        console.error('Error loading mobile gallery images:', e)
       }
     }
     
@@ -334,6 +217,11 @@ export default function AdminEditor() {
           setPendingGalleryImages(data.gallery)
           localStorage.setItem('foxbuilt-gallery', JSON.stringify(data.gallery))
         }
+        if (data.mobileGallery) {
+          setMobileGalleryImages(data.mobileGallery)
+          setPendingMobileGalleryImages(data.mobileGallery)
+          localStorage.setItem('foxbuilt-mobile-gallery', JSON.stringify(data.mobileGallery))
+        }
         
         // Load gallery crops if available
         if (data.galleryCrops) {
@@ -359,9 +247,15 @@ export default function AdminEditor() {
       setUploadQueue(queue => queue.slice(1))
       
       if (nextUpload.type === 'product') {
-        processProductImageUpload(nextUpload.category!, nextUpload.productId!, nextUpload.file, nextUpload.fileName!)
+        processProductImageUpload(nextUpload.category!, nextUpload.productId!, nextUpload.file, nextUpload.fileName!, {
+          showMessage,
+          setActiveUploads
+        })
       } else {
-        processGalleryImageUpload(nextUpload.index!, nextUpload.file, nextUpload.fileName!)
+        processGalleryImageUpload(nextUpload.index!, nextUpload.file, nextUpload.fileName!, {
+          showMessage,
+          setActiveUploads
+        })
       }
     }
   }, [uploadQueue, activeUploads])
@@ -411,17 +305,6 @@ export default function AdminEditor() {
     setCurrentSlide((prev) => (prev - 1 + pendingGalleryImages.length) % pendingGalleryImages.length)
   }
 
-  // Authentication
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (password === "foxbuilt2025") {
-      setShowPageSelection(true)
-    } else if (password === "goof") {
-      window.location.href = '/games'
-    } else {
-      alert("Incorrect password")
-    }
-  }
 
   // Update product
   const updateProduct = (category: string, productId: number, field: string, value: any) => {
@@ -435,362 +318,80 @@ export default function AdminEditor() {
 
   // Add image to upload queue
   const handleImageUpload = (category: string, productId: number, file: File) => {
-    // Generate the filename immediately
-    const timestamp = Date.now()
-    const fileName = `product-${productId}-${timestamp}.jpg`
-    const githubPath = `/images/${fileName}`
-    
-    // Update to use GitHub path immediately
-    updateProduct(category, productId, 'image', githubPath)
-    
-    // Reset crop settings for the new image (full image, no crop)
-    setCropSettings(prev => ({
-      ...prev,
-      [githubPath]: { scale: 1, x: 50, y: 50 }
-    }))
-    
-    // Create a temporary preview URL
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      if (e.target?.result) {
-        setTempPreviews(prev => ({
-          ...prev,
-          [githubPath]: e.target.result as string
-        }))
-      }
-    }
-    reader.readAsDataURL(file)
-    
-    // Add to queue with the filename
-    setUploadQueue(queue => [...queue, { type: 'product', file, category, productId, fileName }])
+    handleImageUploadService(category, productId, file, {
+      updateProduct,
+      setCropSettings,
+      setTempPreviews,
+      setUploadQueue,
+      showMessage,
+      setActiveUploads
+    })
   }
   
-  // Process product image upload
-  const processProductImageUpload = async (category: string, productId: number, file: File, fileName: string) => {
-    setActiveUploads(count => count + 1)
-    
-    // Set a timeout to prevent infinite loading
-    const uploadTimeout = setTimeout(() => {
-      console.error('Product upload timeout after 30 seconds')
-      showMessage("❌ Upload timeout - please try again", 5000)
-      setActiveUploads(count => count - 1)
-    }, 30000) // 30 second timeout
-    
-    try {
-      // GitHub API configuration
-      // GitHub token from environment variable
-      // Set this in Netlify: Site settings → Environment variables
-      // Name: NEXT_PUBLIC_GITHUB_TOKEN
-      // Value: your GitHub token (get from https://github.com/settings/tokens/new)
-      const GITHUB_TOKEN = process.env.NEXT_PUBLIC_GITHUB_TOKEN || 'SET_IN_NETLIFY_ENV'
-      const OWNER = 'lakotafox'
-      const REPO = 'FOXSITE'
-      
-      // Use the pre-generated filename
-      const PATH = `public/images/${fileName}`
-      
-      // Convert file to base64
-      const reader = new FileReader()
-      reader.readAsDataURL(file)
-      
-      reader.onload = async () => {
-        const base64Data = reader.result as string
-        // Remove the data:image/jpeg;base64, prefix
-        const base64Content = base64Data.split(',')[1]
-        
-        // Upload to GitHub
-        const response = await fetch(
-          `https://api.github.com/repos/${OWNER}/${REPO}/contents/${PATH}`,
-          {
-            method: 'PUT',
-            headers: {
-              'Authorization': `token ${GITHUB_TOKEN}`,
-              'Accept': 'application/vnd.github.v3+json',
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              message: `Add product image: ${fileName}`,
-              content: base64Content,
-              branch: 'main'
-            })
-          }
-        )
-        
-        if (response.ok) {
-          // Upload successful - image will show after build
-          clearTimeout(uploadTimeout)
-        setActiveUploads(count => count - 1)
-        } else {
-          const error = await response.json()
-          console.error('GitHub upload error:', error)
-          if (response.status === 401) {
-            showMessage("❌ GitHub token expired - Tell Khabe: 'GitHub 401 error'", 5000)
-            alert("ERROR: GitHub token expired (401)\n\nTell Khabe: 'GitHub 401 error - need new token'\n\nHe'll fix it free!")
-          } else {
-            showMessage(`❌ Error: ${error.message || response.status}`, 5000)
-          }
-          clearTimeout(uploadTimeout)
-        setActiveUploads(count => count - 1)
-        }
-      }
-      
-      reader.onerror = () => {
-        showMessage("❌ Error reading image file", 3000)
-        clearTimeout(uploadTimeout)
-        setActiveUploads(count => count - 1)
-      }
-    } catch (error) {
-      console.error('Image upload error:', error)
-      showMessage("❌ Error uploading image", 3000)
-      setActiveUploads(count => count - 1)
-    }
-  }
 
   // Add gallery image to upload queue
-  const handleGalleryImageUpload = (index: number, file: File) => {
-    // Generate the filename immediately
-    const timestamp = Date.now()
-    const fileName = `gallery-${index}-${timestamp}.jpg`
-    const githubPath = `/images/${fileName}`
+  const handleGalleryImageUpload = (index: number, file: File, isMobile: boolean = false) => {
+    const currentImages = isMobile ? pendingMobileGalleryImages : pendingGalleryImages
+    const setImages = isMobile ? setPendingMobileGalleryImages : setPendingGalleryImages
     
-    // Update to use GitHub path immediately
-    const newImages = [...pendingGalleryImages]
-    newImages[index] = githubPath
-    setPendingGalleryImages(newImages)
-    
-    // Reset crop settings for the new image (full image, no crop)
-    setCropSettings(prev => ({
-      ...prev,
-      [githubPath]: { scale: 1, x: 50, y: 50 }
-    }))
-    
-    // Create a temporary preview URL
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      if (e.target?.result) {
-        setGalleryTempPreviews(prev => ({
-          ...prev,
-          [githubPath]: e.target.result as string
-        }))
-      }
-    }
-    reader.readAsDataURL(file)
-    
-    // Add to queue with the filename
-    setUploadQueue(queue => [...queue, { type: 'gallery', file, index, fileName }])
-  }
-  
-  // Process gallery image upload
-  const processGalleryImageUpload = async (index: number, file: File, fileName: string) => {
-    setActiveUploads(count => count + 1)
-    
-    // Set a timeout to prevent infinite loading
-    const uploadTimeout = setTimeout(() => {
-      showMessage("❌ Upload timeout - please try again", 5000)
-      setActiveUploads(count => count - 1)
-    }, 30000) // 30 second timeout
-    
-    
-    try {
-      // GitHub token from environment variable
-      // Set this in Netlify: Site settings → Environment variables
-      // Name: NEXT_PUBLIC_GITHUB_TOKEN
-      // Value: your GitHub token (get from https://github.com/settings/tokens/new)
-      const GITHUB_TOKEN = process.env.NEXT_PUBLIC_GITHUB_TOKEN || 'SET_IN_NETLIFY_ENV'
-      const OWNER = 'lakotafox'
-      const REPO = 'FOXSITE'
-      
-      // Use the pre-generated filename
-      const PATH = `public/images/${fileName}`
-      
-      // Convert file to base64
-      const reader = new FileReader()
-      reader.readAsDataURL(file)
-      
-      reader.onload = async () => {
-        try {
-          const base64Data = reader.result as string
-          const base64Content = base64Data.split(',')[1]
-          
-          // Upload to GitHub
-          const response = await fetch(
-          `https://api.github.com/repos/${OWNER}/${REPO}/contents/${PATH}`,
-          {
-            method: 'PUT',
-            headers: {
-              'Authorization': `token ${GITHUB_TOKEN}`,
-              'Accept': 'application/vnd.github.v3+json',
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              message: `Add gallery image: ${fileName}`,
-              content: base64Content,
-              branch: 'main'
-            })
-          }
-        )
-        
-        
-        if (!response.ok) {
-          const error = await response.json()
-          if (response.status === 401) {
-            showMessage("❌ GitHub token expired - Tell Khabe: 'GitHub 401 error'", 5000)
-            alert("ERROR: GitHub token expired (401)\n\nTell Khabe: 'GitHub 401 error - need new token'\n\nHe'll fix it free!")
-          } else if (response.status === 404) {
-            showMessage(`❌ GitHub repo not found or no access - check token permissions`, 5000)
-          } else {
-            showMessage(`❌ Error: ${error.message || response.status}`, 5000)
-          }
-          clearTimeout(uploadTimeout)
-        setActiveUploads(count => count - 1)
-          return
-        }
-        
-        // Upload successful - image will show after build
-        
-        
-        clearTimeout(uploadTimeout)
-        setActiveUploads(count => count - 1)
-        } catch (uploadError) {
-          console.error('Error during upload:', uploadError)
-          showMessage("❌ Upload error - check console", 5000)
-          clearTimeout(uploadTimeout)
-          setActiveUploads(count => count - 1)
-        }
-      }
-      
-      reader.onerror = () => {
-        console.error('FileReader error')
-        showMessage("❌ Error reading gallery image", 3000)
-        clearTimeout(uploadTimeout)
-        setActiveUploads(count => count - 1)
-      }
-    } catch (error) {
-      console.error('Gallery upload error:', error)
-      showMessage("❌ Error uploading image", 3000)
-      setActiveUploads(count => count - 1)
-    }
+    handleGalleryImageUploadService(index, file, currentImages, {
+      setPendingGalleryImages: setImages,
+      setCropSettings,
+      setGalleryTempPreviews,
+      setUploadQueue,
+      showMessage,
+      setActiveUploads
+    })
   }
 
 
 
   // Save all changes (publish live)
   const saveAllChanges = async () => {
-    showMessage("🚀 Publishing live site...", 30000) // 30 seconds for publish
+    const result = await publishToGitHub({
+      products: featuredProducts,
+      gallery: pendingGalleryImages,
+      mobileGallery: pendingMobileGalleryImages,
+      cropSettings,
+      showMessage
+    })
     
-    try {
-      // GitHub API configuration
-      // GitHub token from environment variable
-      // Set this in Netlify: Site settings → Environment variables
-      // Name: NEXT_PUBLIC_GITHUB_TOKEN
-      // Value: your GitHub token (get from https://github.com/settings/tokens/new)
-      const GITHUB_TOKEN = process.env.NEXT_PUBLIC_GITHUB_TOKEN || 'SET_IN_NETLIFY_ENV'
-      const OWNER = 'lakotafox'
-      const REPO = 'FOXSITE'
-      const PATH = 'public/content.json'
+    if (result.success) {
+      // Also save to localStorage as backup
+      saveProducts(featuredProducts)
+      localStorage.setItem('foxbuilt-gallery', JSON.stringify(pendingGalleryImages))
+      localStorage.setItem('foxbuilt-mobile-gallery', JSON.stringify(pendingMobileGalleryImages))
+      setGalleryImages(pendingGalleryImages)
+      setPendingGalleryImages(pendingGalleryImages)
+      setMobileGalleryImages(pendingMobileGalleryImages)
+      setPendingMobileGalleryImages(pendingMobileGalleryImages)
       
-      // First, get the current file to get its SHA
-      const currentFileResponse = await fetch(
-        `https://api.github.com/repos/${OWNER}/${REPO}/contents/${PATH}`,
-        {
-          headers: {
-            'Authorization': `token ${GITHUB_TOKEN}`,
-            'Accept': 'application/vnd.github.v3+json'
-          }
-        }
-      )
+      setSaveMessage("✅ Published successfully!")
       
-      let sha = ''
-      if (currentFileResponse.ok) {
-        const currentFile = await currentFileResponse.json()
-        sha = currentFile.sha
-      }
-      
-      // No conversion needed - images already use GitHub paths
-      // But we need to add crop settings to products
-      const convertedProducts = JSON.parse(JSON.stringify(featuredProducts))
-      Object.keys(convertedProducts).forEach(category => {
-        convertedProducts[category].forEach((product: any) => {
-          if (cropSettings[product.image]) {
-            product.imageCrop = cropSettings[product.image]
-          }
-        })
-      })
-      const convertedGallery = pendingGalleryImages
-      
-      
-      // Prepare the content
-      const content = {
-        products: convertedProducts,
-        gallery: convertedGallery,
-        galleryCrops: cropSettings, // Save all crop settings
-        lastUpdated: new Date().toISOString(),
-        updatedBy: "Kyle"
-      }
-      
-      
-      // Encode content to base64
-      const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2))))
-      
-      // Update the file on GitHub
-      const updateResponse = await fetch(
-        `https://api.github.com/repos/${OWNER}/${REPO}/contents/${PATH}`,
-        {
-          method: 'PUT',
-          headers: {
-            'Authorization': `token ${GITHUB_TOKEN}`,
-            'Accept': 'application/vnd.github.v3+json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            message: `Update products and gallery via admin panel - ${new Date().toLocaleString()}`,
-            content: contentBase64,
-            sha: sha, // Required for updates
-            branch: 'main'
-          })
-        }
-      )
-      
-      if (updateResponse.ok) {
-        // Also save to localStorage as backup
-        saveProducts(convertedProducts)
-        localStorage.setItem('foxbuilt-gallery', JSON.stringify(convertedGallery))
-        setGalleryImages(convertedGallery)
-        setPendingGalleryImages(convertedGallery)
+      // Show publish loading overlay for 1 minute
+      setTimeout(() => {
+        setSaveMessage("")
+        setShowPublishLoadingOverlay(true)
         
-        setSaveMessage("✅ Published successfully!")
+        // Start rotating messages
+        let messageIndex = 0
+        setPublishMessage(CONSTRUCTION_MESSAGES[0])
         
-        // Show publish loading overlay for 1 minute
+        const messageInterval = setInterval(() => {
+          messageIndex = (messageIndex + 1) % CONSTRUCTION_MESSAGES.length
+          setPublishMessage(CONSTRUCTION_MESSAGES[messageIndex])
+        }, 4000) // Change message every 4 seconds
+        
+        // Hide overlay after 60 seconds
         setTimeout(() => {
-          setSaveMessage("")
-          setShowPublishLoadingOverlay(true)
-          
-          // Start rotating messages
-          let messageIndex = 0
-          setPublishMessage(constructionMessages[0])
-          
-          const messageInterval = setInterval(() => {
-            messageIndex = (messageIndex + 1) % constructionMessages.length
-            setPublishMessage(constructionMessages[messageIndex])
-          }, 4000) // Change message every 4 seconds
-          
-          // Hide overlay after 60 seconds
-          setTimeout(() => {
-            clearInterval(messageInterval)
-            setShowPublishLoadingOverlay(false)
-            setPublishMessage("")
-            setShowPublishConfirm(true)
-          }, 60000) // 1 minute
-        }, 2000)
-      } else {
-        const error = await updateResponse.json()
-        console.error('GitHub API error:', error)
-        setSaveMessage(`❌ Error publishing: ${error.message || updateResponse.status}`)
-        setTimeout(() => setSaveMessage(""), 5000)
-      }
-    } catch (error) {
-      console.error('Error publishing to GitHub:', error)
-      setSaveMessage(`❌ Error publishing: ${error.message || error}`)
+          clearInterval(messageInterval)
+          setShowPublishLoadingOverlay(false)
+          setPublishMessage("")
+          setShowPublishConfirm(true)
+        }, 60000) // 1 minute
+      }, 2000)
+    } else {
+      setSaveMessage(`❌ Error publishing: ${result.error}`)
       setTimeout(() => setSaveMessage(""), 5000)
     }
   }
@@ -802,265 +403,41 @@ export default function AdminEditor() {
     // Show page selection after successful password
     if (showPageSelection) {
       return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-800 via-slate-900 to-zinc-900 flex items-center justify-center p-4">
-          <div className="bg-slate-800 border-8 border-red-600 p-12 max-w-2xl w-full">
-            <h1 className="text-4xl font-black text-white mb-8 text-center tracking-tight">
-              FOXBUILT
-              <br />
-              <span className="text-red-500">EDITOR SELECTION</span>
-            </h1>
-            <p className="text-xl text-zinc-300 text-center mb-12 font-bold">
-              Choose which page to edit:
-            </p>
-            <div className="grid md:grid-cols-2 gap-8">
-              <button
-                onClick={() => setIsAuthenticated(true)}
-                className="bg-green-600 hover:bg-green-700 text-white font-black text-xl p-8 border-4 border-green-500 hover:border-green-600 transition-all transform hover:scale-105"
-              >
-                <div>EDIT MAIN PAGE</div>
-                <div className="text-sm mt-2 font-normal">Homepage content & featured products</div>
-              </button>
-              <button
-                onClick={() => {
-                  // Set a session flag that the user is already authenticated
-                  sessionStorage.setItem('foxbuilt-authenticated', 'true')
-                  window.location.href = '/products-editor'
-                }}
-                className="bg-yellow-600 hover:bg-yellow-700 text-white font-black text-xl p-8 border-4 border-yellow-500 hover:border-yellow-600 transition-all transform hover:scale-105"
-              >
-                <div>EDIT PRODUCTS</div>
-                <div className="text-sm mt-2 font-normal">Full products catalog page</div>
-              </button>
-            </div>
-            <button
-              onClick={() => {
-                setShowPageSelection(false)
-                setPassword("")
-              }}
-              className="mt-8 text-zinc-400 hover:text-white font-bold transition-colors block mx-auto"
-            >
-              ← Back to login
-            </button>
-          </div>
-        </div>
+        <PageSelector 
+          onSelectMainPage={() => setIsAuthenticated(true)}
+          onSelectProductsPage={() => {
+            sessionStorage.setItem('foxbuilt-authenticated', 'true')
+            window.location.href = '/products-editor'
+          }}
+          onBack={() => {
+            setShowPageSelection(false)
+            setPassword("")
+          }}
+        />
       )
     }
     
     if (!showPasswordScreen) {
-      // Initial prompt screen
-      return (
-        <div 
-          className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 flex items-center justify-center p-4 relative overflow-hidden cursor-pointer"
-          onClick={() => setShowPasswordScreen(true)}
-          onKeyDown={() => setShowPasswordScreen(true)}
-          tabIndex={0}
-        >
-          {/* DVD Bouncing emojis */}
-          <div className="absolute inset-0 overflow-hidden">
-            <BouncingEmoji emoji="🎃" delay={0} />
-            <BouncingEmoji emoji="🇺🇸" delay={0.5} />
-            <BouncingEmoji emoji="🎃" delay={1} />
-            <BouncingEmoji emoji="🇺🇸" delay={1.5} />
-            <BouncingEmoji emoji="🔨" delay={2} />
-            <BouncingEmoji emoji="🛠️" delay={2.5} />
-            
-            {/* Floating text message */}
-            <div className="absolute top-3/4 right-1/4 text-white/80 font-bold text-lg animate-pulse" style={{ animationDelay: '1s' }}>
-              🇺🇸 May Your Business Prosper! 🇺🇸
-            </div>
-          </div>
-          
-          {/* Main prompt */}
-          <div className="text-center z-10">
-            <h1 className="text-3xl md:text-4xl font-black text-white animate-pulse">
-              FIRE THE EDITOR, BOSS?
-            </h1>
-          </div>
-        </div>
-      )
+      return <InitialPrompt onShowPassword={() => setShowPasswordScreen(true)} />
     }
 
     // Password screen
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-800 via-slate-900 to-zinc-900 flex items-center justify-center p-4 relative overflow-hidden">
-        {/* DVD Bouncing emojis (faded) */}
-        <div className="absolute inset-0 opacity-10 overflow-hidden">
-          <BouncingEmoji emoji="🎃" delay={0} />
-          <BouncingEmoji emoji="🇺🇸" delay={0.5} />
-          <BouncingEmoji emoji="🎃" delay={1} />
-          <BouncingEmoji emoji="🇺🇸" delay={1.5} />
-          <BouncingEmoji emoji="🔨" delay={2} />
-          <BouncingEmoji emoji="🛠️" delay={2.5} />
-        </div>
-        
-        <Card className="max-w-2xl w-full bg-white/95 backdrop-blur shadow-2xl border-4 border-red-600">
-          <CardContent className="p-12">
-            {/* ASCII Art - FOX on mobile, FOXBUILT on desktop */}
-            <pre className="text-red-600 font-mono text-xs text-center mb-8 font-bold block md:hidden">
-{`███████╗  ██████╗  ██╗  ██╗
-██╔════╝ ██╔═══██╗ ╚██╗██╔╝
-█████╗   ██║   ██║  ╚███╔╝ 
-██╔══╝   ██║   ██║  ██╔██╗ 
-██║      ╚██████╔╝ ██╔╝ ██╗
-╚═╝       ╚═════╝  ╚═╝  ╚═╝`}
-            </pre>
-            
-            <pre className="text-red-600 font-mono text-sm text-center mb-8 font-bold hidden md:block">
-{`███████╗  ██████╗  ██╗  ██╗ ██████╗  ██╗   ██╗ ██╗ ██╗   ████████╗
-██╔════╝ ██╔═══██╗ ╚██╗██╔╝ ██╔══██╗ ██║   ██║ ██║ ██║   ╚══██╔══╝
-█████╗   ██║   ██║  ╚███╔╝  ██████╔╝ ██║   ██║ ██║ ██║      ██║   
-██╔══╝   ██║   ██║  ██╔██╗  ██╔══██╗ ██║   ██║ ██║ ██║      ██║   
-██║      ╚██████╔╝ ██╔╝ ██╗ ██████╔╝ ╚██████╔╝ ██║ ███████╗ ██║   
-╚═╝       ╚═════╝  ╚═╝  ╚═╝ ╚═════╝   ╚═════╝  ╚═╝ ╚══════╝ ╚═╝`}
-            </pre>
-            
-            <div className="text-center mb-8">
-              <h1 className="text-4xl font-black text-slate-900 mb-4">
-                Hey Dad! 👋
-              </h1>
-              <p className="text-xl text-slate-700 font-bold mb-2">
-                Nice to see ya! 🎃
-              </p>
-              <p className="text-lg text-slate-600">
-                Ready to update the website?
-              </p>
-            </div>
-
-            <form onSubmit={handleLogin}>
-              <input
-                type="password"
-                placeholder="Enter the secret password..."
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full p-4 border-2 border-slate-300 rounded-lg mb-6 text-lg font-semibold focus:border-red-500 focus:outline-none"
-                autoFocus
-              />
-              <Button 
-                type="submit" 
-                className="w-full bg-red-600 hover:bg-red-700 text-white font-black text-lg py-4 tracking-wider"
-              >
-                LET'S GO! 🚀
-              </Button>
-            </form>
-
-            <div className="text-center mt-6 text-sm text-slate-500">
-              <p>Remember: With great power comes great furniture updates!</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    )
+    return <PasswordScreen onAuthenticate={() => setShowPageSelection(true)} />
   }
 
-  // Show mobile warning
-  if (isAuthenticated && isMobile) {
-    return (
-      <div className="min-h-screen bg-red-600 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg p-8 text-center max-w-md">
-          <h1 className="text-3xl font-black text-red-600 mb-4">
-            ⚠️ MOBILE NOT SUPPORTED
-          </h1>
-          <p className="text-lg mb-6">
-            Editor on mobile is not ready yet!
-          </p>
-          <p className="text-gray-600 mb-8">
-            Please use a desktop or laptop computer to edit the website.
-          </p>
-          <Button 
-            onClick={() => window.location.href = '/'}
-            className="bg-red-600 hover:bg-red-700 text-white font-bold"
-          >
-            Return to Main Site
-          </Button>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div className="min-h-screen bg-zinc-100">
-      {/* Loading Overlay */}
-      {showLoadingOverlay && (
-        <div className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center pointer-events-auto" style={{ pointerEvents: 'all' }}>
-          {/* Fox loading video only */}
-          <video 
-            className="w-64 h-64"
-            autoPlay
-            loop
-            muted
-            playsInline
-          >
-            <source src="/foxloading.webm" type="video/webm" />
-          </video>
-        </div>
-      )}
+      <LoadingOverlay show={showLoadingOverlay} type="default" />
+      <LoadingOverlay show={showPublishLoadingOverlay} type="publish" publishMessage={publishMessage} />
       
-      {/* Publish Loading Overlay */}
-      {showPublishLoadingOverlay && (
-        <div className="fixed inset-0 bg-black/95 z-[100] flex flex-col items-center justify-center pointer-events-auto" style={{ pointerEvents: 'all' }}>
-          {/* Fox loading video */}
-          <video 
-            className="w-64 h-64 mb-8"
-            autoPlay
-            loop
-            muted
-            playsInline
-          >
-            <source src="/foxloading.webm" type="video/webm" />
-          </video>
-          
-          {/* Construction message */}
-          <div className="text-white text-xl font-bold animate-pulse mb-8">
-            {publishMessage}
-          </div>
-          
-          {/* Game prompt */}
-          <div className="text-white text-lg">
-            Want to play a game while you wait?
-            <button
-              onClick={() => window.open('/games', '_blank')}
-              className="ml-3 bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded transition-all"
-            >
-              YES
-            </button>
-          </div>
-        </div>
-      )}
-      
-      {/* Admin Controls Bar */}
-      <div className="bg-green-600 text-white p-2">
-        <div className="container mx-auto">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-2">
-            <div className="flex items-center gap-2">
-              <Edit2 className="w-5 h-5" />
-              <span className="font-bold text-sm sm:text-base">ADMIN EDIT MODE</span>
-            </div>
-            <div className="flex gap-2 flex-wrap justify-center">
-              <Button
-                onClick={() => setShowMobilePreviewHelp(true)}
-                size="lg"
-                className="bg-blue-600 text-white hover:bg-blue-700 font-bold px-6 py-3 text-lg"
-              >
-                📱 Mobile Preview
-              </Button>
-              <Button
-                onClick={saveAllChanges}
-                size="lg"
-                className="bg-green-600 text-white hover:bg-green-700 font-bold px-8 py-3 text-lg"
-              >
-                🚀 Publish Changes
-              </Button>
-          </div>
-        </div>
-      </div>
-
+      <AdminControls onPublish={saveAllChanges} onMobilePreview={() => setShowMobilePreviewHelp(true)} />
       {/* Save message */}
       {saveMessage && (
         <div className="fixed top-0 left-0 right-0 z-[59] bg-green-500 text-white p-4 text-center font-bold">
           {saveMessage}
         </div>
       )}
-
       {/* Main site content with edit capability */}
       <div>
         {/* Header - Hidden in admin mode */}
@@ -1114,651 +491,67 @@ export default function AdminEditor() {
         </header>
         )}
 
-        {/* Hero Section - Same as main site */}
-        <section className={`bg-gradient-to-br from-slate-800 via-slate-900 to-zinc-900 py-24 text-white relative overflow-hidden ${isEditMode ? "pt-24" : "pt-40"}`}>
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute inset-0 bg-gradient-to-r from-red-600/20 to-blue-600/20"></div>
-            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-red-600 via-white to-blue-600"></div>
-          </div>
+        <HeroSection isEditMode={isEditMode} />
 
-          <div className="container mx-auto px-4 text-center relative z-10">
-            <div className="flex flex-col sm:flex-row gap-6 justify-center">
-              <Button
-                size="lg"
-                className="bg-red-600 hover:bg-red-700 text-white font-black text-lg px-10 py-4 border-4 border-white tracking-widest"
-                onClick={() => document.getElementById("gallery")?.scrollIntoView({ behavior: "smooth" })}
-              >
-                VISIT SHOWROOM
-              </Button>
-              <Button
-                size="lg"
-                className="bg-black hover:bg-zinc-800 text-white font-black text-lg px-10 py-4 border-4 border-white tracking-widest"
-              >
-                (801) 899-9406
-              </Button>
-            </div>
-          </div>
-        </section>
-
-        {/* Gallery - Same as main site */}
-        <section id="gallery" className="py-20 bg-zinc-100">
-          <div className="container mx-auto px-4">
-            <h2 className="text-5xl font-black text-center text-slate-900 mb-16 tracking-tight">
-              AMERICAN <span className="text-red-600">CRAFTSMANSHIP</span>
-            </h2>
-            <div className="relative max-w-6xl mx-auto">
-              {isEditMode && (
-                <div className="text-center mb-4">
-                  <Button
-                    onClick={() => setShowGalleryEditor(true)}
-                    className="bg-green-600 hover:bg-green-700 text-white"
-                  >
-                    <Edit2 className="w-4 h-4 mr-2" />
-                    Edit Gallery Images
-                  </Button>
-                </div>
-              )}
-              <div className="relative h-96 md:h-[500px] overflow-hidden border-8 border-slate-700 group bg-gray-100">
-                {pendingGalleryImages.map((image, index) => {
-                  const crop = cropSettings[image] || { scale: 1, x: 50, y: 50 }
-                  const isEditing = editingCrop === image
-                  const isActive = index === currentSlide
-                  
-                  return (
-                    <div
-                      key={index}
-                      className={`absolute inset-0 transition-opacity duration-1000 ${
-                        isActive ? "opacity-100" : "opacity-0"
-                      }`}
-                    >
-                      <div 
-                        className="absolute inset-0"
-                        style={{
-                          transform: `translate(${crop.x - 50}%, ${crop.y - 50}%) scale(${crop.scale})`,
-                          transition: isEditing ? 'none' : 'transform 0.3s'
-                        }}
-                      >
-                        <Image 
-                          src={getImageUrl(image, true)} 
-                          alt={`Project ${index + 1}`} 
-                          width={1000}
-                          height={600}
-                          className="w-full h-full object-contain"
-                          unoptimized
-                          priority={index === 0}
-                        />
-                      </div>
-                      
-                      {isEditMode && isActive && !isEditing && (
-                        <div className="absolute top-2 right-2 z-10">
-                          <button
-                            onClick={() => setEditingCrop(image)}
-                            className="hover:scale-110 transition-transform"
-                          >
-                            <Image
-                              src="/locked.jpeg"
-                              alt="Resize"
-                              width={48}
-                              height={48}
-                              className="drop-shadow-lg"
-                            />
-                          </button>
-                        </div>
-                      )}
-                      
-                      {isEditing && isActive && (
-                        <div className="absolute top-2 right-2 z-30">
-                          <button
-                            onClick={() => setEditingCrop(null)}
-                            className="hover:scale-110 transition-transform"
-                          >
-                            <Image
-                              src="/unlocked.jpeg"
-                              alt="Save"
-                              width={48}
-                              height={48}
-                              className="drop-shadow-lg"
-                            />
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-
-              <button
-                onClick={prevSlide}
-                className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-red-600 hover:bg-red-700 p-4 border-4 border-white shadow-xl transition-all z-30"
-              >
-                <ChevronLeft className="w-8 h-8 text-white" />
-              </button>
-              <button
-                onClick={nextSlide}
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-red-600 hover:bg-red-700 p-4 border-4 border-white shadow-xl transition-all z-30"
-              >
-                <ChevronRight className="w-8 h-8 text-white" />
-              </button>
-
-              <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-3">
-                {pendingGalleryImages.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentSlide(index)}
-                    className={`w-4 h-4 border-2 border-white transition-all ${
-                      index === currentSlide ? "bg-red-600" : "bg-slate-600"
-                    }`}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
+        <GallerySection
+          isEditMode={isEditMode}
+          pendingGalleryImages={galleryViewMode === 'mobile' ? pendingMobileGalleryImages : pendingGalleryImages}
+          currentSlide={currentSlide}
+          cropSettings={cropSettings}
+          editingCrop={editingCrop}
+          onEditGallery={() => setShowGalleryEditor(true)}
+          onSetCurrentSlide={setCurrentSlide}
+          onSetEditingCrop={setEditingCrop}
+          onNextSlide={nextSlide}
+          onPrevSlide={prevSlide}
+          getImageUrl={getImageUrl}
+        />
 
         {/* Featured Products Section - EDITABLE */}
-        <section className="py-20 bg-slate-800">
-          <div className="container mx-auto px-4">
-            <h2 className="text-5xl font-black text-center text-white mb-16 tracking-tight">
-              FEATURED <span className="text-blue-400">PRODUCTS</span>
-            </h2>
-
-            {/* Category Buttons */}
-            <div className="flex justify-center mb-12">
-              <div className="bg-slate-700 border-4 border-slate-600 p-2 flex flex-wrap justify-center">
-                <Button
-                  className={`font-black text-sm md:text-lg px-3 md:px-6 py-2 md:py-3 tracking-wide transition-all ${
-                    featuredCategory === "new"
-                      ? "bg-red-600 text-white border-2 border-red-600"
-                      : "bg-transparent text-zinc-300 hover:text-white border-2 border-transparent"
-                  }`}
-                  onClick={() => setFeaturedCategory("new")}
-                >
-                  NEW
-                </Button>
-                <Button
-                  className={`font-black text-sm md:text-lg px-3 md:px-6 py-2 md:py-3 tracking-wide transition-all ${
-                    featuredCategory === "battleTested"
-                      ? "bg-blue-600 text-white border-2 border-blue-600"
-                      : "bg-transparent text-zinc-300 hover:text-white border-2 border-transparent"
-                  }`}
-                  onClick={() => setFeaturedCategory("battleTested")}
-                >
-                  BATTLE TESTED
-                </Button>
-                <Button
-                  className={`font-black text-sm md:text-lg px-3 md:px-6 py-2 md:py-3 tracking-wide transition-all ${
-                    featuredCategory === "seating"
-                      ? "bg-green-600 text-white border-2 border-green-600"
-                      : "bg-transparent text-zinc-300 hover:text-white border-2 border-transparent"
-                  }`}
-                  onClick={() => setFeaturedCategory("seating")}
-                >
-                  SEATING
-                </Button>
-              </div>
-            </div>
-
-            {/* Product Grid */}
-            <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-              {featuredProducts[featuredCategory].map((product) => (
-                <Card
-                  key={product.id}
-                  className={`overflow-hidden hover:shadow-2xl transition-all border-4 border-slate-600 bg-zinc-100 ${
-                    isEditMode ? `ring-2 ${
-                      featuredCategory === "new"
-                        ? "ring-red-500"
-                        : featuredCategory === "battleTested"
-                          ? "ring-blue-500"
-                          : "ring-green-500"
-                    }` : ""
-                  }`}
-                >
-                  <div className="relative h-56 group overflow-hidden bg-gray-100">
-                    {(() => {
-                      const crop = cropSettings[product.image] || { scale: 1, x: 50, y: 50 }
-                      const isEditing = editingCrop === product.image
-                      
-                      return (
-                        <>
-                          <div 
-                            className="absolute inset-0"
-                            style={{
-                              transform: `translate(${crop.x - 50}%, ${crop.y - 50}%) scale(${crop.scale})`,
-                              transition: isEditing ? 'none' : 'transform 0.3s'
-                            }}
-                          >
-                            <Image 
-                              src={getImageUrl(product.image, false)} 
-                              alt={product.title} 
-                              width={500}
-                              height={500}
-                              className="w-full h-full object-contain"
-                              unoptimized
-                              key={product.image}
-                            />
-                          </div>
-                          
-                          {isEditMode && !isEditing && (
-                            <>
-                              <div className="absolute inset-0 flex items-end justify-center pb-4 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                                <label className="bg-white hover:bg-gray-100 text-black px-4 py-2 rounded cursor-pointer flex items-center gap-2 font-bold shadow-lg">
-                                  <Edit2 className="w-4 h-4" />
-                                  Change Image
-                                  <input
-                                    type="file"
-                                    accept="image/*"
-                                    className="hidden"
-                                    onChange={(e) => {
-                                      const file = e.target.files?.[0]
-                                      if (file) handleImageUpload(featuredCategory, product.id, file)
-                                    }}
-                                  />
-                                </label>
-                              </div>
-                              <div className="absolute top-2 right-2 z-10">
-                                <button
-                                  onClick={() => setEditingCrop(product.image)}
-                                  className="hover:scale-110 transition-transform"
-                                >
-                                  <Image
-                                    src="/locked.jpeg"
-                                    alt="Resize"
-                                    width={48}
-                                    height={48}
-                                    className="drop-shadow-lg"
-                                  />
-                                </button>
-                              </div>
-                            </>
-                          )}
-                          
-                          {isEditing && (
-                            <div className="absolute top-2 right-2 z-30">
-                              <button
-                                onClick={() => setEditingCrop(null)}
-                                className="hover:scale-110 transition-transform"
-                              >
-                                <Image
-                                  src="/unlocked.jpeg"
-                                  alt="Save"
-                                  width={48}
-                                  height={48}
-                                  className="drop-shadow-lg"
-                                />
-                              </button>
-                            </div>
-                          )}
-                        </>
-                      )
-                    })()}
-                  </div>
-                  <CardContent className="p-6">
-                    {/* Title */}
-                    {isEditMode && editingId === product.id ? (
-                      <input
-                        type="text"
-                        value={product.title}
-                        onChange={(e) => updateProduct(featuredCategory, product.id, 'title', e.target.value)}
-                        className="text-xl font-black mb-3 tracking-wide w-full p-1 border rounded"
-                        onBlur={() => setEditingId(null)}
-                        autoFocus
-                      />
-                    ) : (
-                      <h3 
-                        className={`text-xl font-black mb-3 tracking-wide ${
-                          isEditMode ? "cursor-pointer hover:bg-yellow-100 p-1 rounded" : ""
-                        }`}
-                        onClick={() => isEditMode && setEditingId(product.id)}
-                      >
-                        {product.title}
-                      </h3>
-                    )}
-
-                    {/* Description */}
-                    {isEditMode && editingId === -product.id ? (
-                      <textarea
-                        value={product.description}
-                        onChange={(e) => updateProduct(featuredCategory, product.id, 'description', e.target.value)}
-                        className="text-slate-600 mb-4 font-semibold w-full p-1 border rounded resize-none"
-                        rows={2}
-                        onBlur={() => setEditingId(null)}
-                        autoFocus
-                      />
-                    ) : (
-                      <p 
-                        className={`text-slate-600 mb-4 font-semibold ${
-                          isEditMode ? "cursor-pointer hover:bg-yellow-100 p-1 rounded" : ""
-                        }`}
-                        onClick={() => isEditMode && setEditingId(-product.id)}
-                      >
-                        {product.description}
-                      </p>
-                    )}
-
-                    {/* Features */}
-                    {product.features && (
-                      <ul className="text-sm text-slate-500 mb-4 space-y-1">
-                        {product.features.map((feature, index) => (
-                          <li key={index} className="flex items-center">
-                            <span
-                              className={`w-2 h-2 rounded-full mr-2 ${
-                                featuredCategory === "new"
-                                  ? "bg-red-600"
-                                  : featuredCategory === "battleTested"
-                                    ? "bg-blue-600"
-                                    : "bg-green-600"
-                              }`}
-                            ></span>
-                            {isEditMode && editingId === product.id * 1000 + index ? (
-                              <input
-                                type="text"
-                                value={feature}
-                                onChange={(e) => {
-                                  const newFeatures = [...product.features]
-                                  newFeatures[index] = e.target.value
-                                  updateProduct(featuredCategory, product.id, 'features', newFeatures)
-                                }}
-                                onBlur={() => setEditingId(null)}
-                                onKeyPress={(e) => e.key === 'Enter' && setEditingId(null)}
-                                className="flex-1 p-1 border rounded text-sm"
-                                autoFocus
-                              />
-                            ) : (
-                              <span 
-                                className={isEditMode ? "cursor-pointer hover:bg-yellow-100 p-1 rounded" : ""}
-                                onClick={() => isEditMode && setEditingId(product.id * 1000 + index)}
-                              >
-                                {feature}
-                              </span>
-                            )}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-
-                    {/* Price */}
-                    <div className="flex justify-between items-center">
-                      {isEditMode && editingId === product.id * 10000 ? (
-                        <input
-                          type="text"
-                          value={product.price}
-                          onChange={(e) => updateProduct(featuredCategory, product.id, 'price', e.target.value)}
-                          onBlur={() => setEditingId(null)}
-                          onKeyPress={(e) => e.key === 'Enter' && setEditingId(null)}
-                          className={`text-2xl font-black p-1 border rounded ${
-                            featuredCategory === "new"
-                              ? "text-red-600"
-                              : featuredCategory === "battleTested"
-                                ? "text-blue-600"
-                                : "text-green-600"
-                          }`}
-                          placeholder="e.g., $1,299"
-                          autoFocus
-                        />
-                      ) : (
-                        <span
-                          className={`text-2xl font-black ${
-                            featuredCategory === "new"
-                              ? "text-red-600"
-                              : featuredCategory === "battleTested"
-                                ? "text-blue-600"
-                                : "text-green-600"
-                          } ${isEditMode ? "cursor-pointer hover:bg-yellow-100 p-1 rounded" : ""}`}
-                          onClick={() => isEditMode && setEditingId(product.id * 10000)}
-                        >
-                          {product.price}
-                        </span>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
+        <FeaturedProducts
+          isEditMode={isEditMode}
+          featuredCategory={featuredCategory}
+          featuredProducts={featuredProducts}
+          editingId={editingId}
+          cropSettings={cropSettings}
+          editingCrop={editingCrop}
+          onCategorySelect={setFeaturedCategory}
+          onEditingIdChange={setEditingId}
+          onUpdateProduct={updateProduct}
+          onImageUpload={handleImageUpload}
+          onSetEditingCrop={setEditingCrop}
+          getImageUrl={getImageUrl}
+        />
 
         {/* About Us Section */}
-        <section id="about" className="py-20 bg-zinc-100">
-          <div className="container mx-auto px-4">
-            <h2 className="text-5xl font-black text-center text-slate-900 mb-16 tracking-tight">
-              AMERICAN <span className="text-red-600">GRIT</span>
-            </h2>
-
-            <div className="max-w-5xl mx-auto">
-              {/* Kyle Fox Story */}
-              <div className="bg-slate-800 text-white border-8 border-slate-700 p-10 mb-16">
-                <div className="flex flex-col md:flex-row items-center gap-10">
-                  <div className="relative w-56 h-56 border-8 border-red-600 flex-shrink-0">
-                    <Image src="/images/kyle-fox-profile.webp" alt="Kyle Fox - Founder" fill className="object-cover" />
-                  </div>
-                  <div>
-                    <h3 className="text-3xl font-black text-white mb-6 tracking-wide">KYLE FOX - FOUNDER</h3>
-                    <blockquote className="text-xl text-zinc-300 italic mb-6 font-bold">
-                      "You need a desk? I actually know a great guy, He deserves your business" That's our marketing.
-                    </blockquote>
-                    <p className="text-zinc-300 leading-relaxed text-lg font-semibold">
-                      Started with nothing but a van, a dream, and American determination. Built this company from the
-                      ground up with sweat, steel, and satisfaction guaranteed. We don't just sell furniture - we build
-                      the foundation of American business, one workspace at a time.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Visit Our Showroom CTA */}
-              <div className="bg-gradient-to-r from-red-600 to-blue-600 text-white border-8 border-slate-700 p-10 text-center">
-                <h3 className="text-3xl font-black mb-6 tracking-wide">WANT TO SEE IT IN PERSON?</h3>
-                <p className="text-xl mb-8 font-bold">
-                  We are located in Pleasant Grove right off of the freeway. Drinks are cold, snacks are
-                  free, and the furniture is built to last.
-                </p>
-                <Button
-                  className="bg-white text-slate-900 hover:bg-zinc-200 font-black text-lg px-8 py-4 border-4 border-slate-900"
-                  onClick={() => setShowAddress(!showAddress)}
-                >
-                  {showAddress ? "HIDE ADDRESS" : "VISIT SHOWROOM"}
-                </Button>
-
-                {showAddress && (
-                  <div className="mt-8 bg-white/10 border-4 border-white p-6 text-center">
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-center space-x-4">
-                        <MapPin className="w-6 h-6 text-white" />
-                        <div>
-                          <p className="text-xl font-bold">420 W Commerce Dr Building LL</p>
-                          <p className="text-xl font-bold">Pleasant Grove, UT 84062</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-center space-x-4">
-                        <Phone className="w-6 h-6 text-white" />
-                        <span className="text-xl font-bold">{textContent.phoneNumber}</span>
-                      </div>
-                      <div className="text-lg font-bold text-zinc-200">
-                        <p>Monday–Friday: 10:00am–5:00pm</p>
-                        <p>Saturday–Sunday: By Appointment</p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </section>
+        <AboutSection 
+          showAddress={showAddress}
+          onToggleAddress={() => setShowAddress(!showAddress)}
+        />
 
         {/* Contact Section */}
-        <section id="contact" className="py-20 bg-slate-900 text-white">
-          <div className="container mx-auto px-4">
-            <h2 className="text-5xl font-black text-center mb-16 tracking-tight">
-              GET IN <span className="text-red-500">TOUCH</span>
-            </h2>
+        <ContactSection />
 
-            <div className="grid md:grid-cols-2 gap-16 max-w-5xl mx-auto">
-              <div>
-                <h3 className="text-3xl font-black mb-8 tracking-wide">CONTACT INFO</h3>
-                <div className="space-y-6">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-red-600 flex items-center justify-center">
-                      <Phone className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-zinc-400 font-semibold">CALL US</p>
-                      <p className="text-xl font-black">(801) 899-9406</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-blue-600 flex items-center justify-center">
-                      <Mail className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-zinc-400 font-semibold">EMAIL US</p>
-                      <p className="text-xl font-black">info@foxbuilt.com</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-green-600 flex items-center justify-center">
-                      <MapPin className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-zinc-400 font-semibold">VISIT US</p>
-                      <p className="text-lg font-black">420 W Commerce Dr Building LL</p>
-                      <p className="text-lg font-black">Pleasant Grove, UT 84062</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <h3 className="text-3xl font-black mb-8 tracking-wide">SEND A MESSAGE</h3>
-                <form className="space-y-6">
-                  <input
-                    type="text"
-                    placeholder="Your Name"
-                    className="w-full px-6 py-4 bg-slate-800 border-2 border-slate-700 text-white placeholder-zinc-400 font-bold"
-                  />
-                  <input
-                    type="email"
-                    placeholder="Your Email"
-                    className="w-full px-6 py-4 bg-slate-800 border-2 border-slate-700 text-white placeholder-zinc-400 font-bold"
-                  />
-                  <textarea
-                    placeholder="Your Message"
-                    rows={4}
-                    className="w-full px-6 py-4 bg-slate-800 border-2 border-slate-700 text-white placeholder-zinc-400 font-bold"
-                  />
-                  <Button className="w-full bg-red-600 hover:bg-red-700 text-white font-black text-lg py-4 border-4 border-red-500">
-                    SEND A MESSAGE
-                  </Button>
-                </form>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Footer */}
-        <footer className="bg-slate-800 border-t-4 border-red-600 text-zinc-400 py-6">
-          <div className="container mx-auto px-4">
-            <p className="text-sm font-bold">&copy; 2025, FOXBUILT. ESTABLISHED 1999. BUILT IN AMERICA.</p>
-            <p className="text-xs text-zinc-500 mt-1">THIS SITE IS A PRODUCT OF LAKOTA.CODE.CO. USER ACCEPTS IT IS WHAT IT IS.</p>
-            <p className="text-xs text-yellow-500 mt-1">Want a free website? Email lakota.code@gmail.com</p>
-          </div>
-        </footer>
+        <Footer />
       </div>
 
-      {/* Gallery Editor Modal */}
-      {showGalleryEditor && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-[70] flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold">Edit Gallery Images</h2>
-              <Button
-                onClick={() => setShowGalleryEditor(false)}
-                variant="ghost"
-                size="sm"
-                className="text-black hover:bg-gray-100"
-              >
-                <X className="w-5 h-5" />
-              </Button>
-            </div>
-            
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {pendingGalleryImages.map((image, index) => (
-                <div key={index} className="space-y-2">
-                  <label className="block text-sm font-medium">
-                    Image {index + 1}
-                  </label>
-                  <div className="relative aspect-video bg-gray-100 rounded border-2 border-dashed border-gray-300 overflow-hidden group">
-                    {image && (
-                      <Image 
-                        src={getImageUrl(image, true)} 
-                        alt={`Gallery ${index + 1}`} 
-                        fill 
-                        className="object-cover"
-                        unoptimized
-                      />
-                    )}
-                    <label className="absolute inset-0 flex items-center justify-center cursor-pointer bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-opacity">
-                      <div className="text-white opacity-0 group-hover:opacity-100 text-center">
-                        <Edit2 className="w-6 h-6 mx-auto mb-1" />
-                        <span className="text-sm">Click to change</span>
-                      </div>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0]
-                          if (file) handleGalleryImageUpload(index, file)
-                        }}
-                      />
-                    </label>
-                  </div>
-                </div>
-              ))}
-            </div>
-            
-            <div className="mt-6 flex justify-end">
-              <Button
-                onClick={() => {
-                  setShowGalleryEditor(false)
-                  // Gallery changes are now staged in pendingGalleryImages
-                  // They will be published when user clicks Publish button
-                }}
-                className="bg-green-600 hover:bg-green-700"
-              >
-                Done
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      <GalleryEditor
+        show={showGalleryEditor}
+        onClose={() => setShowGalleryEditor(false)}
+        galleryImages={pendingGalleryImages}
+        mobileGalleryImages={pendingMobileGalleryImages}
+        onImageUpload={handleGalleryImageUpload}
+        getImageUrl={getImageUrl}
+        viewMode={galleryViewMode}
+        onViewModeChange={setGalleryViewMode}
+      />
 
 
-      {/* Publish Confirmation Modal */}
-      {showPublishConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-[70] flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-sm w-full p-6">
-            <h2 className="text-2xl font-black text-center mb-4 text-slate-900">
-              Going back to main site?
-            </h2>
-            
-            <div className="flex justify-center gap-4">
-              <Button
-                onClick={() => window.location.href = '/'}
-                className="bg-green-600 hover:bg-green-700 text-white px-8"
-              >
-                Yes
-              </Button>
-              <Button
-                onClick={() => setShowPublishConfirm(false)}
-                variant="outline"
-                className="px-8 border-gray-600 text-gray-800 hover:bg-gray-100 font-bold"
-              >
-                No
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      <PublishConfirmation 
+        show={showPublishConfirm} 
+        onConfirm={() => window.location.href = '/'}
+        onCancel={() => setShowPublishConfirm(false)}
+      />
 
       {/* Floating Help Button */}
       <button
@@ -1767,7 +560,7 @@ export default function AdminEditor() {
         style={{ position: 'fixed' }}
       >
         <Image
-          src="/questionmark.png"
+          src="/icons/questionmark.png"
           alt="Help"
           width={64}
           height={64}
@@ -1775,143 +568,12 @@ export default function AdminEditor() {
         />
       </button>
 
-      {/* Help Modal */}
-      {showHelp && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-[80] flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto p-8">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-3xl font-black text-slate-900">HEY POPS 👋</h2>
-              <button
-                onClick={() => setShowHelp(false)}
-                className="text-gray-500 hover:text-gray-700 transition-colors"
-              >
-                <X className="w-8 h-8" />
-              </button>
-            </div>
-            
-            <div className="space-y-6">
-              <div className="bg-blue-50 border-l-4 border-blue-600 p-4">
-                <h3 className="font-bold text-xl mb-3 text-blue-900 text-center">Here is a quick guide</h3>
-                <p className="text-blue-800 text-lg text-center">
-                  :Hover mouse over image to see edit options.
-                </p>
-                <p className="text-blue-800 text-lg mt-2 text-center">
-                  :Use lock 🔒 to resize and position images.
-                </p>
-              </div>
-
-              <div>
-                <h3 className="font-bold text-2xl mb-4 text-slate-900 text-center">EDIT Image Controls</h3>
-                <div className="space-y-4 text-gray-700">
-                  <p className="text-lg text-center">
-                    :when lock is <span className="text-green-600 font-bold">GREEN</span> 🟢 use ⬆️⬇️⬅️➡️ to move the image
-                  </p>
-                  <p className="text-lg text-center">
-                    :when lock is <span className="text-green-600 font-bold">GREEN</span> 🟢 use Scroll Wheel to Zoom in/out
-                  </p>
-                  <p className="text-lg text-center">
-                    :when you are done resizing your image lock it! (Click lock <span className="text-red-600 font-bold">RED</span> 🔴)
-                  </p>
-                </div>
-              </div>
-
-              <div>
-                <h3 className="font-bold text-2xl mb-4 text-slate-900 text-center">💾 Publishing Changes</h3>
-                <div className="space-y-4 text-gray-700">
-                  <p className="text-lg text-center">
-                    <span className="text-2xl">1️⃣:</span> Make all your changes to products and images
-                  </p>
-                  <p className="text-lg text-center">
-                    <span className="text-2xl">2️⃣:</span> Click the <strong>"Publish Live Site"</strong> button at the top
-                  </p>
-                  <p className="text-lg text-center">
-                    <span className="text-2xl">3️⃣:</span> Wait <strong>60 seconds</strong> for changes to build and go live
-                  </p>
-                  <p className="text-lg text-center">
-                    <span className="text-2xl">4️⃣:</span> Your updates will be available!
-                  </p>
-                </div>
-              </div>
-
-              <div className="text-center pt-6">
-                <Button
-                  onClick={() => setShowHelp(false)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg font-bold"
-                >
-                  Got it! 👍
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Mobile Preview Help Modal */}
-      {showMobilePreviewHelp && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-[80] flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto p-8">
-            <div className="flex justify-center items-center mb-6">
-              <h2 className="text-3xl font-black text-slate-900">📱 MOBILE PREVIEW GUIDE</h2>
-            </div>
-            
-            <div className="space-y-6">
-              <div className="text-center">
-                <h3 className="font-bold text-2xl mb-4">Hey Pops! 👋</h3>
-                <p className="text-xl mb-6">Quick way to check mobile view:</p>
-                <div className="bg-blue-50 border-2 border-blue-600 p-4 rounded-lg inline-block">
-                  <p className="text-2xl font-bold text-blue-900">Press Ctrl+Shift+M to toggle mobile preview mode!</p>
-                </div>
-              </div>
-
-              <div className="text-center">
-                <p className="text-lg font-bold mb-4">SELECT DIFFERENT PHONES FROM DROPDOWN!</p>
-              </div>
-
-              <div>
-                <h3 className="font-bold text-xl mb-4 text-center">Why check both mobile & desktop?! 🤔 well, let me explain..</h3>
-                <div className="space-y-3 text-gray-700">
-                  <p className="text-lg">
-                    So… the pics you upload will look different on phones vs. computers That's life…
-                  </p>
-                  <p className="text-lg">
-                    Making images look good for all devices, well it's a shite problem… even big companies struggle!
-                  </p>
-                  <p className="text-lg font-bold">
-                    So PLEASE can you check how it looks on both before publishing.
-                  </p>
-                  <p className="text-lg mt-4">
-                    Sometimes an image that looks perfect on desktop might be:
-                  </p>
-                  <ul className="list-disc list-inside text-lg ml-4 space-y-1">
-                    <li>zoomed differently</li>
-                    <li>cut off</li>
-                    <li>or not filling the shape nicely, for example.</li>
-                  </ul>
-                  <p className="text-lg mt-4">
-                    Find the way that makes it look good for both
-                  </p>
-                  <p className="text-lg mt-4 font-bold">
-                    GOODLUCK! Have fun.
-                  </p>
-                </div>
-              </div>
-
-
-              <div className="text-center pt-6">
-                <Button
-                  onClick={() => setShowMobilePreviewHelp(false)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg font-bold"
-                >
-                  I CAN DO THIS! 👍
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-
-    </div>
+      <HelpModal show={showHelp} onClose={() => setShowHelp(false)} />
+      
+      <MobilePreviewHelp 
+        show={showMobilePreviewHelp}
+        onClose={() => setShowMobilePreviewHelp(false)}
+      />
     </div>
   )
 }
