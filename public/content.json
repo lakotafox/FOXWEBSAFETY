@@ -158,10 +158,10 @@
     "/images/reception tan.jpg"
   ],
   "mobileGallery": [
-    "/images/showroom-1.jpg",
+    "/images/gallery-0-1754508279996.jpg",
     "/images/gallery-1-1754503330341.jpg",
     "/images/gallery-2-1754503810158.jpg",
-    "/images/showfacinggarage.jpg",
+    "/images/gallery-3-1754508379713.jpg",
     "/images/tanconf.jpg",
     "/images/reception tan.jpg"
   ],
@@ -198,8 +198,8 @@
     },
     "/images/reception tan.jpg": {
       "scale": 2.5937424601000023,
-      "x": 50,
-      "y": 22
+      "x": 53,
+      "y": 20
     },
     "/images/showroom-2.jpg": {
       "scale": 2.3333442148503076,
@@ -235,8 +235,18 @@
       "scale": 1.2158914564007275,
       "x": 52,
       "y": 60
+    },
+    "/images/gallery-0-1754508279996.jpg": {
+      "scale": 1.262418434253762,
+      "x": 52.5,
+      "y": 50
+    },
+    "/images/gallery-3-1754508379713.jpg": {
+      "scale": 1.2936066304537963,
+      "x": 42,
+      "y": 50
     }
   },
-  "lastUpdated": "2025-08-06T18:10:49.954Z",
+  "lastUpdated": "2025-08-06T19:27:07.254Z",
   "updatedBy": "Kyle"
 }
