@@ -151,7 +151,7 @@
   },
   "gallery": [
     "/images/gallery-0-1754156159270.jpg",
-    "/images/gallery-1-1754156223796.jpg",
+    "/images/gallery-1-1754503257651.jpg",
     "/images/gallery-2-1754156249548.jpg",
     "/images/showfacinggarage.jpg",
     "/images/tanconf.jpg",
@@ -159,13 +159,18 @@
   ],
   "mobileGallery": [
     "/images/showroom-1.jpg",
-    "/images/showroom-2.jpg",
+    "/images/gallery-1-1754503330341.jpg",
     "/images/Showroomwglassboard.jpg",
     "/images/showfacinggarage.jpg",
     "/images/tanconf.jpg",
     "/images/reception tan.jpg"
   ],
   "galleryCrops": {
+    "/images/Showroomwglassboard.jpg": {
+      "scale": 2.357947691000002,
+      "x": 100,
+      "y": 54
+    },
     "/images/tanconf.jpg": {
       "scale": 2.5937424601000023,
       "x": 50,
@@ -207,7 +212,7 @@
       "y": 30
     },
     "/images/gallery-1-1754156223796.jpg": {
-      "scale": 3.104956726528866,
+      "scale": 1.986280641409702,
       "x": 50,
       "y": 82
     },
@@ -216,12 +221,17 @@
       "x": 50,
       "y": 42
     },
-    "/images/Showroomwglassboard.jpg": {
-      "scale": 2.357947691000002,
-      "x": 100,
-      "y": 54
+    "/images/gallery-1-1754503257651.jpg": {
+      "scale": 1.8706722757351608,
+      "x": 50,
+      "y": 40
+    },
+    "/images/gallery-1-1754503330341.jpg": {
+      "scale": 1.8713009676621828,
+      "x": 50,
+      "y": 56
     }
   },
-  "lastUpdated": "2025-08-06T17:55:55.739Z",
+  "lastUpdated": "2025-08-06T18:02:58.029Z",
   "updatedBy": "Kyle"
 }
