@@ -179,7 +179,7 @@ export default function ContactSection() {
                     className="drop-shadow-lg w-16 h-16 md:w-24 md:h-24"
                   />
                   <span className="text-xs font-bold text-white mt-1">
-                    TOP
+                    {rocketDisabled ? 'LAUNCHING...' : 'TOP'}
                   </span>
                 </button>
               </div>
