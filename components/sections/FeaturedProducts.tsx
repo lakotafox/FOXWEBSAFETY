@@ -114,7 +114,9 @@ export default function FeaturedProducts({
               </div>
               <CardContent className="pt-2 px-6 pb-3">
                 <h3 className="text-xl font-black mb-1 tracking-wide">{product.title}</h3>
-                <p className="text-slate-600 mb-1 font-semibold">{product.description}</p>
+                {product.description && (
+                  <p className="text-slate-600 mb-1 font-semibold">{product.description}</p>
+                )}
                 {product.features && (
                   <ul className="text-sm text-slate-500 space-y-0.5">
                     {product.features.map((feature: string, index: number) => (

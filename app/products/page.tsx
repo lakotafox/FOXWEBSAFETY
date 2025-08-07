@@ -118,73 +118,73 @@ export default function ProductsPage() {
         id: 1,
         title: "Executive Desk Series",
         image: "/images/desk grey L showroom.jpg",
-        description: "Premium executive desks built to last",
+        description: "",
         features: ["Solid wood construction", "Cable management", "5-year warranty"],
-        price: "$2,499"
+        price: ""
       },
       {
         id: 2,
         title: "Ergonomic Task Chair",
         image: "/images/reception-area.jpg",
-        description: "All-day comfort for productive work",
+        description: "",
         features: ["Lumbar support", "Adjustable arms", "Breathable mesh"],
-        price: "$899"
+        price: ""
       },
       {
         id: 3,
         title: "Conference Table",
         image: "/images/tanconf.jpg",
-        description: "Impressive tables for important meetings",
+        description: "",
         features: ["Seats 8-12", "Power integration", "Premium finishes"],
-        price: "$3,999"
+        price: ""
       },
       {
         id: 4,
         title: "Storage Cabinet",
         image: "/images/showroom-1.jpg",
-        description: "Secure storage solutions",
+        description: "",
         features: ["Locking drawers", "Adjustable shelves", "Anti-tip design"],
-        price: "$799"
+        price: ""
       },
       {
         id: 5,
         title: "Reception Desk",
         image: "/images/reception tan.jpg",
-        description: "Make a great first impression",
+        description: "",
         features: ["ADA compliant", "Built-in storage", "Custom sizes"],
-        price: "$2,799"
+        price: ""
       },
       {
         id: 6,
         title: "Standing Desk",
         image: "/images/showfacinggarage.jpg",
-        description: "Height adjustable for health",
+        description: "",
         features: ["Electric lift", "Memory settings", "Anti-collision"],
-        price: "$1,299"
+        price: ""
       },
       {
         id: 7,
         title: "Lounge Seating",
         image: "/images/Showroomwglassboard.jpg",
-        description: "Comfortable waiting area furniture",
+        description: "",
         features: ["Stain resistant", "Modular design", "USB charging"],
-        price: "$1,599"
+        price: ""
       },
       {
         id: 8,
         title: "File Cabinet",
         image: "/images/small desk.jpg",
-        description: "Organize your important documents",
+        description: "",
         features: ["Fire resistant", "Full extension", "Lock system"],
-        price: "$499"
+        price: ""
       },
       {
         id: 9,
         title: "Training Table",
         image: "/images/conference-room.jpg",
-        description: "Flexible classroom solutions",
+        description: "",
         features: ["Flip-top design", "Nesting storage", "Mobile casters"],
-        price: "$699"
+        price: ""
       }
     ],
     battleTested: [
@@ -192,73 +192,73 @@ export default function ProductsPage() {
         id: 10,
         title: "Pre-Owned Executive Desk",
         image: "/images/showroom-2.jpg",
-        description: "Quality pre-owned executive furniture",
+        description: "",
         features: ["Inspected & certified", "Like-new condition", "50% off retail"],
-        price: "$1,249"
+        price: ""
       },
       {
         id: 11,
         title: "Refurbished Conference Set",
         image: "/images/desk grey L showroom.jpg",
-        description: "Complete conference room solution",
+        description: "",
         features: ["Table & 8 chairs", "Professionally cleaned", "1-year warranty"],
-        price: "$2,999"
+        price: ""
       },
       {
         id: 12,
         title: "Pre-Owned Task Chairs",
         image: "/images/reception-area.jpg",
-        description: "High-quality used seating",
+        description: "",
         features: ["Fully functional", "New casters", "Bulk discounts"],
-        price: "$299"
+        price: ""
       },
       {
         id: 13,
         title: "Refurbished Storage Units",
         image: "/images/showroom-1.jpg",
-        description: "Pre-owned filing and storage",
+        description: "",
         features: ["New locks installed", "Touch-up paint", "Various sizes"],
-        price: "$399"
+        price: ""
       },
       {
         id: 14,
         title: "Pre-Owned Workstations",
         image: "/images/tanconf.jpg",
-        description: "Complete cubicle systems",
+        description: "",
         features: ["Modular design", "Easy reconfiguration", "Great value"],
-        price: "$899"
+        price: ""
       },
       {
         id: 15,
         title: "Refurbished Reception Desk",
         image: "/images/reception tan.jpg",
-        description: "Make an impression for less",
+        description: "",
         features: ["Professional refinish", "Updated hardware", "60% off new"],
-        price: "$1,799"
+        price: ""
       },
       {
         id: 16,
         title: "Pre-Owned Lounge Set",
         image: "/images/Showroomwglassboard.jpg",
-        description: "Comfortable waiting area furniture",
+        description: "",
         features: ["Deep cleaned", "No visible wear", "Ready to use"],
-        price: "$999"
+        price: ""
       },
       {
         id: 17,
         title: "Refurbished Training Tables",
         image: "/images/conference-room.jpg",
-        description: "Classroom and training solutions",
+        description: "",
         features: ["Flip-top mechanism", "New wheels", "Set of 6 available"],
-        price: "$449"
+        price: ""
       },
       {
         id: 18,
         title: "Pre-Owned Executive Suite",
         image: "/images/showfacinggarage.jpg",
-        description: "Complete executive office set",
+        description: "",
         features: ["Desk, credenza, chair", "Matching finish", "Premium quality"],
-        price: "$3,499"
+        price: ""
       }
     ],
     seating: [
@@ -266,73 +266,73 @@ export default function ProductsPage() {
         id: 19,
         title: "Ergonomic Office Chairs",
         image: "/images/reception-area.jpg",
-        description: "All-day comfort seating",
+        description: "",
         features: ["Lumbar support", "Adjustable everything", "5-year warranty"],
-        price: "$699"
+        price: ""
       },
       {
         id: 20,
         title: "Executive Leather Chairs",
         image: "/images/showroom-2.jpg",
-        description: "Premium executive seating",
+        description: "",
         features: ["Genuine leather", "Memory foam", "Lifetime frame warranty"],
-        price: "$1,899"
+        price: ""
       },
       {
         id: 21,
         title: "Conference Room Chairs",
         image: "/images/tanconf.jpg",
-        description: "Professional meeting seating",
+        description: "",
         features: ["Stackable option", "Arms available", "Bulk pricing"],
-        price: "$399"
+        price: ""
       },
       {
         id: 22,
         title: "Reception Area Seating",
         image: "/images/reception tan.jpg",
-        description: "Welcoming lobby furniture",
+        description: "",
         features: ["Anti-microbial fabric", "Modular design", "ADA compliant"],
-        price: "$1,299"
+        price: ""
       },
       {
         id: 23,
         title: "Task Chairs",
         image: "/images/small desk.jpg",
-        description: "Versatile workplace seating",
+        description: "",
         features: ["Height adjustable", "Swivel base", "Multiple colors"],
-        price: "$449"
+        price: ""
       },
       {
         id: 24,
         title: "Lounge Chairs",
         image: "/images/Showroomwglassboard.jpg",
-        description: "Comfortable casual seating",
+        description: "",
         features: ["Deep cushions", "Stain resistant", "Modern design"],
-        price: "$799"
+        price: ""
       },
       {
         id: 25,
         title: "Drafting Stools",
         image: "/images/showfacinggarage.jpg",
-        description: "Height-adjustable work stools",
+        description: "",
         features: ["Foot ring", "360° swivel", "Industrial rated"],
-        price: "$349"
+        price: ""
       },
       {
         id: 26,
         title: "Guest Chairs",
         image: "/images/desk grey L showroom.jpg",
-        description: "Visitor and guest seating",
+        description: "",
         features: ["No assembly required", "Stackable", "Easy clean"],
-        price: "$299"
+        price: ""
       },
       {
         id: 27,
         title: "Collaborative Seating",
         image: "/images/conference-room.jpg",
-        description: "Modern team workspace chairs",
+        description: "",
         features: ["Mobile base", "Tablet arm option", "Flexible design"],
-        price: "$599"
+        price: ""
       }
     ]
       },
@@ -661,7 +661,9 @@ export default function ProductsPage() {
                 </div>
                 <CardContent className="pt-2 px-6 pb-3">
                   <h3 className="text-xl font-black mb-1 tracking-wide">{product.title}</h3>
-                  <p className="text-slate-600 mb-1 font-semibold">{product.description}</p>
+                  {product.description && (
+                    <p className="text-slate-600 mb-1 font-semibold">{product.description}</p>
+                  )}
                   {product.features && (
                     <ul className="text-sm text-slate-500 space-y-0.5">
                       {product.features.map((feature, index) => (
