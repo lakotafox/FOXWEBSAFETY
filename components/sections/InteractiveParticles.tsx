@@ -42,9 +42,7 @@ export default function InteractiveParticles() {
     }
 
     // Track scroll prevention and touch timing
-    let scrollPreventTimeout: NodeJS.Timeout | null = null
     let shouldPreventScroll = false
-    let touchStartTime = 0
     let lastTouchEndTime = 0
 
     // Handle touch movement for mobile
@@ -55,10 +53,10 @@ export default function InteractiveParticles() {
         const touchY = touch.clientY - rect.top
         const canvasHeight = rect.height
         
-        touchStartTime = Date.now()
+        const currentTime = Date.now()
         
         // Check if this touch came quickly after the last one ended
-        const gapSinceLastTouch = touchStartTime - lastTouchEndTime
+        const gapSinceLastTouch = currentTime - lastTouchEndTime
         if (gapSinceLastTouch < 300 && lastTouchEndTime > 0) {
           // User is making repeated touch attempts - allow scroll
           shouldPreventScroll = false
@@ -72,12 +70,6 @@ export default function InteractiveParticles() {
           } else {
             // Rest of canvas (bottom 85%) - prevent scroll
             shouldPreventScroll = true
-            
-            // Allow scroll again after 600ms
-            if (scrollPreventTimeout) clearTimeout(scrollPreventTimeout)
-            scrollPreventTimeout = setTimeout(() => {
-              shouldPreventScroll = false
-            }, 600)
           }
         }
         
@@ -95,12 +87,8 @@ export default function InteractiveParticles() {
         mouse.x = touch.clientX - rect.left
         mouse.y = touch.clientY - rect.top
         
-        // Only prevent scroll if conditions are met
-        const touchDuration = Date.now() - touchStartTime
-        
-        // If touch is held for more than 150ms, prevent scroll
-        // If it's a quick swipe (less than 150ms), allow scroll
-        if (shouldPreventScroll && touchDuration > 150) {
+        // Simply prevent scroll based on shouldPreventScroll flag
+        if (shouldPreventScroll) {
           e.preventDefault()
         }
       }
@@ -111,10 +99,6 @@ export default function InteractiveParticles() {
       mouse.y = -1000
       lastTouchEndTime = Date.now()
       shouldPreventScroll = false
-      if (scrollPreventTimeout) {
-        clearTimeout(scrollPreventTimeout)
-        scrollPreventTimeout = null
-      }
     }
 
     // Mouse events
@@ -208,9 +192,6 @@ export default function InteractiveParticles() {
       canvas.removeEventListener('touchmove', handleTouchMove)
       canvas.removeEventListener('touchend', handleTouchEnd)
       window.removeEventListener('resize', handleResize)
-      if (scrollPreventTimeout) {
-        clearTimeout(scrollPreventTimeout)
-      }
     }
   }, [])
 
