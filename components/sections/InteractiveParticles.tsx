@@ -41,12 +41,11 @@ export default function InteractiveParticles() {
       mouse.y = e.clientY - rect.top
     }
 
-    // Track scroll prevention and swipe detection
+    // Track scroll prevention and touch movement
     let scrollPreventTimeout: NodeJS.Timeout | null = null
     let shouldPreventScroll = false
-    let lastSwipeTime = 0
-    let lastSwipeDirection: 'up' | 'down' | null = null
-    let lastTouchY = 0
+    let touchStartY = 0
+    let totalSwipeDistance = 0
 
     // Handle touch movement for mobile
     const handleTouchStart = (e: TouchEvent) => {
@@ -56,11 +55,12 @@ export default function InteractiveParticles() {
         const touchY = touch.clientY - rect.top
         const canvasHeight = rect.height
         
-        lastTouchY = touch.clientY
+        touchStartY = touch.clientY
+        totalSwipeDistance = 0
         
-        // Check if touch is in the center 58% (21% from top, 21% from bottom)
-        const topBoundary = canvasHeight * 0.21
-        const bottomBoundary = canvasHeight * 0.79
+        // Check if touch is in the center 50% (25% from top, 25% from bottom)
+        const topBoundary = canvasHeight * 0.25
+        const bottomBoundary = canvasHeight * 0.75
         
         if (touchY > topBoundary && touchY < bottomBoundary) {
           shouldPreventScroll = true
@@ -80,28 +80,16 @@ export default function InteractiveParticles() {
     const handleTouchMove = (e: TouchEvent) => {
       if (e.touches.length > 0) {
         const touch = e.touches[0]
-        const currentY = touch.clientY
-        const deltaY = currentY - lastTouchY
+        const deltaY = Math.abs(touch.clientY - touchStartY)
+        totalSwipeDistance += deltaY
         
-        // Detect swipe direction
-        if (Math.abs(deltaY) > 30) { // Minimum swipe distance
-          const currentTime = Date.now()
-          const swipeDirection = deltaY > 0 ? 'down' : 'up'
-          
-          // Check for double swipe
-          if (lastSwipeDirection === swipeDirection && 
-              currentTime - lastSwipeTime < 300) { // Within 300ms
-            // Double swipe detected - free the scroll
-            shouldPreventScroll = false
-            if (scrollPreventTimeout) {
-              clearTimeout(scrollPreventTimeout)
-              scrollPreventTimeout = null
-            }
-          }
-          
-          lastSwipeTime = currentTime
-          lastSwipeDirection = swipeDirection
-          lastTouchY = currentY
+        // If swipe is long (more than 100px total), allow interaction but prevent scroll
+        // If swipe is short, allow normal scroll
+        if (totalSwipeDistance > 100) {
+          shouldPreventScroll = true
+        } else if (shouldPreventScroll && totalSwipeDistance < 50) {
+          // Short swipe detected, allow scroll
+          shouldPreventScroll = false
         }
         
         if (shouldPreventScroll) {
@@ -118,7 +106,6 @@ export default function InteractiveParticles() {
       mouse.x = -1000
       mouse.y = -1000
       shouldPreventScroll = false
-      lastSwipeDirection = null
       if (scrollPreventTimeout) {
         clearTimeout(scrollPreventTimeout)
         scrollPreventTimeout = null
