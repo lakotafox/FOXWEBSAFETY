@@ -41,8 +41,42 @@ export default function InteractiveParticles() {
       mouse.y = e.clientY - rect.top
     }
 
+    // Track scroll prevention timeout
+    let scrollPreventTimeout: NodeJS.Timeout | null = null
+    let shouldPreventScroll = false
+
     // Handle touch movement for mobile
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        const rect = canvas.getBoundingClientRect()
+        const touch = e.touches[0]
+        const touchY = touch.clientY - rect.top
+        const canvasHeight = rect.height
+        
+        // Check if touch is in the center 70% (15% from top, 15% from bottom)
+        const topBoundary = canvasHeight * 0.15
+        const bottomBoundary = canvasHeight * 0.85
+        
+        if (touchY > topBoundary && touchY < bottomBoundary) {
+          shouldPreventScroll = true
+          
+          // Allow scroll again after 600ms
+          if (scrollPreventTimeout) clearTimeout(scrollPreventTimeout)
+          scrollPreventTimeout = setTimeout(() => {
+            shouldPreventScroll = false
+          }, 600)
+        }
+        
+        mouse.x = touch.clientX - rect.left
+        mouse.y = touchY
+      }
+    }
+
     const handleTouchMove = (e: TouchEvent) => {
+      if (shouldPreventScroll) {
+        e.preventDefault()
+      }
+      
       if (e.touches.length > 0) {
         const rect = canvas.getBoundingClientRect()
         const touch = e.touches[0]
@@ -54,6 +88,11 @@ export default function InteractiveParticles() {
     const handleTouchEnd = () => {
       mouse.x = -1000
       mouse.y = -1000
+      shouldPreventScroll = false
+      if (scrollPreventTimeout) {
+        clearTimeout(scrollPreventTimeout)
+        scrollPreventTimeout = null
+      }
     }
 
     // Mouse events
@@ -63,9 +102,9 @@ export default function InteractiveParticles() {
       mouse.y = -1000
     })
 
-    // Touch events with passive flag for better scroll performance
-    canvas.addEventListener('touchstart', handleTouchMove, { passive: true })
-    canvas.addEventListener('touchmove', handleTouchMove, { passive: true })
+    // Touch events - note: touchmove is NOT passive when we need to prevent scroll
+    canvas.addEventListener('touchstart', handleTouchStart, { passive: true })
+    canvas.addEventListener('touchmove', handleTouchMove, { passive: false })
     canvas.addEventListener('touchend', handleTouchEnd, { passive: true })
 
     // Animation loop
@@ -143,10 +182,13 @@ export default function InteractiveParticles() {
     // Cleanup
     return () => {
       canvas.removeEventListener('mousemove', handleMouseMove)
-      canvas.removeEventListener('touchstart', handleTouchMove)
+      canvas.removeEventListener('touchstart', handleTouchStart)
       canvas.removeEventListener('touchmove', handleTouchMove)
       canvas.removeEventListener('touchend', handleTouchEnd)
       window.removeEventListener('resize', handleResize)
+      if (scrollPreventTimeout) {
+        clearTimeout(scrollPreventTimeout)
+      }
     }
   }, [])
 
