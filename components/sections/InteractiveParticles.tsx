@@ -78,23 +78,20 @@ export default function InteractiveParticles() {
     const handleTouchMove = (e: TouchEvent) => {
       if (e.touches.length > 0) {
         const touch = e.touches[0]
-        const touchDuration = Date.now() - touchStartTime
-        
-        // If touch is held for more than 150ms, it's a deliberate interaction
-        // If it's a quick swipe (less than 150ms), allow scroll
-        if (touchDuration > 150) {
-          shouldPreventScroll = true
-        } else {
-          shouldPreventScroll = false
-        }
-        
-        if (shouldPreventScroll) {
-          e.preventDefault()
-        }
-        
         const rect = canvas.getBoundingClientRect()
+        
+        // ALWAYS update mouse position for particle interaction
         mouse.x = touch.clientX - rect.left
         mouse.y = touch.clientY - rect.top
+        
+        // Only prevent scroll if conditions are met
+        const touchDuration = Date.now() - touchStartTime
+        
+        // If touch is held for more than 150ms, prevent scroll
+        // If it's a quick swipe (less than 150ms), allow scroll
+        if (shouldPreventScroll && touchDuration > 150) {
+          e.preventDefault()
+        }
       }
     }
 
