@@ -4,7 +4,7 @@
       {
         "id": 1,
         "title": "Classic Laminate Series - Silver Birch",
-        "image": "/images/desk grey L showroom.jpg",
+        "image": "/images/product-1-1754542732412.jpg",
         "price": "Price coming soon",
         "description": "Website is a work in progress - prices and products coming soon!",
         "features": [
@@ -12,7 +12,12 @@
           "Metal connections",
           "Core removable locks"
         ],
-        "specs": "Dimensions: 60\"W x 30\"D x 29\"H\nWeight: 120 lbs\nMaterial: Laminate surface with metal frame\nColors: Silver Birch, Natural Oak, Espresso"
+        "specs": "Dimensions: 60\"W x 30\"D x 29\"H\nWeight: 120 lbs\nMaterial: Laminate surface with metal frame\nColors: Silver Birch, Natural Oak, Espresso",
+        "imageCrop": {
+          "scale": 1.6084372494752261,
+          "x": 50,
+          "y": 47
+        }
       },
       {
         "id": 2,
@@ -25,12 +30,17 @@
           "Heavy duty steel frame",
           "Coordinates with Classic storage"
         ],
-        "specs": "Dimensions: 48\"W x 24\"D x 29\"H\nWeight: 95 lbs\nMaterial: Heavy-duty steel frame\nLoad Capacity: 300 lbs"
+        "specs": "Dimensions: 48\"W x 24\"D x 29\"H\nWeight: 95 lbs\nMaterial: Heavy-duty steel frame\nLoad Capacity: 300 lbs",
+        "imageCrop": {
+          "scale": 1.2682417945625455,
+          "x": 50,
+          "y": 50
+        }
       },
       {
         "id": 3,
         "title": "Signature Collection",
-        "image": "/images/Showroomwglassboard.jpg",
+        "image": "/images/product-3-1754542776592.jpg",
         "price": "Price coming soon",
         "description": "Website is a work in progress - prices and products coming soon!",
         "features": [
@@ -40,9 +50,9 @@
         ],
         "specs": "Dimensions: 72\"W x 36\"D x 30\"H\nWeight: 150 lbs\nMaterial: Premium wood veneer\nOptions: Multiple leg styles",
         "imageCrop": {
-          "scale": 2.357947691000002,
-          "x": 100,
-          "y": 54
+          "scale": 1,
+          "x": 50,
+          "y": 50
         }
       }
     ],
@@ -50,7 +60,7 @@
       {
         "id": 4,
         "title": "Palmer House Conference Tables",
-        "image": "/images/tanconf.jpg",
+        "image": "/images/product-4-1754542855583.jpg",
         "price": "Price coming soon",
         "description": "Website is a work in progress - prices and products coming soon!",
         "features": [
@@ -60,15 +70,15 @@
         ],
         "specs": "Dimensions: 96\"W x 42\"D x 29\"H\nWeight: 200 lbs\nMaterial: Solid wood top\nSeating: 6-8 people",
         "imageCrop": {
-          "scale": 2.5937424601000023,
+          "scale": 1.5768992641913981,
           "x": 50,
-          "y": 46
+          "y": 50
         }
       },
       {
         "id": 5,
         "title": "Height Adjustable Desks",
-        "image": "/images/showfacinggarage.jpg",
+        "image": "/images/product-5-1754542819856.jpg",
         "price": "Price coming soon",
         "description": "Website is a work in progress - prices and products coming soon!",
         "features": [
@@ -78,15 +88,15 @@
         ],
         "specs": "Height Range: 24\" - 50\"\nWidth Options: 48\", 60\", 72\"\nDepth: 30\"\nWeight Capacity: 265 lbs\nMotor: Dual motor system",
         "imageCrop": {
-          "scale": 1.9970884181829347,
-          "x": 44,
-          "y": 52
+          "scale": 1.6734181143540252,
+          "x": 50,
+          "y": 33.5
         }
       },
       {
         "id": 6,
         "title": "Encore Collection",
-        "image": "/images/conference-room.jpg",
+        "image": "/images/product-6-1754542877273.jpg",
         "price": "Price coming soon",
         "description": "Website is a work in progress - prices and products coming soon!",
         "features": [
@@ -94,28 +104,38 @@
           "Greenguard Certified",
           "Works with Elements storage"
         ],
-        "specs": "Dimensions: 60\"W x 30\"D x 29\"H\nWeight: 110 lbs\nMaterial: Steel frame with laminate\nWarranty: 10 year limited"
+        "specs": "Dimensions: 60\"W x 30\"D x 29\"H\nWeight: 110 lbs\nMaterial: Steel frame with laminate\nWarranty: 10 year limited",
+        "imageCrop": {
+          "scale": 1,
+          "x": 50,
+          "y": 50
+        }
       }
     ],
     "seating": [
       {
         "id": 7,
         "title": "Konfurb Seating Collection",
-        "image": "/images/reception-area.jpg",
-        "price": "Price coming soon",
+        "image": "/images/product-7-1754542897406.jpg",
+        "price": "",
         "description": "Website is a work in progress - prices and products coming soon!",
         "features": [
           "Award-winning design",
           "Ergonomic features",
           "Multiple series available"
         ],
-        "specs": "Seat Height: 16\" - 21\" adjustable\nSeat Width: 19\"\nBack Height: 38\" - 42\"\nWeight Capacity: 300 lbs\nMaterials: Mesh back, foam cushion"
+        "specs": "Seat Height: 16\" - 21\" adjustable\nSeat Width: 19\"\nBack Height: 38\" - 42\"\nWeight Capacity: 300 lbs\nMaterials: Mesh back, foam cushion",
+        "imageCrop": {
+          "scale": 1.485947395978355,
+          "x": 50,
+          "y": 46
+        }
       },
       {
         "id": 8,
         "title": "Storage Solutions",
-        "image": "/images/showroom-1.jpg",
-        "price": "Price coming soon",
+        "image": "/images/product-8-1754542918319.jpg",
+        "price": "",
         "description": "Website is a work in progress - prices and products coming soon!",
         "features": [
           "Ball bearing slides",
@@ -124,16 +144,16 @@
         ],
         "specs": "Dimensions: 36\"W x 18\"D x 28\"H\nDrawers: 3 or 4 drawer options\nLock: Central locking system\nWeight: 75-90 lbs",
         "imageCrop": {
-          "scale": 1.9874117654832348,
+          "scale": 1.0569708005532248,
           "x": 50,
-          "y": 46
+          "y": 50
         }
       },
       {
         "id": 9,
         "title": "Lounge Seating",
         "image": "/images/product-9-1754156837163.jpg",
-        "price": "Price - Call or text ",
+        "price": " ",
         "description": "Neo Bucket Lounge Chair",
         "features": [
           "4-prong spider base",
@@ -142,9 +162,9 @@
         ],
         "specs": "Dimensions: 72\"W x 28\"D x 32\"H\nSeating: 3 person capacity\nMaterial: Commercial grade vinyl\nFrame: Steel reinforced",
         "imageCrop": {
-          "scale": 1.4349644100000007,
+          "scale": 1.6483230513538065,
           "x": 50,
-          "y": 54
+          "y": 58
         }
       }
     ]
@@ -187,9 +207,9 @@
       "y": 46
     },
     "/images/product-9-1754156837163.jpg": {
-      "scale": 1.4349644100000007,
+      "scale": 1.6483230513538065,
       "x": 50,
-      "y": 54
+      "y": 58
     },
     "/images/product-9-1754115312078.jpg": {
       "scale": 0.42780603780514015,
@@ -355,8 +375,53 @@
       "scale": 1.4853530170199636,
       "x": 41.5,
       "y": 51.5
+    },
+    "/images/product-1-1754542732412.jpg": {
+      "scale": 1.6084372494752261,
+      "x": 50,
+      "y": 47
+    },
+    "/images/small desk.jpg": {
+      "scale": 1.2682417945625455,
+      "x": 50,
+      "y": 50
+    },
+    "/images/product-3-1754542776592.jpg": {
+      "scale": 1,
+      "x": 50,
+      "y": 50
+    },
+    "/images/product-5-1754542802556.jpg": {
+      "scale": 1.7068864766411058,
+      "x": 50,
+      "y": 46
+    },
+    "/images/product-5-1754542819856.jpg": {
+      "scale": 1.6734181143540252,
+      "x": 50,
+      "y": 33.5
+    },
+    "/images/product-4-1754542855583.jpg": {
+      "scale": 1.5768992641913981,
+      "x": 50,
+      "y": 50
+    },
+    "/images/product-6-1754542877273.jpg": {
+      "scale": 1,
+      "x": 50,
+      "y": 50
+    },
+    "/images/product-7-1754542897406.jpg": {
+      "scale": 1.485947395978355,
+      "x": 50,
+      "y": 46
+    },
+    "/images/product-8-1754542918319.jpg": {
+      "scale": 1.0569708005532248,
+      "x": 50,
+      "y": 50
     }
   },
-  "lastUpdated": "2025-08-06T23:24:46.006Z",
+  "lastUpdated": "2025-08-07T05:02:59.009Z",
   "updatedBy": "Kyle"
 }
