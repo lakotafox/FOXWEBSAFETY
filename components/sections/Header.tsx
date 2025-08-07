@@ -55,15 +55,6 @@ export default function Header({ showAddress, setShowAddress }: HeaderProps) {
           {/* Desktop Buttons */}
           <div className="hidden md:flex items-center space-x-4">
             <Button
-              className={`bg-blue-600 hover:bg-blue-700 text-white font-bold tracking-wide border-2 border-blue-600 hover:border-blue-700 transition-all duration-500 ${
-                isScrolled ? "px-2 py-1 text-xs" : "px-4 py-2 text-sm"
-              }`}
-              onClick={() => document.getElementById("featured-products")?.scrollIntoView({ behavior: "smooth" })}
-            >
-              FURNITURE
-            </Button>
-
-            <Button
               className={`bg-red-600 hover:bg-red-700 text-white font-bold tracking-wide border-2 border-red-600 hover:border-red-700 transition-all duration-500 ${
                 isScrolled ? "px-3 py-1 text-sm" : "px-6 py-2"
               }`}

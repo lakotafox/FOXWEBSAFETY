@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Phone, MapPin, Mail } from 'lucide-react'
+import FullImageModal from '@/components/ui/FullImageModal'
 
 export default function ProductsPage() {
   const [productCategory, setProductCategory] = useState('new')
@@ -18,6 +19,9 @@ export default function ProductsPage() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
+  const [showFullImage, setShowFullImage] = useState(false)
+  const [fullImageSrc, setFullImageSrc] = useState('')
+  const [fullImageAlt, setFullImageAlt] = useState('')
   const [showFloatingCategories, setShowFloatingCategories] = useState(false)
   const categoryButtonsRef = useRef<HTMLDivElement>(null)
   
@@ -626,7 +630,14 @@ export default function ProductsPage() {
                       : "ring-green-500"
                 }`}
               >
-                <div className="relative h-56 overflow-hidden">
+                <div 
+                  className="relative h-56 overflow-hidden bg-black cursor-pointer"
+                  onClick={() => {
+                    setFullImageSrc(getImageUrl(product.image))
+                    setFullImageAlt(product.title)
+                    setShowFullImage(true)
+                  }}
+                >
                   {(() => {
                     const crop = cropSettings[product.image] || { scale: 1, x: 50, y: 50 }
                     return (
@@ -847,6 +858,14 @@ export default function ProductsPage() {
           <p className="text-xs text-yellow-500 mt-1">Want a free website? Email lakota.code@gmail.com</p>
         </div>
       </footer>
+      
+      {/* Full Image Modal */}
+      <FullImageModal 
+        isOpen={showFullImage}
+        onClose={() => setShowFullImage(false)}
+        imageSrc={fullImageSrc}
+        imageAlt={fullImageAlt}
+      />
     </div>
   )
 }

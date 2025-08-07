@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import ComingSoonModal from '@/components/ui/ComingSoonModal'
+import FullImageModal from '@/components/ui/FullImageModal'
 
 interface FeaturedProductsProps {
   featuredProducts: any
@@ -19,12 +20,15 @@ export default function FeaturedProducts({
 }: FeaturedProductsProps) {
   const [featuredCategory, setFeaturedCategory] = useState("new")
   const [showComingSoon, setShowComingSoon] = useState(false)
+  const [showFullImage, setShowFullImage] = useState(false)
+  const [fullImageSrc, setFullImageSrc] = useState('')
+  const [fullImageAlt, setFullImageAlt] = useState('')
 
   return (
-    <section id="featured" className="py-20 bg-slate-800">
+    <section id="featured" className="pt-20 pb-8 bg-slate-800">
       <div className="container mx-auto px-4">
-        <h2 className="text-5xl font-black text-center text-white mb-16 tracking-tight">
-          FEATURED <span className="text-blue-400">PRODUCTS</span>
+        <h2 className="text-5xl font-black text-center text-white mb-4 tracking-tight">
+          OUR <span className="text-blue-400">FAVORITES</span>
         </h2>
 
         {/* Category Buttons */}
@@ -79,7 +83,14 @@ export default function FeaturedProducts({
                     : "ring-green-500"
               }`}
             >
-              <div className="relative h-56 overflow-hidden bg-black">
+              <div 
+                className="relative h-56 overflow-hidden bg-black cursor-pointer"
+                onClick={() => {
+                  setFullImageSrc(getImageUrl(product.image))
+                  setFullImageAlt(product.title)
+                  setShowFullImage(true)
+                }}
+              >
                 {(() => {
                   const crop = cropSettings[product.image] || { scale: 1, x: 50, y: 50 }
                   return (
@@ -141,7 +152,7 @@ export default function FeaturedProducts({
         </div>
         
         {/* MORE button */}
-        <div className="flex justify-center mt-12">
+        <div className="flex justify-center mt-8">
           <Button
             onClick={() => setShowComingSoon(true)}
             className="bg-green-600 hover:bg-green-700 text-white font-black text-xl px-12 py-6 tracking-wide border-4 border-green-600 hover:border-green-700 transition-all"
@@ -153,6 +164,14 @@ export default function FeaturedProducts({
       
       {/* Coming Soon Modal */}
       <ComingSoonModal isOpen={showComingSoon} onClose={() => setShowComingSoon(false)} />
+      
+      {/* Full Image Modal */}
+      <FullImageModal 
+        isOpen={showFullImage}
+        onClose={() => setShowFullImage(false)}
+        imageSrc={fullImageSrc}
+        imageAlt={fullImageAlt}
+      />
     </section>
   )
 }
