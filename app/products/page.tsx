@@ -659,11 +659,11 @@ export default function ProductsPage() {
                     )
                   })()}
                 </div>
-                <CardContent className="p-6">
-                  <h3 className="text-xl font-black mb-3 tracking-wide">{product.title}</h3>
-                  <p className="text-slate-600 mb-4 font-semibold">{product.description}</p>
+                <CardContent className="pt-2 px-6 pb-3">
+                  <h3 className="text-xl font-black mb-1 tracking-wide">{product.title}</h3>
+                  <p className="text-slate-600 mb-1 font-semibold">{product.description}</p>
                   {product.features && (
-                    <ul className="text-sm text-slate-500 mb-4 space-y-1">
+                    <ul className="text-sm text-slate-500 space-y-0.5">
                       {product.features.map((feature, index) => (
                         <li key={index} className="flex items-center">
                           <span
@@ -680,19 +680,21 @@ export default function ProductsPage() {
                       ))}
                     </ul>
                   )}
-                  <div className="flex justify-between items-center">
-                    <span
-                      className={`text-2xl font-black ${
-                        productCategory === "new"
-                          ? "text-red-600"
-                          : productCategory === "battleTested"
-                            ? "text-blue-600"
-                            : "text-green-600"
-                      }`}
-                    >
-                      {product.price}
-                    </span>
-                  </div>
+                  {product.price && (
+                    <div className="flex justify-between items-center">
+                      <span
+                        className={`text-2xl font-black ${
+                          productCategory === "new"
+                            ? "text-red-600"
+                            : productCategory === "battleTested"
+                              ? "text-blue-600"
+                              : "text-green-600"
+                        }`}
+                      >
+                        {product.price}
+                      </span>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             ))}

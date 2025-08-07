@@ -184,7 +184,7 @@ export default function FeaturedProducts({
                   )
                 })()}
               </div>
-              <CardContent className="p-6">
+              <CardContent className="pt-2 px-6 pb-3">
                 {/* Title */}
                 {isEditMode && editingId === product.id ? (
                   <input
@@ -197,7 +197,7 @@ export default function FeaturedProducts({
                   />
                 ) : (
                   <h3 
-                    className={`text-xl font-black mb-3 tracking-wide ${
+                    className={`text-xl font-black mb-1 tracking-wide ${
                       isEditMode ? "cursor-pointer hover:bg-yellow-100 p-1 rounded" : ""
                     }`}
                     onClick={() => isEditMode && onEditingIdChange(product.id)}
@@ -211,14 +211,14 @@ export default function FeaturedProducts({
                   <textarea
                     value={product.description}
                     onChange={(e) => onUpdateProduct(featuredCategory, product.id, 'description', e.target.value)}
-                    className="text-slate-600 mb-4 font-semibold w-full p-1 border rounded resize-none"
+                    className="text-slate-600 mb-1 font-semibold w-full p-1 border rounded resize-none"
                     rows={2}
                     onBlur={() => onEditingIdChange(null)}
                     autoFocus
                   />
                 ) : (
                   <p 
-                    className={`text-slate-600 mb-4 font-semibold ${
+                    className={`text-slate-600 mb-1 font-semibold ${
                       isEditMode ? "cursor-pointer hover:bg-yellow-100 p-1 rounded" : ""
                     }`}
                     onClick={() => isEditMode && onEditingIdChange(-product.id)}
@@ -229,7 +229,7 @@ export default function FeaturedProducts({
 
                 {/* Features */}
                 {product.features && (
-                  <ul className="text-sm text-slate-500 mb-4 space-y-1">
+                  <ul className="text-sm text-slate-500 space-y-0.5">
                     {product.features.map((feature, index) => (
                       <li key={index} className="flex items-center">
                         <span
@@ -269,7 +269,8 @@ export default function FeaturedProducts({
                 )}
 
                 {/* Price */}
-                <div className="flex justify-between items-center">
+                {(product.price || isEditMode) && (
+                  <div className="flex justify-between items-center">
                   {isEditMode && editingId === product.id * 10000 ? (
                     <input
                       type="text"
@@ -301,7 +302,8 @@ export default function FeaturedProducts({
                       {product.price}
                     </span>
                   )}
-                </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           ))}

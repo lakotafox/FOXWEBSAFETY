@@ -100,9 +100,9 @@ export default function ProductCard({
         }
       </div>
       
-      <CardContent className="p-6">
+      <CardContent className="pt-2 px-6 pb-3">
         {/* Title */}
-        <h3 className="text-xl font-black mb-3 tracking-wide">
+        <h3 className="text-xl font-black mb-1 tracking-wide">
           <EditableField
             value={product.title}
             isEditing={editingId === product.id}
@@ -118,7 +118,7 @@ export default function ProductCard({
         </h3>
         
         {/* Description */}
-        <div className="text-slate-600 mb-4 font-semibold">
+        <div className="text-slate-600 mb-1 font-semibold">
           <EditableField
             value={product.description}
             isEditing={editingId === -product.id}
@@ -136,7 +136,7 @@ export default function ProductCard({
         
         {/* Features */}
         {product.features && (
-          <ul className="text-sm text-slate-500 mb-4 space-y-1">
+          <ul className="text-sm text-slate-500 space-y-0.5">
             {product.features.map((feature, index) => (
               <li key={index} className="flex items-center">
                 <span
@@ -164,7 +164,8 @@ export default function ProductCard({
         )}
         
         {/* Price */}
-        <div className={`text-2xl font-black ${getCategoryColor(productCategory)}`}>
+        {(product.price || editingId === product.id * 10000) && (
+          <div className={`text-2xl font-black ${getCategoryColor(productCategory)}`}>
           <EditableField
             value={product.price}
             isEditing={editingId === product.id * 10000}
@@ -177,7 +178,8 @@ export default function ProductCard({
               input: `text-2xl font-black p-1 border rounded ${getCategoryColor(productCategory)}`
             }}
           />
-        </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   )
