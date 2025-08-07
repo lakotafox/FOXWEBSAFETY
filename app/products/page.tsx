@@ -20,6 +20,8 @@ export default function ProductsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [showFullImage, setShowFullImage] = useState(false)
+  const [rocketDisabled, setRocketDisabled] = useState(false)
+  const rocketTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const [fullImageSrc, setFullImageSrc] = useState('')
   const [fullImageAlt, setFullImageAlt] = useState('')
   const [showFloatingCategories, setShowFloatingCategories] = useState(false)
@@ -817,13 +819,26 @@ export default function ProductsPage() {
                   <button
                     type="button"
                     onClick={() => {
+                      if (rocketDisabled) return
+                      
+                      // Disable rocket for 5 seconds
+                      setRocketDisabled(true)
+                      
                       const audio = new Audio('/sounds/rocketlaunch.mp3')
                       audio.play()
                       setTimeout(() => {
                         window.scrollTo({ top: 0, behavior: 'smooth' })
                       }, 3750)
+                      
+                      // Re-enable after 5 seconds
+                      rocketTimeoutRef.current = setTimeout(() => {
+                        setRocketDisabled(false)
+                      }, 5000)
                     }}
-                    className="group flex flex-col items-center justify-center px-2 md:px-4 hover:scale-110 transition-transform"
+                    disabled={rocketDisabled}
+                    className={`group flex flex-col items-center justify-center px-2 md:px-4 transition-transform ${
+                      rocketDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-110 cursor-pointer'
+                    }`}
                     aria-label="Back to top"
                   >
                     <img 
