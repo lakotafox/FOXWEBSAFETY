@@ -63,14 +63,22 @@ export default function InteractiveParticles() {
           // User is making repeated touch attempts - allow scroll
           shouldPreventScroll = false
         } else {
-          // No zone check - entire canvas prevents scroll
-          shouldPreventScroll = true
+          // Check if touch is in top 15% - always allow scroll there
+          const topBoundary = canvasHeight * 0.15
           
-          // Allow scroll again after 600ms
-          if (scrollPreventTimeout) clearTimeout(scrollPreventTimeout)
-          scrollPreventTimeout = setTimeout(() => {
+          if (touchY < topBoundary) {
+            // Top edge - always allow scroll
             shouldPreventScroll = false
-          }, 600)
+          } else {
+            // Rest of canvas (bottom 85%) - prevent scroll
+            shouldPreventScroll = true
+            
+            // Allow scroll again after 600ms
+            if (scrollPreventTimeout) clearTimeout(scrollPreventTimeout)
+            scrollPreventTimeout = setTimeout(() => {
+              shouldPreventScroll = false
+            }, 600)
+          }
         }
         
         mouse.x = touch.clientX - rect.left
