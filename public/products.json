@@ -11,19 +11,29 @@
           "Cable management",
           "5-year warranty"
         ],
-        "price": ""
+        "price": "",
+        "imageCrop": {
+          "scale": 3.045213915504014,
+          "x": 44,
+          "y": 28
+        }
       },
       {
         "id": 2,
         "title": "Ergonomic Task Chair",
-        "image": "/images/reception-area.jpg",
+        "image": "/images/product-2-1754595166035.jpg",
         "description": "",
         "features": [
           "Lumbar support",
           "Adjustable arms",
           "Breathable mesh"
         ],
-        "price": ""
+        "price": "",
+        "imageCrop": {
+          "scale": 1,
+          "x": 50,
+          "y": 50
+        }
       },
       {
         "id": 3,
@@ -133,7 +143,12 @@
           "Professionally cleaned",
           "1-year warranty"
         ],
-        "price": ""
+        "price": "",
+        "imageCrop": {
+          "scale": 3.045213915504014,
+          "x": 44,
+          "y": 28
+        }
       },
       {
         "id": 12,
@@ -315,7 +330,12 @@
           "Stackable",
           "Easy clean"
         ],
-        "price": ""
+        "price": "",
+        "imageCrop": {
+          "scale": 3.045213915504014,
+          "x": 44,
+          "y": 28
+        }
       },
       {
         "id": 27,
@@ -331,7 +351,18 @@
       }
     ]
   },
-  "productsCrops": {},
-  "lastUpdated": "2025-08-07T06:38:47.043Z",
+  "productsCrops": {
+    "/images/product-2-1754595166035.jpg": {
+      "scale": 1,
+      "x": 50,
+      "y": 50
+    },
+    "/images/desk grey L showroom.jpg": {
+      "scale": 3.045213915504014,
+      "x": 44,
+      "y": 28
+    }
+  },
+  "lastUpdated": "2025-08-07T19:33:12.062Z",
   "updatedBy": "Kyle"
 }
