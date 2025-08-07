@@ -41,11 +41,10 @@ export default function InteractiveParticles() {
       mouse.y = e.clientY - rect.top
     }
 
-    // Track scroll prevention and touch movement
+    // Track scroll prevention and touch timing
     let scrollPreventTimeout: NodeJS.Timeout | null = null
     let shouldPreventScroll = false
-    let touchStartY = 0
-    let totalSwipeDistance = 0
+    let touchStartTime = 0
 
     // Handle touch movement for mobile
     const handleTouchStart = (e: TouchEvent) => {
@@ -55,8 +54,7 @@ export default function InteractiveParticles() {
         const touchY = touch.clientY - rect.top
         const canvasHeight = rect.height
         
-        touchStartY = touch.clientY
-        totalSwipeDistance = 0
+        touchStartTime = Date.now()
         
         // Check if touch is in the center 50% (25% from top, 25% from bottom)
         const topBoundary = canvasHeight * 0.25
@@ -80,15 +78,13 @@ export default function InteractiveParticles() {
     const handleTouchMove = (e: TouchEvent) => {
       if (e.touches.length > 0) {
         const touch = e.touches[0]
-        const deltaY = Math.abs(touch.clientY - touchStartY)
-        totalSwipeDistance += deltaY
+        const touchDuration = Date.now() - touchStartTime
         
-        // If swipe is long (more than 100px total), allow interaction but prevent scroll
-        // If swipe is short, allow normal scroll
-        if (totalSwipeDistance > 100) {
+        // If touch is held for more than 150ms, it's a deliberate interaction
+        // If it's a quick swipe (less than 150ms), allow scroll
+        if (touchDuration > 150) {
           shouldPreventScroll = true
-        } else if (shouldPreventScroll && totalSwipeDistance < 50) {
-          // Short swipe detected, allow scroll
+        } else {
           shouldPreventScroll = false
         }
         
