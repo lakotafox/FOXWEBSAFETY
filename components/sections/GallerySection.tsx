@@ -81,16 +81,38 @@ export default function GallerySection({
             })}
           </div>
 
-          {/* Navigation buttons */}
+          {/* Navigation buttons - Mobile (always grey) */}
           <button
             onClick={prevSlide}
-            className="absolute left-2 md:left-4 top-1/2 transform -translate-y-1/2 bg-gray-700 hover:bg-gray-800 p-2 md:p-5 border-2 md:border-4 border-white shadow-xl transition-all"
+            className="md:hidden absolute left-2 top-1/2 transform -translate-y-1/2 p-2 border-2 border-white shadow-xl transition-all"
+            style={{ backgroundColor: '#374151' }}
+          >
+            <ChevronLeft className="w-3 h-3 text-white" />
+          </button>
+          <button
+            onClick={nextSlide}
+            className="md:hidden absolute right-2 top-1/2 transform -translate-y-1/2 p-2 border-2 border-white shadow-xl transition-all"
+            style={{ backgroundColor: '#374151' }}
+          >
+            <ChevronRight className="w-3 h-3 text-white" />
+          </button>
+
+          {/* Navigation buttons - Desktop (transparent with hover) */}
+          <button
+            onClick={prevSlide}
+            className="hidden md:block absolute left-2 md:left-4 top-1/2 transform -translate-y-1/2 p-2 md:p-5 border-2 md:border-4 border-white shadow-xl transition-all"
+            style={{ backgroundColor: 'transparent' }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#374151'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
           >
             <ChevronLeft className="w-3 h-3 md:w-6 md:h-6 text-white" />
           </button>
           <button
             onClick={nextSlide}
-            className="absolute right-2 md:right-4 top-1/2 transform -translate-y-1/2 bg-gray-700 hover:bg-gray-800 p-2 md:p-5 border-2 md:border-4 border-white shadow-xl transition-all"
+            className="hidden md:block absolute right-2 md:right-4 top-1/2 transform -translate-y-1/2 p-2 md:p-5 border-2 md:border-4 border-white shadow-xl transition-all"
+            style={{ backgroundColor: 'transparent' }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#374151'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
           >
             <ChevronRight className="w-3 h-3 md:w-6 md:h-6 text-white" />
           </button>
