@@ -41,9 +41,12 @@ export default function InteractiveParticles() {
       mouse.y = e.clientY - rect.top
     }
 
-    // Track scroll prevention timeout
+    // Track scroll prevention and swipe detection
     let scrollPreventTimeout: NodeJS.Timeout | null = null
     let shouldPreventScroll = false
+    let lastSwipeTime = 0
+    let lastSwipeDirection: 'up' | 'down' | null = null
+    let lastTouchY = 0
 
     // Handle touch movement for mobile
     const handleTouchStart = (e: TouchEvent) => {
@@ -52,6 +55,8 @@ export default function InteractiveParticles() {
         const touch = e.touches[0]
         const touchY = touch.clientY - rect.top
         const canvasHeight = rect.height
+        
+        lastTouchY = touch.clientY
         
         // Check if touch is in the center 58% (21% from top, 21% from bottom)
         const topBoundary = canvasHeight * 0.21
@@ -73,13 +78,37 @@ export default function InteractiveParticles() {
     }
 
     const handleTouchMove = (e: TouchEvent) => {
-      if (shouldPreventScroll) {
-        e.preventDefault()
-      }
-      
       if (e.touches.length > 0) {
-        const rect = canvas.getBoundingClientRect()
         const touch = e.touches[0]
+        const currentY = touch.clientY
+        const deltaY = currentY - lastTouchY
+        
+        // Detect swipe direction
+        if (Math.abs(deltaY) > 30) { // Minimum swipe distance
+          const currentTime = Date.now()
+          const swipeDirection = deltaY > 0 ? 'down' : 'up'
+          
+          // Check for double swipe
+          if (lastSwipeDirection === swipeDirection && 
+              currentTime - lastSwipeTime < 300) { // Within 300ms
+            // Double swipe detected - free the scroll
+            shouldPreventScroll = false
+            if (scrollPreventTimeout) {
+              clearTimeout(scrollPreventTimeout)
+              scrollPreventTimeout = null
+            }
+          }
+          
+          lastSwipeTime = currentTime
+          lastSwipeDirection = swipeDirection
+          lastTouchY = currentY
+        }
+        
+        if (shouldPreventScroll) {
+          e.preventDefault()
+        }
+        
+        const rect = canvas.getBoundingClientRect()
         mouse.x = touch.clientX - rect.left
         mouse.y = touch.clientY - rect.top
       }
@@ -89,6 +118,7 @@ export default function InteractiveParticles() {
       mouse.x = -1000
       mouse.y = -1000
       shouldPreventScroll = false
+      lastSwipeDirection = null
       if (scrollPreventTimeout) {
         clearTimeout(scrollPreventTimeout)
         scrollPreventTimeout = null
