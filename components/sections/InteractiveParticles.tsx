@@ -59,23 +59,18 @@ export default function InteractiveParticles() {
         
         // Check if this touch came quickly after the last one ended
         const gapSinceLastTouch = touchStartTime - lastTouchEndTime
-        if (gapSinceLastTouch < 600 && lastTouchEndTime > 0) {
+        if (gapSinceLastTouch < 300 && lastTouchEndTime > 0) {
           // User is making repeated touch attempts - allow scroll
           shouldPreventScroll = false
         } else {
-          // Check if touch is in the center 50% (25% from top, 25% from bottom)
-          const topBoundary = canvasHeight * 0.25
-          const bottomBoundary = canvasHeight * 0.75
+          // No zone check - entire canvas prevents scroll
+          shouldPreventScroll = true
           
-          if (touchY > topBoundary && touchY < bottomBoundary) {
-            shouldPreventScroll = true
-            
-            // Allow scroll again after 600ms
-            if (scrollPreventTimeout) clearTimeout(scrollPreventTimeout)
-            scrollPreventTimeout = setTimeout(() => {
-              shouldPreventScroll = false
-            }, 600)
-          }
+          // Allow scroll again after 600ms
+          if (scrollPreventTimeout) clearTimeout(scrollPreventTimeout)
+          scrollPreventTimeout = setTimeout(() => {
+            shouldPreventScroll = false
+          }, 600)
         }
         
         mouse.x = touch.clientX - rect.left
