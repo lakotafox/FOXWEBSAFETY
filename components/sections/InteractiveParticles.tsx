@@ -41,11 +41,32 @@ export default function InteractiveParticles() {
       mouse.y = e.clientY - rect.top
     }
 
+    // Handle touch movement for mobile
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        const rect = canvas.getBoundingClientRect()
+        const touch = e.touches[0]
+        mouse.x = touch.clientX - rect.left
+        mouse.y = touch.clientY - rect.top
+      }
+    }
+
+    const handleTouchEnd = () => {
+      mouse.x = -1000
+      mouse.y = -1000
+    }
+
+    // Mouse events
     canvas.addEventListener('mousemove', handleMouseMove)
     canvas.addEventListener('mouseleave', () => {
       mouse.x = -1000
       mouse.y = -1000
     })
+
+    // Touch events with passive flag for better scroll performance
+    canvas.addEventListener('touchstart', handleTouchMove, { passive: true })
+    canvas.addEventListener('touchmove', handleTouchMove, { passive: true })
+    canvas.addEventListener('touchend', handleTouchEnd, { passive: true })
 
     // Animation loop
     function animate() {
@@ -122,6 +143,9 @@ export default function InteractiveParticles() {
     // Cleanup
     return () => {
       canvas.removeEventListener('mousemove', handleMouseMove)
+      canvas.removeEventListener('touchstart', handleTouchMove)
+      canvas.removeEventListener('touchmove', handleTouchMove)
+      canvas.removeEventListener('touchend', handleTouchEnd)
       window.removeEventListener('resize', handleResize)
     }
   }, [])
