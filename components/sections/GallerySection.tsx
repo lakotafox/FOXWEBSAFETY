@@ -84,15 +84,15 @@ export default function GallerySection({
           {/* Navigation buttons */}
           <button
             onClick={prevSlide}
-            className="absolute left-2 md:left-4 top-1/2 transform -translate-y-1/2 bg-red-600 hover:bg-red-700 p-4 md:p-5 border-2 md:border-4 border-white shadow-xl transition-all"
+            className="absolute left-2 md:left-4 top-1/2 transform -translate-y-1/2 bg-gray-700 hover:bg-gray-800 p-2 md:p-5 border-2 md:border-4 border-white shadow-xl transition-all"
           >
-            <ChevronLeft className="w-4 h-4 md:w-6 md:h-6 text-white" />
+            <ChevronLeft className="w-3 h-3 md:w-6 md:h-6 text-white" />
           </button>
           <button
             onClick={nextSlide}
-            className="absolute right-2 md:right-4 top-1/2 transform -translate-y-1/2 bg-red-600 hover:bg-red-700 p-4 md:p-5 border-2 md:border-4 border-white shadow-xl transition-all"
+            className="absolute right-2 md:right-4 top-1/2 transform -translate-y-1/2 bg-gray-700 hover:bg-gray-800 p-2 md:p-5 border-2 md:border-4 border-white shadow-xl transition-all"
           >
-            <ChevronRight className="w-4 h-4 md:w-6 md:h-6 text-white" />
+            <ChevronRight className="w-3 h-3 md:w-6 md:h-6 text-white" />
           </button>
 
           {/* Slide indicators */}
