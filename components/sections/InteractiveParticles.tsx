@@ -53,9 +53,9 @@ export default function InteractiveParticles() {
         const touchY = touch.clientY - rect.top
         const canvasHeight = rect.height
         
-        // Check if touch is in the center 70% (15% from top, 15% from bottom)
-        const topBoundary = canvasHeight * 0.15
-        const bottomBoundary = canvasHeight * 0.85
+        // Check if touch is in the center 58% (21% from top, 21% from bottom)
+        const topBoundary = canvasHeight * 0.21
+        const bottomBoundary = canvasHeight * 0.79
         
         if (touchY > topBoundary && touchY < bottomBoundary) {
           shouldPreventScroll = true
