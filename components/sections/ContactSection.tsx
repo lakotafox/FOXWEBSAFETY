@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Phone, MapPin } from 'lucide-react'
 
 interface ContactFormData {
   name: string
@@ -94,40 +93,10 @@ export default function ContactSection() {
   return (
     <section id="contact" className="py-20 bg-slate-900 text-white">
       <div className="container mx-auto px-4">
-        <h2 className="text-5xl font-black text-center text-white mb-16 tracking-tight">
-          CONTACT US
-        </h2>
-
         <div className="grid md:grid-cols-2 gap-16 max-w-5xl mx-auto">
           <div>
-            <h3 className="text-3xl font-black mb-8 tracking-wide">CONTACT INFO</h3>
-            <div className="space-y-6">
-              <a href="tel:+18018999406" className="flex items-center space-x-4 hover:opacity-80 transition-opacity -mx-4 px-4 py-3 rounded-lg">
-                <div className="w-12 h-12 bg-red-600 flex items-center justify-center">
-                  <Phone className="w-6 h-6 text-white" />
-                </div>
-                <span className="text-xl font-bold">
-                  (801) 899-9406
-                </span>
-              </a>
-              <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-red-600 flex items-center justify-center">
-                  <MapPin className="w-6 h-6 text-white" />
-                </div>
-                <a 
-                  href="https://www.google.com/maps/search/?api=1&query=420+W+Industrial+Dr+Building+LL+Pleasant+Grove+UT+84062"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-red-400 transition-colors"
-                >
-                  <p className="text-xl font-bold">420 W Industrial Dr Building LL</p>
-                  <p className="text-xl font-bold">Pleasant Grove, UT 84062</p>
-                </a>
-              </div>
-            </div>
-
             <div className="mt-12">
-              <h4 className="text-2xl font-black mb-6 tracking-wide">STORE HOURS</h4>
+              <h4 className="text-2xl font-black mb-6 tracking-wide">HOURS</h4>
               <div className="space-y-3 text-zinc-300">
                 <p className="text-lg font-bold">Monday–Friday: 10:00am–5:00pm</p>
                 <p className="text-lg font-bold">Saturday–Sunday: By Appointment</p>
@@ -149,21 +118,12 @@ export default function ContactSection() {
               </div>
               <div>
                 <input
-                  type="email"
+                  type="text"
                   name="email"
-                  placeholder="EMAIL *"
+                  placeholder="EMAIL / PHONE *"
                   required
+                  autoComplete="off"
                   value={formData.email}
-                  onChange={handleFormChange}
-                  className="w-full px-6 py-4 bg-slate-800 border-4 border-slate-700 text-white placeholder-zinc-400 font-bold focus:outline-none focus:border-red-500"
-                />
-              </div>
-              <div>
-                <input
-                  type="tel"
-                  name="phone"
-                  placeholder="PHONE"
-                  value={formData.phone}
                   onChange={handleFormChange}
                   className="w-full px-6 py-4 bg-slate-800 border-4 border-slate-700 text-white placeholder-zinc-400 font-bold focus:outline-none focus:border-red-500"
                 />
@@ -172,19 +132,42 @@ export default function ContactSection() {
                 <textarea
                   name="message"
                   placeholder="TELL US WHAT YOU NEED"
-                  rows={4}
+                  rows={1}
                   value={formData.message}
                   onChange={handleFormChange}
-                  className="w-full px-6 py-4 bg-slate-800 border-4 border-slate-700 text-white placeholder-zinc-400 font-bold focus:outline-none focus:border-red-500"
+                  className="w-full px-6 py-4 bg-slate-800 border-4 border-slate-700 text-white placeholder-zinc-400 font-bold focus:outline-none focus:border-red-500 resize-none"
                 />
               </div>
-              <Button 
-                type="submit" 
-                disabled={isSubmitting}
-                className="w-full bg-red-600 hover:bg-red-700 py-4 font-black text-lg tracking-widest border-4 border-red-600 disabled:opacity-50"
-              >
-                {isSubmitting ? "SENDING..." : "SEND A MESSAGE"}
-              </Button>
+              <div className="flex gap-4">
+                <Button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="flex-1 bg-red-600 hover:bg-red-700 py-4 font-black text-lg tracking-widest border-4 border-red-600 disabled:opacity-50"
+                >
+                  {isSubmitting ? "SENDING..." : "SEND A MESSAGE"}
+                </Button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const audio = new Audio('/sounds/rocketlaunch.mp3')
+                    audio.play()
+                    setTimeout(() => {
+                      window.scrollTo({ top: 0, behavior: 'smooth' })
+                    }, 3750)
+                  }}
+                  className="group flex flex-col items-center justify-center px-2 md:px-4 hover:scale-110 transition-transform"
+                  aria-label="Back to top"
+                >
+                  <img 
+                    src="/rocket.png" 
+                    alt="Launch to top" 
+                    className="drop-shadow-lg w-16 h-16 md:w-24 md:h-24"
+                  />
+                  <span className="text-xs font-bold text-white mt-1">
+                    TOP
+                  </span>
+                </button>
+              </div>
             </form>
           </div>
         </div>

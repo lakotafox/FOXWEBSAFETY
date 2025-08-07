@@ -12,6 +12,7 @@ export default function SnakeGame({ onExit }: SnakeGameProps) {
   const [score, setScore] = useState(0)
   const [gameOver, setGameOver] = useState(false)
   const [gameStarted, setGameStarted] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
   const gameStateRef = useRef({
     snake: [{ x: 10, y: 10 }],
     dx: 0,
@@ -23,6 +24,10 @@ export default function SnakeGame({ onExit }: SnakeGameProps) {
   })
   
   useEffect(() => {
+    // Check if mobile
+    const checkMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0
+    setIsMobile(checkMobile)
+    
     const canvas = canvasRef.current
     if (!canvas) return
     
@@ -174,7 +179,19 @@ export default function SnakeGame({ onExit }: SnakeGameProps) {
         ref={canvasRef} 
         className="absolute inset-0"
       />
-      {!gameStarted && !gameOver && (
+      {isMobile && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black z-50">
+          <div className="text-white text-center p-8">
+            <h1 className="text-4xl font-bold mb-4">MOBILE NOT SUPPORTED</h1>
+            <p className="text-xl mb-6">Snake game requires keyboard controls</p>
+            <p className="text-lg mb-8">Please play on a desktop computer</p>
+            <Button onClick={onExit} className="bg-gray-600 text-white">
+              Back to Games
+            </Button>
+          </div>
+        </div>
+      )}
+      {!isMobile && !gameStarted && !gameOver && (
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-white text-center">
             <h1 className="text-6xl font-bold mb-4">SNAKE</h1>

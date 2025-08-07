@@ -13,6 +13,8 @@ export default function GalagaGame({ onExit }: GalagaGameProps) {
   const [lives, setLives] = useState(3)
   const [gameOver, setGameOver] = useState(false)
   const [wave, setWave] = useState(1)
+  const touchXRef = useRef<number | null>(null)
+  const isMobileRef = useRef(false)
   
   const gameStateRef = useRef({
     player: { x: 0, y: 0, width: 40, height: 40 },
@@ -40,6 +42,9 @@ export default function GalagaGame({ onExit }: GalagaGameProps) {
     if (!ctx) return
     
     const gameState = gameStateRef.current
+    
+    // Check if mobile
+    isMobileRef.current = 'ontouchstart' in window || navigator.maxTouchPoints > 0
     
     // Initialize player
     gameState.player.x = canvas.width / 2 - 20
@@ -308,11 +313,49 @@ export default function GalagaGame({ onExit }: GalagaGameProps) {
     window.addEventListener('keydown', handleKeyDown)
     window.addEventListener('keyup', handleKeyUp)
     
+    // Touch controls for mobile
+    const handleTouchMove = (e: TouchEvent) => {
+      e.preventDefault()
+      const touch = e.touches[0]
+      const canvasRect = canvas.getBoundingClientRect()
+      const touchX = touch.clientX - canvasRect.left
+      
+      // Set player position to follow touch
+      gameState.player.x = Math.max(0, Math.min(touchX - gameState.player.width / 2, canvas.width - gameState.player.width))
+    }
+    
+    const handleTouchStart = (e: TouchEvent) => {
+      e.preventDefault()
+      handleTouchMove(e)
+    }
+    
+    // Auto-shoot for mobile
+    let autoShootInterval: NodeJS.Timer | null = null
+    if (isMobileRef.current) {
+      autoShootInterval = setInterval(() => {
+        if (Date.now() - gameState.lastShot > 200) {
+          gameState.bullets.push({
+            x: gameState.player.x + 18,
+            y: gameState.player.y,
+            width: 4,
+            height: 10
+          })
+          gameState.lastShot = Date.now()
+        }
+      }, 200)
+    }
+    
+    canvas.addEventListener('touchmove', handleTouchMove, { passive: false })
+    canvas.addEventListener('touchstart', handleTouchStart, { passive: false })
+    
     return () => {
       clearInterval(interval)
       clearInterval(playerInterval)
+      if (autoShootInterval) clearInterval(autoShootInterval)
       window.removeEventListener('keydown', handleKeyDown)
       window.removeEventListener('keyup', handleKeyUp)
+      canvas.removeEventListener('touchmove', handleTouchMove)
+      canvas.removeEventListener('touchstart', handleTouchStart)
     }
   }, [gameOver])
   
@@ -344,7 +387,9 @@ export default function GalagaGame({ onExit }: GalagaGameProps) {
         Exit
       </Button>
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-center">
-        <p className="text-lg">Arrow Keys: Move | Space: Shoot</p>
+        <p className="text-lg">
+          {isMobileRef.current ? 'Touch to move | Auto-shooting enabled' : 'Arrow Keys: Move | Space: Shoot'}
+        </p>
       </div>
       
     </div>

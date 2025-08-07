@@ -10,16 +10,18 @@ interface PongGameProps {
 export default function PongGame({ onExit }: PongGameProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [scores, setScores] = useState({ player: 0, ai: 0 })
+  const touchYRef = useRef<number | null>(null)
+  const waitingForServeRef = useRef(false)
   const gameStateRef = useRef({
     ballX: 0,
     ballY: 0,
-    ballDX: 7,
-    ballDY: 7,
+    ballDX: 4,
+    ballDY: 4,
     playerY: 0,
     aiY: 0,
     paddleHeight: 120,
     paddleWidth: 20,
-    baseSpeed: 7,
+    baseSpeed: 4,
     speedMultiplier: 1.05
   })
   
@@ -42,20 +44,55 @@ export default function PongGame({ onExit }: PongGameProps) {
     gameState.playerY = canvas.height / 2 - gameState.paddleHeight / 2
     gameState.aiY = canvas.height / 2 - gameState.paddleHeight / 2
     
+    // Sound helper functions
+    const playHitSound = () => {
+      const hitSounds = ['/sounds/ponghit2.mp3', '/sounds/ponghit4.mp3']
+      const randomSound = hitSounds[Math.floor(Math.random() * hitSounds.length)]
+      const audio = new Audio(randomSound)
+      audio.play().catch(e => console.log('Hit sound failed:', e))
+    }
+    
+    const playGoalSound = () => {
+      const audio = new Audio('/sounds/ponggoal.mp3')
+      audio.play().catch(e => console.log('Goal sound failed:', e))
+      return audio
+    }
+    
+    const playStartSound = () => {
+      const audio = new Audio('/sounds/pongstart.mp3')
+      audio.play().catch(e => console.log('Start sound failed:', e))
+    }
+    
+    // Play start sound when game begins
+    setTimeout(() => playStartSound(), 100)
+    
+    // Create scanline effect
+    const scanlineCanvas = document.createElement('canvas')
+    scanlineCanvas.width = canvas.width
+    scanlineCanvas.height = canvas.height
+    const scanlineCtx = scanlineCanvas.getContext('2d')!
+    
+    // Draw scanlines
+    scanlineCtx.fillStyle = 'rgba(0, 0, 0, 0.1)'
+    for (let i = 0; i < canvas.height; i += 4) {
+      scanlineCtx.fillRect(0, i, canvas.width, 2)
+    }
+    
     const gameLoop = () => {
-      // Clear canvas
-      ctx.fillStyle = '#000'
+      if (waitingForServeRef.current) return
+      
+      // Clear canvas with slight flicker effect
+      const flicker = Math.random() > 0.98 ? 0.85 : 1
+      ctx.fillStyle = `rgba(0, 0, 0, ${flicker})`
       ctx.fillRect(0, 0, canvas.width, canvas.height)
       
-      // Draw center line
-      ctx.setLineDash([10, 10])
-      ctx.beginPath()
-      ctx.moveTo(canvas.width / 2, 0)
-      ctx.lineTo(canvas.width / 2, canvas.height)
-      ctx.strokeStyle = '#666'
-      ctx.lineWidth = 5
-      ctx.stroke()
-      ctx.setLineDash([])
+      // Draw center line (blocky style)
+      ctx.fillStyle = '#fff'
+      const dashHeight = 20
+      const gapHeight = 20
+      for (let y = 0; y < canvas.height; y += dashHeight + gapHeight) {
+        ctx.fillRect(canvas.width / 2 - 4, y, 8, dashHeight)
+      }
       
       // Move ball
       gameState.ballX += gameState.ballDX
@@ -64,6 +101,7 @@ export default function PongGame({ onExit }: PongGameProps) {
       // Ball collision with top/bottom
       if (gameState.ballY <= 10 || gameState.ballY >= canvas.height - 10) {
         gameState.ballDY = -gameState.ballDY
+        playHitSound()
       }
       
       // Ball collision with paddles
@@ -83,6 +121,7 @@ export default function PongGame({ onExit }: PongGameProps) {
         speed = Math.min(speed * gameState.speedMultiplier, 15) // Cap at max speed
         gameState.ballDX = speed * Math.cos(angle)
         gameState.ballDY = speed * Math.sin(angle)
+        playHitSound()
       }
       
       if (gameState.ballX >= canvas.width - 40 && 
@@ -101,47 +140,90 @@ export default function PongGame({ onExit }: PongGameProps) {
         speed = Math.min(speed * gameState.speedMultiplier, 15) // Cap at max speed
         gameState.ballDX = -speed * Math.cos(angle)
         gameState.ballDY = speed * Math.sin(angle)
+        playHitSound()
       }
       
       // Score
       if (gameState.ballX <= 0) {
         setScores(prev => ({ ...prev, ai: prev.ai + 1 }))
+        waitingForServeRef.current = true
+        playGoalSound()
+        
+        // Reset ball position immediately
         gameState.ballX = canvas.width / 2
         gameState.ballY = canvas.height / 2
-        gameState.ballDX = -gameState.baseSpeed
-        gameState.ballDY = (Math.random() - 0.5) * gameState.baseSpeed
+        gameState.ballDX = 0
+        gameState.ballDY = 0
+        
+        // Wait 1.5 seconds then serve
+        setTimeout(() => {
+          gameState.ballDX = -gameState.baseSpeed
+          gameState.ballDY = (Math.random() - 0.5) * gameState.baseSpeed
+          waitingForServeRef.current = false
+          playStartSound()
+        }, 1500)
       }
       if (gameState.ballX >= canvas.width) {
         setScores(prev => ({ ...prev, player: prev.player + 1 }))
+        waitingForServeRef.current = true
+        playGoalSound()
+        
+        // Reset ball position immediately
         gameState.ballX = canvas.width / 2
         gameState.ballY = canvas.height / 2
-        gameState.ballDX = gameState.baseSpeed
-        gameState.ballDY = (Math.random() - 0.5) * gameState.baseSpeed
+        gameState.ballDX = 0
+        gameState.ballDY = 0
+        
+        // Wait 1.5 seconds then serve
+        setTimeout(() => {
+          gameState.ballDX = gameState.baseSpeed
+          gameState.ballDY = (Math.random() - 0.5) * gameState.baseSpeed
+          waitingForServeRef.current = false
+          playStartSound()
+        }, 1500)
       }
       
-      // AI movement (improved)
-      const aiSpeed = 4
+      // AI movement - original Pong style (perfect tracking with speed limit)
+      const aiSpeed = 5.5 // Slightly slower than ball max speed
       const aiCenter = gameState.aiY + gameState.paddleHeight / 2
-      if (gameState.ballY > aiCenter + 20) {
+      const targetY = gameState.ballY
+      
+      // Move towards ball position, limited by max speed
+      if (targetY > aiCenter) {
         gameState.aiY = Math.min(gameState.aiY + aiSpeed, canvas.height - gameState.paddleHeight)
-      } else if (gameState.ballY < aiCenter - 20) {
+      } else if (targetY < aiCenter) {
         gameState.aiY = Math.max(gameState.aiY - aiSpeed, 0)
       }
       
-      // Draw paddles
+      // Draw paddles (blocky style)
       ctx.fillStyle = '#fff'
       ctx.fillRect(20, gameState.playerY, gameState.paddleWidth, gameState.paddleHeight)
       ctx.fillRect(canvas.width - 40, gameState.aiY, gameState.paddleWidth, gameState.paddleHeight)
       
-      // Draw ball
-      ctx.beginPath()
-      ctx.arc(gameState.ballX, gameState.ballY, 10, 0, Math.PI * 2)
-      ctx.fill()
+      // Draw ball trail (ghosting effect)
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.3)'
+      ctx.fillRect(gameState.ballX - gameState.ballDX - 6, gameState.ballY - gameState.ballDY - 6, 12, 12)
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)'
+      ctx.fillRect(gameState.ballX - gameState.ballDX * 0.5 - 6, gameState.ballY - gameState.ballDY * 0.5 - 6, 12, 12)
       
-      // Draw scores
-      ctx.font = '60px monospace'
-      ctx.fillText(scores.player.toString(), canvas.width / 4, 80)
-      ctx.fillText(scores.ai.toString(), 3 * canvas.width / 4 - 60, 80)
+      // Draw ball (square instead of circle)
+      ctx.fillStyle = '#fff'
+      ctx.fillRect(gameState.ballX - 6, gameState.ballY - 6, 12, 12)
+      
+      // Draw scores (pixelated style)
+      ctx.fillStyle = '#fff'
+      ctx.font = 'bold 80px monospace'
+      ctx.fillText(scores.player.toString(), canvas.width / 4, 100)
+      ctx.fillText(scores.ai.toString(), 3 * canvas.width / 4 - 80, 100)
+      
+      // Apply scanlines over everything
+      ctx.globalAlpha = 0.1
+      ctx.drawImage(scanlineCanvas, 0, 0)
+      ctx.globalAlpha = 1
+      
+      // Add green phosphor tint
+      ctx.fillStyle = 'rgba(0, 255, 0, 0.02)'
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
     }
     
     const interval = setInterval(gameLoop, 16)
@@ -159,7 +241,7 @@ export default function PongGame({ onExit }: PongGameProps) {
     
     // Update player position based on keys
     const updatePlayerPosition = () => {
-      const paddleSpeed = 8
+      const paddleSpeed = 5 // Slower, like original Pong
       if (keys['ArrowUp'] && gameState.playerY > 0) {
         gameState.playerY -= paddleSpeed
       }
@@ -173,11 +255,32 @@ export default function PongGame({ onExit }: PongGameProps) {
     window.addEventListener('keydown', handleKeyDown)
     window.addEventListener('keyup', handleKeyUp)
     
+    // Touch controls for mobile
+    const handleTouchMove = (e: TouchEvent) => {
+      e.preventDefault()
+      const touch = e.touches[0]
+      const canvasRect = canvas.getBoundingClientRect()
+      const touchY = touch.clientY - canvasRect.top
+      
+      // Directly set player paddle position to follow touch
+      gameState.playerY = Math.max(0, Math.min(touchY - gameState.paddleHeight / 2, canvas.height - gameState.paddleHeight))
+    }
+    
+    const handleTouchStart = (e: TouchEvent) => {
+      e.preventDefault()
+      handleTouchMove(e)
+    }
+    
+    canvas.addEventListener('touchmove', handleTouchMove, { passive: false })
+    canvas.addEventListener('touchstart', handleTouchStart, { passive: false })
+    
     return () => {
       clearInterval(interval)
       clearInterval(controlInterval)
       window.removeEventListener('keydown', handleKeyDown)
       window.removeEventListener('keyup', handleKeyUp)
+      canvas.removeEventListener('touchmove', handleTouchMove)
+      canvas.removeEventListener('touchstart', handleTouchStart)
     }
   }, [scores])
   
@@ -189,7 +292,6 @@ export default function PongGame({ onExit }: PongGameProps) {
       />
       <div className="absolute top-4 left-1/2 -translate-x-1/2 text-white text-center">
         <p className="text-xl mb-2">First to 10 wins!</p>
-        <p className="text-sm text-gray-400">Use ↑↓ Arrow Keys to move</p>
       </div>
       {(scores.player >= 10 || scores.ai >= 10) && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/50">

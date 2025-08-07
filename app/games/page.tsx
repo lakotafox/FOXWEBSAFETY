@@ -17,27 +17,51 @@ export default function GamesPage() {
   const [showBugMessage, setShowBugMessage] = useState(false)
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
+  useEffect(() => {
+    // Play Atari sound when games page loads
+    if (gameMode === 'select') {
+      const audio = new Audio('/sounds/Atari.mp3')
+      audio.loop = true
+      audio.play().catch(e => console.log('Atari audio failed:', e))
+      audioRef.current = audio
+    } else {
+      // Stop audio when entering a game
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current = null
+      }
+    }
+    
+    // Cleanup on unmount
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current = null
+      }
+    }
+  }, [gameMode])
+
   if (gameMode === 'select') {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center p-4">
         <div className="text-center">
-          <h1 className="text-8xl font-bold text-white mb-12">CHOOSE YOUR GAME</h1>
-          <div className="flex gap-12">
+          <h1 className="text-4xl md:text-6xl lg:text-8xl font-bold text-white mb-8 md:mb-12">CHOOSE YOUR GAME</h1>
+          <div className="flex flex-col md:flex-row gap-6 md:gap-12">
             <Button 
               onClick={() => setGameMode('snake')} 
-              className="bg-green-600 hover:bg-green-700 text-white text-4xl py-12 px-24 rounded-xl"
+              className="bg-green-600 hover:bg-green-700 text-white text-2xl md:text-3xl lg:text-4xl py-8 md:py-10 lg:py-12 px-12 md:px-16 lg:px-24 rounded-xl w-full md:w-auto"
             >
               SNAKE
             </Button>
             <Button 
               onClick={() => setGameMode('pong')} 
-              className="bg-blue-600 hover:bg-blue-700 text-white text-4xl py-12 px-24 rounded-xl"
+              className="bg-blue-600 hover:bg-blue-700 text-white text-2xl md:text-3xl lg:text-4xl py-8 md:py-10 lg:py-12 px-12 md:px-16 lg:px-24 rounded-xl w-full md:w-auto"
             >
               PONG
             </Button>
             <Button 
               onClick={() => setGameMode('galaga')} 
-              className="bg-purple-600 hover:bg-purple-700 text-white text-4xl py-12 px-24 rounded-xl"
+              className="bg-purple-600 hover:bg-purple-700 text-white text-2xl md:text-3xl lg:text-4xl py-8 md:py-10 lg:py-12 px-12 md:px-16 lg:px-24 rounded-xl w-full md:w-auto"
             >
               GALAGA
             </Button>
