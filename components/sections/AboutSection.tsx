@@ -23,7 +23,7 @@ export default function AboutSection({ showAddress, setShowAddress }: AboutSecti
               <div>
                 <h3 className="text-3xl font-black text-white mb-6 tracking-wide">THE ARTIST</h3>
                 <p className="text-zinc-300 leading-relaxed text-lg font-semibold">
-                  With over 30 years in the creative industry, Kyle brings a rare blend of retro charm and modern edge to every space he designs. A true master of layout and flow whether you need new school top of the line, or old school basically free Kyle is the guy.
+                  With over 30 years in the creative industry, Kyle brings a rare blend of retro charm and modern edge to every space he designs. A true master of layout and flow, if you need new school, old school, top of the line or basically free Kyle is the guy, Foxbuilt is the place.
                 </p>
               </div>
             </div>

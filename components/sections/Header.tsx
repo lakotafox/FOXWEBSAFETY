@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { Phone, MapPin, Mail } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import MapConfirmModal from '@/components/ui/MapConfirmModal'
 
 interface HeaderProps {
   showAddress: boolean
@@ -12,6 +13,7 @@ interface HeaderProps {
 
 export default function Header({ showAddress, setShowAddress }: HeaderProps) {
   const [isScrolled, setIsScrolled] = useState(false)
+  const [showMapConfirm, setShowMapConfirm] = useState(false)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -23,6 +25,7 @@ export default function Header({ showAddress, setShowAddress }: HeaderProps) {
   }, [])
 
   return (
+    <>
     <header
       className={`fixed top-0 left-0 right-0 z-50 bg-slate-900 border-b-4 border-red-600 shadow-xl transition-all duration-500 ${
         isScrolled ? "py-0.25" : "py-1.5"
@@ -74,7 +77,7 @@ export default function Header({ showAddress, setShowAddress }: HeaderProps) {
               <Phone className="w-5 h-5" />
             </button>
             <button
-              onClick={() => window.open('https://www.google.com/maps/search/?api=1&query=420+W+Industrial+Dr+Building+LL+Pleasant+Grove+UT+84062', '_blank')}
+              onClick={() => setShowMapConfirm(true)}
               className="w-10 h-10 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center"
               aria-label="View on map"
             >
@@ -91,5 +94,12 @@ export default function Header({ showAddress, setShowAddress }: HeaderProps) {
         </div>
       </div>
     </header>
+    
+    <MapConfirmModal 
+      isOpen={showMapConfirm}
+      onClose={() => setShowMapConfirm(false)}
+      onConfirm={() => {}}
+    />
+    </>
   )
 }

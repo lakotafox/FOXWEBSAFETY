@@ -18,7 +18,7 @@ export default function FeaturedProducts({
   cropSettings,
   getImageUrl 
 }: FeaturedProductsProps) {
-  const [featuredCategory, setFeaturedCategory] = useState("new")
+  const [featuredCategory, setFeaturedCategory] = useState("battleTested")
   const [showComingSoon, setShowComingSoon] = useState(false)
   const [showFullImage, setShowFullImage] = useState(false)
   const [fullImageSrc, setFullImageSrc] = useState('')
@@ -32,7 +32,7 @@ export default function FeaturedProducts({
         </h2>
 
         {/* Category Buttons */}
-        <div className="flex justify-center mb-12">
+        <div className="flex justify-center mb-6">
           <div className="bg-slate-700 border-4 border-slate-600 p-2 flex flex-wrap justify-center">
             <Button
               id="category-new"
