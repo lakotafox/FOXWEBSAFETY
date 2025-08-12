@@ -362,18 +362,6 @@ export default function RollingGallery({
         </div>
       )}
       
-      {/* Instruction text with fade-in after 3 seconds */}
-      <div 
-        className="absolute top-4 left-0 right-0 z-30 text-center transition-opacity duration-1000 ease-out"
-        style={{
-          opacity: showInstruction && imagesReady ? 1 : 0,
-        }}
-      >
-        <p className="text-white text-sm md:text-base font-semibold tracking-wider uppercase">
-          {isScreenSizeSm ? 'Tap any image' : 'Click any image'}
-        </p>
-      </div>
-      
       {/* Gallery track */}
       <div className="flex items-center justify-center h-full">
         <div
