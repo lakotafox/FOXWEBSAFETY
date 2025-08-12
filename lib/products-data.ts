@@ -2,90 +2,225 @@ export const defaultProducts = {
   new: [
     {
       id: 1,
-      title: "Classic Laminate Series - Silver Birch",
+      title: "Executive Desk Series",
       image: "/images/desk grey L showroom.jpg",
-      price: "Price coming soon",
-      description: "Website is a work in progress - prices and products coming soon!",
-      features: ["Silver Square Handles", "Metal connections", "Core removable locks"],
-      specs: "Dimensions: 60\"W x 30\"D x 29\"H\nWeight: 120 lbs\nMaterial: Laminate surface with metal frame\nColors: Silver Birch, Natural Oak, Espresso",
+      description: "",
+      features: ["Solid wood construction", "Cable management", "5-year warranty"],
+      price: ""
     },
     {
       id: 2,
-      title: "Elements Laminate Series",
-      image: "/images/small desk.jpg",
-      price: "Price coming soon",
-      description: "Website is a work in progress - prices and products coming soon!",
-      features: ["Greenguard Certified", "Heavy duty steel frame", "Coordinates with Classic storage"],
-      specs: "Dimensions: 48\"W x 24\"D x 29\"H\nWeight: 95 lbs\nMaterial: Heavy-duty steel frame\nLoad Capacity: 300 lbs",
+      title: "Ergonomic Task Chair",
+      image: "/images/reception-area.jpg",
+      description: "",
+      features: ["Lumbar support", "Adjustable arms", "Breathable mesh"],
+      price: ""
     },
     {
       id: 3,
-      title: "Signature Collection",
-      image: "/images/Showroomwglassboard.jpg",
-      price: "Price coming soon",
-      description: "Website is a work in progress - prices and products coming soon!",
-      features: ["Wood VA Legs available", "Metal VA Legs available", "Modern design"],
-      specs: "Dimensions: 72\"W x 36\"D x 30\"H\nWeight: 150 lbs\nMaterial: Premium wood veneer\nOptions: Multiple leg styles",
+      title: "Conference Table",
+      image: "/images/tanconf.jpg",
+      description: "",
+      features: ["Seats 8-12", "Power integration", "Premium finishes"],
+      price: ""
     },
-  ],
-  battleTested: [
     {
       id: 4,
-      title: "Palmer House Conference Tables",
-      image: "/images/tanconf.jpg",
-      price: "Price coming soon",
-      description: "Website is a work in progress - prices and products coming soon!",
-      features: ["Brushed Steel Base", "Standard grommet", "Multiple sizes available"],
-      specs: "Dimensions: 96\"W x 42\"D x 29\"H\nWeight: 200 lbs\nMaterial: Solid wood top\nSeating: 6-8 people",
+      title: "Storage Cabinet",
+      image: "/images/showroom-1.jpg",
+      description: "",
+      features: ["Locking drawers", "Adjustable shelves", "Anti-tip design"],
+      price: ""
     },
     {
       id: 5,
-      title: "Height Adjustable Desks",
-      image: "/images/showfacinggarage.jpg",
-      price: "Price coming soon",
-      description: "Website is a work in progress - prices and products coming soon!",
-      features: ["3-stage legs", "Memory handset", "265 lb weight rating"],
-      specs: "Height Range: 24\" - 50\"\nWidth Options: 48\", 60\", 72\"\nDepth: 30\"\nWeight Capacity: 265 lbs\nMotor: Dual motor system",
+      title: "Reception Desk",
+      image: "/images/reception tan.jpg",
+      description: "",
+      features: ["ADA compliant", "Built-in storage", "Custom sizes"],
+      price: ""
     },
     {
       id: 6,
-      title: "Encore Collection",
-      image: "/images/conference-room.jpg",
-      price: "Price coming soon",
-      description: "Website is a work in progress - prices and products coming soon!",
-      features: ["Beveled steel frame", "Greenguard Certified", "Works with Elements storage"],
-      specs: "Dimensions: 60\"W x 30\"D x 29\"H\nWeight: 110 lbs\nMaterial: Steel frame with laminate\nWarranty: 10 year limited",
+      title: "Standing Desk",
+      image: "/images/showfacinggarage.jpg",
+      description: "",
+      features: ["Electric lift", "Memory settings", "Anti-collision"],
+      price: ""
     },
-  ],
-  seating: [
     {
       id: 7,
-      title: "Konfurb Seating Collection",
-      image: "/images/reception-area.jpg",
-      price: "Price coming soon",
-      description: "Website is a work in progress - prices and products coming soon!",
-      features: ["Award-winning design", "Ergonomic features", "Multiple series available"],
-      specs: "Seat Height: 16\" - 21\" adjustable\nSeat Width: 19\"\nBack Height: 38\" - 42\"\nWeight Capacity: 300 lbs\nMaterials: Mesh back, foam cushion",
+      title: "Lounge Seating",
+      image: "/images/Showroomwglassboard.jpg",
+      description: "",
+      features: ["Stain resistant", "Modular design", "USB charging"],
+      price: ""
     },
     {
       id: 8,
-      title: "Storage Solutions",
-      image: "/images/showroom-1.jpg",
-      price: "Price coming soon",
-      description: "Website is a work in progress - prices and products coming soon!",
-      features: ["Ball bearing slides", "Locking options", "Multiple finishes"],
-      specs: "Dimensions: 36\"W x 18\"D x 28\"H\nDrawers: 3 or 4 drawer options\nLock: Central locking system\nWeight: 75-90 lbs",
+      title: "File Cabinet",
+      image: "/images/small desk.jpg",
+      description: "",
+      features: ["Fire resistant", "Full extension", "Lock system"],
+      price: ""
     },
     {
       id: 9,
-      title: "Reception Seating",
-      image: "/images/reception tan.jpg",
-      price: "Price coming soon",
-      description: "Website is a work in progress - prices and products coming soon!",
-      features: ["Anti-microbial vinyl", "Designer fabrics", "Modular options"],
-      specs: "Dimensions: 72\"W x 28\"D x 32\"H\nSeating: 3 person capacity\nMaterial: Commercial grade vinyl\nFrame: Steel reinforced",
-    },
+      title: "Training Table",
+      image: "/images/conference-room.jpg",
+      description: "",
+      features: ["Flip-top design", "Nesting storage", "Mobile casters"],
+      price: ""
+    }
   ],
+  battleTested: [
+    {
+      id: 10,
+      title: "Pre-Owned Executive Desk",
+      image: "/images/showroom-2.jpg",
+      description: "",
+      features: ["Inspected & certified", "Like-new condition", "50% off retail"],
+      price: ""
+    },
+    {
+      id: 11,
+      title: "Refurbished Conference Set",
+      image: "/images/desk grey L showroom.jpg",
+      description: "",
+      features: ["Table & 8 chairs", "Professionally cleaned", "1-year warranty"],
+      price: ""
+    },
+    {
+      id: 12,
+      title: "Pre-Owned Task Chairs",
+      image: "/images/reception-area.jpg",
+      description: "",
+      features: ["Fully functional", "New casters", "Bulk discounts"],
+      price: ""
+    },
+    {
+      id: 13,
+      title: "Refurbished Storage Units",
+      image: "/images/showroom-1.jpg",
+      description: "",
+      features: ["New locks installed", "Touch-up paint", "Various sizes"],
+      price: ""
+    },
+    {
+      id: 14,
+      title: "Pre-Owned Workstations",
+      image: "/images/tanconf.jpg",
+      description: "",
+      features: ["Modular design", "Easy reconfiguration", "Great value"],
+      price: ""
+    },
+    {
+      id: 15,
+      title: "Refurbished Reception Desk",
+      image: "/images/reception tan.jpg",
+      description: "",
+      features: ["Professional refinish", "Updated hardware", "60% off new"],
+      price: ""
+    },
+    {
+      id: 16,
+      title: "Pre-Owned Lounge Set",
+      image: "/images/Showroomwglassboard.jpg",
+      description: "",
+      features: ["Deep cleaned", "No visible wear", "Ready to use"],
+      price: ""
+    },
+    {
+      id: 17,
+      title: "Refurbished Training Tables",
+      image: "/images/conference-room.jpg",
+      description: "",
+      features: ["Flip-top mechanism", "New wheels", "Set of 6 available"],
+      price: ""
+    },
+    {
+      id: 18,
+      title: "Pre-Owned Executive Suite",
+      image: "/images/showfacinggarage.jpg",
+      description: "",
+      features: ["Desk, credenza, chair", "Matching finish", "Premium quality"],
+      price: ""
+    }
+  ],
+  seating: [
+    {
+      id: 19,
+      title: "Ergonomic Office Chairs",
+      image: "/images/reception-area.jpg",
+      description: "",
+      features: ["Lumbar support", "Adjustable everything", "5-year warranty"],
+      price: ""
+    },
+    {
+      id: 20,
+      title: "Executive Leather Chairs",
+      image: "/images/showroom-2.jpg",
+      description: "",
+      features: ["Genuine leather", "Memory foam", "Lifetime frame warranty"],
+      price: ""
+    },
+    {
+      id: 21,
+      title: "Conference Room Chairs",
+      image: "/images/tanconf.jpg",
+      description: "",
+      features: ["Stackable option", "Arms available", "Bulk pricing"],
+      price: ""
+    },
+    {
+      id: 22,
+      title: "Reception Area Seating",
+      image: "/images/reception tan.jpg",
+      description: "",
+      features: ["Anti-microbial fabric", "Modular design", "ADA compliant"],
+      price: ""
+    },
+    {
+      id: 23,
+      title: "Task Chairs",
+      image: "/images/small desk.jpg",
+      description: "",
+      features: ["Height adjustable", "Swivel base", "Multiple colors"],
+      price: ""
+    },
+    {
+      id: 24,
+      title: "Lounge Chairs",
+      image: "/images/Showroomwglassboard.jpg",
+      description: "",
+      features: ["Deep cushions", "Stain resistant", "Modern design"],
+      price: ""
+    },
+    {
+      id: 25,
+      title: "Drafting Stools",
+      image: "/images/showfacinggarage.jpg",
+      description: "",
+      features: ["Foot ring", "360° swivel", "Industrial rated"],
+      price: ""
+    },
+    {
+      id: 26,
+      title: "Guest Chairs",
+      image: "/images/desk grey L showroom.jpg",
+      description: "",
+      features: ["No assembly required", "Stackable", "Easy clean"],
+      price: ""
+    },
+    {
+      id: 27,
+      title: "Collaborative Seating",
+      image: "/images/conference-room.jpg",
+      description: "",
+      features: ["Mobile base", "Tablet arm option", "Flexible design"],
+      price: ""
+    }
+  ]
 }
 
 export function getProducts() {
@@ -106,5 +241,61 @@ export function getProducts() {
 export function saveProducts(products: any) {
   if (typeof window !== 'undefined') {
     localStorage.setItem('foxbuilt-products', JSON.stringify(products))
+  }
+}
+
+// Helper function to get products for products page
+export async function getProductsPageItems() {
+  // First try to fetch from the published products.json file
+  try {
+    const response = await fetch('/products.json', { cache: 'no-store' })
+    if (response.ok) {
+      const data = await response.json()
+      if (data.products) {
+        // Get crops from productsCrops or extract from products
+        const productCrops: any = data.productsCrops || {}
+        
+        // Also check for embedded imageCrop in products
+        Object.values(data.products).forEach((categoryProducts: any) => {
+          categoryProducts.forEach((product: any) => {
+            if (product.imageCrop && product.image) {
+              productCrops[product.image] = product.imageCrop
+            }
+          })
+        })
+        
+        return { products: data.products, crops: productCrops }
+      }
+    }
+  } catch (e) {
+    console.log('No published products file, using defaults')
+  }
+  
+  // Fallback to localStorage for preview
+  if (typeof window !== 'undefined') {
+    const saved = localStorage.getItem('foxbuilt-products-page')
+    const savedCrops = localStorage.getItem('foxbuilt-products-page-crops')
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved)
+        const crops = savedCrops ? JSON.parse(savedCrops) : {}
+        return {
+          products: {
+            new: parsed.new || [],
+            battleTested: parsed.battleTested || [],
+            seating: parsed.seating || []
+          },
+          crops
+        }
+      } catch (e) {
+        console.error('Error parsing saved products:', e)
+      }
+    }
+  }
+  
+  // Return default products if nothing saved
+  return {
+    products: defaultProducts,
+    crops: {}
   }
 }

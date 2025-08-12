@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from "react"
+import { useSearchParams } from 'next/navigation'
 import { getProducts, defaultProducts } from "@/lib/products-data"
 
 // Import all our extracted components
@@ -12,6 +13,7 @@ import GallerySection from "@/components/sections/GallerySection"
 import FeaturedProducts from "@/components/sections/FeaturedProducts"
 import AboutSection from "@/components/sections/AboutSection"
 import ContactSection from "@/components/sections/ContactSection"
+import ASCIISection from "@/components/sections/ASCIISection"
 import Footer from "@/components/sections/Footer"
 
 // Declare window.emailjs type
@@ -22,10 +24,12 @@ declare global {
 }
 
 export default function FoxBuiltWebsite() {
+  const searchParams = useSearchParams()
   const [showAddress, setShowAddress] = useState(false)
   const [featuredProducts, setFeaturedProducts] = useState(defaultProducts)
   const [cropSettings, setCropSettings] = useState<{[key: string]: {scale: number, x: number, y: number}}>({})
   const [galleryCrops, setGalleryCrops] = useState<{[key: string]: {scale: number, x: number, y: number}}>({})
+  const [openCarouselData, setOpenCarouselData] = useState<{open: boolean, category?: string, index?: number}>({open: false})
   
   // Helper function to get displayable image URL
   const getImageUrl = (imagePath: string) => {
@@ -50,25 +54,41 @@ export default function FoxBuiltWebsite() {
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  // Load products from content.json
+  // Load products from products.json (published by editor) and gallery from content.json
   useEffect(() => {
-    fetch('/content.json')
+    // Load products from products.json (what the editor publishes)
+    fetch('/products.json')
       .then(response => response.json())
       .then(data => {
         if (data.products) {
           setFeaturedProducts(data.products)
           
-          // Extract crop settings from products
-          const crops: {[key: string]: {scale: number, x: number, y: number}} = {}
-          Object.keys(data.products).forEach(category => {
-            data.products[category].forEach((product: any) => {
-              if (product.imageCrop && product.image) {
-                crops[product.image] = product.imageCrop
-              }
+          // Use productsCrops if available, otherwise extract from products
+          if (data.productsCrops) {
+            setCropSettings(data.productsCrops)
+          } else {
+            // Extract crop settings from products
+            const crops: {[key: string]: {scale: number, x: number, y: number}} = {}
+            Object.keys(data.products).forEach(category => {
+              data.products[category].forEach((product: any) => {
+                if (product.imageCrop && product.image) {
+                  crops[product.image] = product.imageCrop
+                }
+              })
             })
-          })
-          setCropSettings(crops)
+            setCropSettings(crops)
+          }
         }
+      })
+      .catch(error => {
+        console.error('Error loading products.json, falling back to defaults:', error)
+        setFeaturedProducts(getProducts())
+      })
+    
+    // Load gallery images from content.json
+    fetch('/content.json')
+      .then(response => response.json())
+      .then(data => {
         if (data.gallery) {
           setGalleryImages(data.gallery)
         }
@@ -80,9 +100,7 @@ export default function FoxBuiltWebsite() {
         }
       })
       .catch(error => {
-        console.error('Error loading content.json, falling back to defaults:', error)
-        setFeaturedProducts(getProducts())
-        
+        console.error('Error loading content.json gallery:', error)
         const savedGallery = localStorage.getItem('foxbuilt-gallery')
         if (savedGallery) {
           try {
@@ -93,6 +111,25 @@ export default function FoxBuiltWebsite() {
         }
       })
   }, [])
+
+  // Check if we should open carousel (returning from product detail)
+  useEffect(() => {
+    if (searchParams.get('openCarousel') === 'true') {
+      const categoryParam = searchParams.get('category')
+      const indexParam = searchParams.get('index')
+      setOpenCarouselData({
+        open: true,
+        category: categoryParam || undefined,
+        index: indexParam ? parseInt(indexParam) : undefined
+      })
+      // Clean up the URL
+      const newUrl = new URL(window.location.href)
+      newUrl.searchParams.delete('openCarousel')
+      newUrl.searchParams.delete('category')
+      newUrl.searchParams.delete('index')
+      window.history.replaceState({}, '', newUrl)
+    }
+  }, [searchParams])
 
   return (
     <div className="min-h-screen bg-zinc-100">
@@ -108,6 +145,7 @@ export default function FoxBuiltWebsite() {
         featuredProducts={featuredProducts}
         cropSettings={cropSettings}
         getImageUrl={getImageUrl}
+        openCarouselData={openCarouselData}
       />
       <InteractiveParticles />
       <AboutSection 
@@ -115,6 +153,7 @@ export default function FoxBuiltWebsite() {
         setShowAddress={setShowAddress}
       />
       <ContactSection />
+      <ASCIISection />
       <Footer />
     </div>
   )

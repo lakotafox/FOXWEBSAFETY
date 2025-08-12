@@ -1,7 +1,8 @@
 export async function publishToGitHub(
   products: any[],
   token: string,
-  onProgress: (message: string, isError?: boolean) => void
+  onProgress: (message: string, isError?: boolean) => void,
+  cropSettings?: {[key: string]: {scale: number, x: number, y: number}}
 ) {
   const owner = 'lakotafox'
   const repo = 'FOXSITE'
@@ -30,8 +31,24 @@ export async function publishToGitHub(
       onProgress('Creating new products file...')
     }
     
+    // Add crop settings to products if provided
+    let productsWithCrops = products
+    if (cropSettings) {
+      productsWithCrops = JSON.parse(JSON.stringify(products))
+      Object.keys(productsWithCrops).forEach(category => {
+        productsWithCrops[category].forEach((product: any) => {
+          if (cropSettings[product.image]) {
+            product.imageCrop = cropSettings[product.image]
+          }
+        })
+      })
+    }
+    
     // Prepare content
-    const content = JSON.stringify({ products }, null, 2)
+    const content = JSON.stringify({ 
+      products: productsWithCrops, 
+      productsCrops: cropSettings || {} 
+    }, null, 2)
     const encodedContent = btoa(unescape(encodeURIComponent(content)))
     
     // Update or create file

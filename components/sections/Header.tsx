@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { Phone, MapPin, Mail } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import MapConfirmModal from '@/components/ui/MapConfirmModal'
+import RollingYearCounter from '@/components/ui/RollingYearCounter'
 
 interface HeaderProps {
   showAddress: boolean
@@ -46,12 +47,17 @@ export default function Header({ showAddress, setShowAddress }: HeaderProps) {
           </div>
         </div>
 
+        {/* Centered EST year counter for mobile */}
+        <div className="md:hidden absolute left-1/2 transform -translate-x-1/2 text-center">
+          <p className="text-xs text-zinc-300 font-bold tracking-wider">EST.<RollingYearCounter year={1999} delay={3} duration={5} className="text-zinc-300 font-bold" /></p>
+        </div>
+
         {/* Centered FOXBUILT OFFICE FURNITURE text - Desktop only */}
         <div className="hidden md:block absolute left-1/2 transform -translate-x-1/2 text-center">
           <h1 className="text-2xl font-black text-white tracking-tight">
             FOXBUILT <span className="text-red-600">OFFICE</span> <span className="text-blue-400">FURNITURE</span>
           </h1>
-          <p className="text-sm text-zinc-300 font-bold tracking-wider mt-1">EST.1999</p>
+          <p className="text-sm text-zinc-300 font-bold tracking-wider mt-1">EST.<RollingYearCounter year={1999} delay={3} duration={5} className="text-zinc-300 font-bold" /></p>
         </div>
 
         <div className="flex items-center space-x-4">

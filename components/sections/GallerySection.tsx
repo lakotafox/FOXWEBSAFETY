@@ -1,9 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import Image from 'next/image'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
-import FullImageModal from '@/components/ui/FullImageModal'
+import { useRouter } from 'next/navigation'
+import RollingGallery from '@/components/ui/RollingGallery'
 
 interface GallerySectionProps {
   galleryImages: string[]
@@ -16,132 +14,26 @@ export default function GallerySection({
   galleryCrops,
   getImageUrl 
 }: GallerySectionProps) {
-  const [currentSlide, setCurrentSlide] = useState(0)
-  const [isUserControlled, setIsUserControlled] = useState(false)
-  const [showFullImage, setShowFullImage] = useState(false)
-  const [fullImageSrc, setFullImageSrc] = useState('')
+  const router = useRouter()
 
-  // Auto-slide gallery every 4 seconds (only if user hasn't manually navigated)
-  useEffect(() => {
-    if (isUserControlled) return
-    
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % galleryImages.length)
-    }, 4000)
-
-    return () => clearInterval(interval)
-  }, [galleryImages, isUserControlled])
-
-  const nextSlide = () => {
-    setIsUserControlled(true)
-    setCurrentSlide((prev) => (prev + 1) % galleryImages.length)
-  }
-
-  const prevSlide = () => {
-    setIsUserControlled(true)
-    setCurrentSlide((prev) => (prev - 1 + galleryImages.length) % galleryImages.length)
-  }
-
-  const handleImageClick = (imageSrc: string) => {
-    setFullImageSrc(imageSrc)
-    setShowFullImage(true)
+  // Handle rolling gallery image click - navigate to gallery page
+  const handleRollingGalleryClick = (index: number) => {
+    router.push(`/gallery?index=${index}`)
   }
 
   return (
     <section id="gallery" className="pt-20 pb-20 mb-8 bg-zinc-100">
       <div className="container mx-auto px-4">
         <div className="relative max-w-6xl mx-auto">
-          <div className="relative h-96 md:h-[500px] overflow-hidden border-8 border-slate-700 bg-black cursor-pointer" onClick={() => handleImageClick(getImageUrl(galleryImages[currentSlide]))}>
-            {galleryImages.map((image, index) => {
-              const crop = galleryCrops[image] || { scale: 1, x: 50, y: 50 }
-              return (
-                <div
-                  key={index}
-                  className={`absolute inset-0 transition-opacity duration-1000 ${
-                    index === currentSlide ? "opacity-100" : "opacity-0"
-                  }`}
-                >
-                  <div 
-                    className="absolute inset-0"
-                    style={{
-                      transform: `translate(${crop.x - 50}%, ${crop.y - 50}%) scale(${crop.scale})`
-                    }}
-                  >
-                    <Image 
-                      src={getImageUrl(image)} 
-                      alt={`Project ${index + 1}`} 
-                      width={1000}
-                      height={600}
-                      className="w-full h-full object-contain"
-                      unoptimized
-                    />
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-
-          {/* Navigation buttons - Mobile (always grey) */}
-          <button
-            onClick={prevSlide}
-            className="md:hidden absolute left-2 top-1/2 transform -translate-y-1/2 p-2 border-2 border-white shadow-xl transition-all"
-            style={{ backgroundColor: '#374151' }}
-          >
-            <ChevronLeft className="w-3 h-3 text-white" />
-          </button>
-          <button
-            onClick={nextSlide}
-            className="md:hidden absolute right-2 top-1/2 transform -translate-y-1/2 p-2 border-2 border-white shadow-xl transition-all"
-            style={{ backgroundColor: '#374151' }}
-          >
-            <ChevronRight className="w-3 h-3 text-white" />
-          </button>
-
-          {/* Navigation buttons - Desktop (transparent with hover) */}
-          <button
-            onClick={prevSlide}
-            className="hidden md:block absolute left-2 md:left-4 top-1/2 transform -translate-y-1/2 p-2 md:p-5 border-2 md:border-4 border-white shadow-xl transition-all"
-            style={{ backgroundColor: 'transparent' }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#374151'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-          >
-            <ChevronLeft className="w-3 h-3 md:w-6 md:h-6 text-white" />
-          </button>
-          <button
-            onClick={nextSlide}
-            className="hidden md:block absolute right-2 md:right-4 top-1/2 transform -translate-y-1/2 p-2 md:p-5 border-2 md:border-4 border-white shadow-xl transition-all"
-            style={{ backgroundColor: 'transparent' }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#374151'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-          >
-            <ChevronRight className="w-3 h-3 md:w-6 md:h-6 text-white" />
-          </button>
-
-          {/* Slide indicators */}
-          <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-3">
-            {galleryImages.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => {
-                  setIsUserControlled(true)
-                  setCurrentSlide(index)
-                }}
-                className={`w-4 h-4 border-2 border-white transition-all ${
-                  index === currentSlide ? "bg-red-600" : "bg-slate-600"
-                }`}
-              />
-            ))}
-          </div>
+          <RollingGallery
+            images={galleryImages.map(img => getImageUrl(img))}
+            autoplay={true}
+            pauseOnHover={false}
+            onImageClick={handleRollingGalleryClick}
+            className="border-8 border-slate-700 bg-black"
+          />
         </div>
       </div>
-      
-      {/* Full Image Modal */}
-      <FullImageModal 
-        isOpen={showFullImage}
-        onClose={() => setShowFullImage(false)}
-        imageSrc={fullImageSrc}
-        imageAlt={`Gallery Image`}
-      />
     </section>
   )
 }

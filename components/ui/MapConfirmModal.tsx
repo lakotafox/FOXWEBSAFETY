@@ -13,7 +13,7 @@ export default function MapConfirmModal({ isOpen, onClose, onConfirm }: MapConfi
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+    <div className="fixed inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm" style={{ zIndex: 999999 }}>
       <div className="relative max-w-md bg-slate-800 border-8 border-slate-700 p-8 shadow-2xl">
         <button
           onClick={onClose}

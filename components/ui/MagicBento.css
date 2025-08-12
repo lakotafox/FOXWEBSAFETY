@@ -1,0 +1,208 @@
+/* MagicBento.css */
+.card-grid {
+  display: grid;
+  gap: 1.5rem;
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+
+@media (max-width: 768px) {
+  .card-grid {
+    grid-template-columns: 1fr;
+    padding: 1rem;
+    gap: 1rem;
+  }
+}
+
+.card {
+  position: relative;
+  border-radius: 16px;
+  padding: 2rem;
+  background: #060010;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+  overflow: hidden;
+  cursor: pointer;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  padding: 1px;
+  background: radial-gradient(
+    circle at var(--glow-x, 50%) var(--glow-y, 50%),
+    rgba(var(--glow-color, 132, 0, 255), calc(var(--glow-intensity, 0) * 0.75)) 0%,
+    rgba(var(--glow-color, 132, 0, 255), calc(var(--glow-intensity, 0) * 0.45)) 20%,
+    rgba(var(--glow-color, 132, 0, 255), calc(var(--glow-intensity, 0) * 0.15)) 40%,
+    transparent 60%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: var(--glow-intensity, 0);
+  transition: opacity 0.3s ease;
+}
+
+.card--border-glow::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 16px;
+  background: radial-gradient(
+    circle at var(--glow-x, 50%) var(--glow-y, 50%),
+    rgba(var(--glow-color, 132, 0, 255), calc(var(--glow-intensity, 0) * 1.2)) 0%,
+    transparent var(--glow-radius, 250px)
+  );
+  opacity: calc(var(--glow-intensity, 0) * 0.75);
+  pointer-events: none;
+  z-index: -1;
+}
+
+@media (max-width: 768px) {
+  .card--border-glow::after {
+    background: radial-gradient(
+      circle at var(--glow-x, 50%) var(--glow-y, 50%),
+      rgba(var(--glow-color, 132, 0, 255), calc(var(--glow-intensity, 0) * 1.2)) 0%,
+      transparent var(--glow-radius, 450px)
+    );
+  }
+}
+
+.card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.card__label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.5);
+  padding: 0.25rem 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.card__content {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.card__title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: white;
+  line-height: 1.2;
+}
+
+.card__description {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.5;
+}
+
+.card--text-autohide:hover .card__content {
+  opacity: 0.1;
+  transform: translateY(-4px);
+}
+
+.particle-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.particle {
+  position: absolute;
+  pointer-events: none;
+}
+
+.global-spotlight {
+  position: fixed;
+  pointer-events: none;
+  z-index: 200;
+  mix-blend-mode: screen;
+}
+
+/* Featured Products specific overrides */
+.featured-card {
+  min-height: 320px;
+  display: flex;
+  flex-direction: column;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.featured-card .card__image {
+  position: relative;
+  height: 200px;
+  margin: -2rem -2rem 1rem -2rem;
+  background: black;
+  overflow: hidden;
+  cursor: pointer;
+  border-radius: 16px 16px 0 0;
+}
+
+.featured-card .card__content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.featured-card .card__features {
+  list-style: none;
+  padding: 0;
+  margin: 0.75rem 0;
+  font-size: 0.85rem;
+}
+
+.featured-card .card__features li {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.25rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.featured-card .card__features li span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-right: 0.5rem;
+  flex-shrink: 0;
+}
+
+.featured-card .card__price {
+  margin-top: auto;
+  font-size: 1.5rem;
+  font-weight: 900;
+}
+
+/* Prevent text selection on all featured card content */
+.featured-card * {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Allow text selection in editor cards */
+.editor-card,
+.editor-card * {
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+  user-select: text !important;
+}
+

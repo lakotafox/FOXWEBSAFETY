@@ -1,7 +1,9 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import RocketButton from '@/components/ui/RocketButton'
+import StoreHours from '@/components/ui/StoreHours'
 
 interface ContactFormData {
   name: string
@@ -18,8 +20,6 @@ export default function ContactSection() {
     message: ""
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [rocketDisabled, setRocketDisabled] = useState(false)
-  const rocketTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
@@ -97,13 +97,7 @@ export default function ContactSection() {
       <div className="container mx-auto px-4">
         <div className="grid md:grid-cols-2 gap-16 max-w-5xl mx-auto">
           <div>
-            <div className="mt-12">
-              <h4 className="text-2xl font-black mb-6 tracking-wide">HOURS</h4>
-              <div className="space-y-3 text-zinc-300">
-                <p className="text-lg font-bold">Monday–Friday: 10:00am–5:00pm</p>
-                <p className="text-lg font-bold">Saturday–Sunday: By Appointment</p>
-              </div>
-            </div>
+            <StoreHours className="mt-12" />
           </div>
 
           <div>
@@ -148,40 +142,7 @@ export default function ContactSection() {
                 >
                   {isSubmitting ? "SENDING..." : "SEND A MESSAGE"}
                 </Button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (rocketDisabled) return
-                    
-                    // Disable rocket for 5 seconds
-                    setRocketDisabled(true)
-                    
-                    const audio = new Audio('/sounds/rocketlaunch.mp3')
-                    audio.play()
-                    setTimeout(() => {
-                      window.scrollTo({ top: 0, behavior: 'smooth' })
-                    }, 3750)
-                    
-                    // Re-enable after 5 seconds
-                    rocketTimeoutRef.current = setTimeout(() => {
-                      setRocketDisabled(false)
-                    }, 5000)
-                  }}
-                  disabled={rocketDisabled}
-                  className={`group flex flex-col items-center justify-center px-2 md:px-4 transition-transform ${
-                    rocketDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-110 cursor-pointer'
-                  }`}
-                  aria-label="Back to top"
-                >
-                  <img 
-                    src="/rocket.png" 
-                    alt="Launch to top" 
-                    className="drop-shadow-lg w-16 h-16 md:w-24 md:h-24"
-                  />
-                  <span className="text-xs font-bold text-white mt-1">
-                    {rocketDisabled ? 'LAUNCHING...' : 'TOP'}
-                  </span>
-                </button>
+                <RocketButton />
               </div>
             </form>
           </div>

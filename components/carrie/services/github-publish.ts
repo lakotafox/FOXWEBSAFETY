@@ -20,11 +20,12 @@ export async function publishToGitHub({
     const GITHUB_TOKEN = process.env.NEXT_PUBLIC_GITHUB_TOKEN || 'SET_IN_NETLIFY_ENV'
     const OWNER = 'lakotafox'
     const REPO = 'FOXSITE'
-    const PATH = 'public/content.json'
+    const PRODUCTS_PATH = 'public/products.json'
+    const CONTENT_PATH = 'public/content.json'
     
-    // First, get the current file to get its SHA
-    const currentFileResponse = await fetch(
-      `https://api.github.com/repos/${OWNER}/${REPO}/contents/${PATH}`,
+    // First, get the current content.json file to get its SHA
+    const currentContentResponse = await fetch(
+      `https://api.github.com/repos/${OWNER}/${REPO}/contents/${CONTENT_PATH}`,
       {
         headers: {
           'Authorization': `token ${GITHUB_TOKEN}`,
@@ -33,10 +34,27 @@ export async function publishToGitHub({
       }
     )
     
-    let sha = ''
-    if (currentFileResponse.ok) {
-      const currentFile = await currentFileResponse.json()
-      sha = currentFile.sha
+    let contentSha = ''
+    if (currentContentResponse.ok) {
+      const currentFile = await currentContentResponse.json()
+      contentSha = currentFile.sha
+    }
+
+    // Get current products.json file SHA
+    const currentProductsResponse = await fetch(
+      `https://api.github.com/repos/${OWNER}/${REPO}/contents/${PRODUCTS_PATH}`,
+      {
+        headers: {
+          'Authorization': `token ${GITHUB_TOKEN}`,
+          'Accept': 'application/vnd.github.v3+json'
+        }
+      }
+    )
+    
+    let productsSha = ''
+    if (currentProductsResponse.ok) {
+      const currentFile = await currentProductsResponse.json()
+      productsSha = currentFile.sha
     }
     
     // Add crop settings to products
@@ -49,7 +67,7 @@ export async function publishToGitHub({
       })
     })
     
-    // Prepare the content
+    // Prepare the content for content.json (includes gallery)
     const content = {
       products: convertedProducts,
       gallery: gallery,
@@ -58,13 +76,20 @@ export async function publishToGitHub({
       lastUpdated: new Date().toISOString(),
       updatedBy: "Kyle"
     }
+
+    // Prepare products.json content (just products with embedded crops)
+    const productsContent = {
+      products: convertedProducts,
+      productsCrops: cropSettings
+    }
     
     // Encode content to base64
     const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2))))
+    const productsBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(productsContent, null, 2))))
     
-    // Update the file on GitHub
-    const updateResponse = await fetch(
-      `https://api.github.com/repos/${OWNER}/${REPO}/contents/${PATH}`,
+    // Update content.json file on GitHub (for gallery data)
+    const updateContentResponse = await fetch(
+      `https://api.github.com/repos/${OWNER}/${REPO}/contents/${CONTENT_PATH}`,
       {
         method: 'PUT',
         headers: {
@@ -73,22 +98,43 @@ export async function publishToGitHub({
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          message: `Update products and gallery via admin panel - ${new Date().toLocaleString()}`,
+          message: `Update content via main editor - ${new Date().toLocaleString()}`,
           content: contentBase64,
-          sha: sha,
+          sha: contentSha,
+          branch: 'main'
+        })
+      }
+    )
+
+    // Update products.json file on GitHub (for products data)
+    const updateProductsResponse = await fetch(
+      `https://api.github.com/repos/${OWNER}/${REPO}/contents/${PRODUCTS_PATH}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Authorization': `token ${GITHUB_TOKEN}`,
+          'Accept': 'application/vnd.github.v3+json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          message: `Update products via main editor - ${new Date().toLocaleString()}`,
+          content: productsBase64,
+          sha: productsSha,
           branch: 'main'
         })
       }
     )
     
-    if (updateResponse.ok) {
+    if (updateContentResponse.ok && updateProductsResponse.ok) {
       return { success: true }
     } else {
-      const error = await updateResponse.json()
+      const contentError = !updateContentResponse.ok ? await updateContentResponse.json() : null
+      const productsError = !updateProductsResponse.ok ? await updateProductsResponse.json() : null
+      const error = contentError || productsError
       console.error('GitHub API error:', error)
       return { 
         success: false, 
-        error: error.message || `Error ${updateResponse.status}` 
+        error: error?.message || `Error updating files` 
       }
     }
   } catch (error: any) {
