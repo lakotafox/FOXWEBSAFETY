@@ -2,8 +2,9 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import ComingSoonModal from '@/components/ui/ComingSoonModal'
+import MagicBento, { ParticleCard } from '@/components/ui/MagicBento'
+import CroppedImageWithLoader from '@/components/ui/CroppedImageWithLoader'
 import ProductCard from './ProductCard'
 import ProductEditor from './ProductEditor'
 import CropControls from './CropControls'
@@ -91,43 +92,64 @@ export default function FeaturedProducts({
           </div>
         </div>
 
-        {/* Product Grid */}
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {featuredProducts[featuredCategory].map((product) => {
-            // Use ProductCard for display mode, or Card with editing components for edit mode
-            if (!isEditMode) {
-              return (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  featuredCategory={featuredCategory}
-                  cropSettings={cropSettings}
-                  getImageUrl={getImageUrl}
-                />
-              )
+        {/* Product Grid - MagicBento for edit mode, regular grid for display */}
+        {isEditMode ? (
+          <MagicBento
+            textAutoHide={false}
+            enableStars={true}
+            enableSpotlight={true}
+            enableBorderGlow={true}
+            enableTilt={false}
+            enableMagnetism={false}
+            clickEffect={true}
+            glowColor={
+              featuredCategory === "new" ? "220, 38, 38" :
+              featuredCategory === "battleTested" ? "37, 99, 235" :
+              "34, 197, 94"
             }
-
-            return (
-              <Card
+          >
+            {featuredProducts[featuredCategory].slice(0, 3).map((product) => (
+              <ParticleCard
                 key={product.id}
-                className={`overflow-hidden hover:shadow-2xl transition-all border-4 border-slate-600 bg-zinc-100 ring-2 ${
+                className={`card featured-card card--border-glow ${
                   featuredCategory === "new"
-                    ? "ring-red-500"
+                    ? "ring-2 ring-red-500"
                     : featuredCategory === "battleTested"
-                      ? "ring-blue-500"
-                      : "ring-green-500"
+                      ? "ring-2 ring-blue-500"
+                      : "ring-2 ring-green-500"
                 }`}
+                style={{
+                  backgroundColor: '#060010',
+                  '--glow-color': featuredCategory === "new" ? "220, 38, 38" :
+                                   featuredCategory === "battleTested" ? "37, 99, 235" :
+                                   "34, 197, 94",
+                } as React.CSSProperties}
+                particleCount={1}
+                glowColor={
+                  featuredCategory === "new" ? "220, 38, 38" :
+                  featuredCategory === "battleTested" ? "37, 99, 235" :
+                  "34, 197, 94"
+                }
+                enableTilt={false}
+                clickEffect={true}
+                enableMagnetism={false}
+                alwaysShowParticles={true}
               >
-                <CropControls
-                  product={product}
-                  featuredCategory={featuredCategory}
-                  cropSettings={cropSettings}
-                  editingCrop={editingCrop}
-                  onImageUpload={onImageUpload}
-                  onSetEditingCrop={onSetEditingCrop}
-                  getImageUrl={getImageUrl}
-                />
-                <CardContent className="pt-2 px-6 pb-3">
+                {/* Use same image container structure as main page but with CropControls for editing */}
+                <div className="card__image relative">
+                  <CropControls
+                    product={product}
+                    featuredCategory={featuredCategory}
+                    cropSettings={cropSettings}
+                    editingCrop={editingCrop}
+                    onImageUpload={onImageUpload}
+                    onSetEditingCrop={onSetEditingCrop}
+                    getImageUrl={getImageUrl}
+                  />
+                </div>
+                
+                {/* Use same content structure as main page */}
+                <div className="card__content">
                   <ProductEditor
                     product={product}
                     featuredCategory={featuredCategory}
@@ -135,11 +157,23 @@ export default function FeaturedProducts({
                     onEditingIdChange={onEditingIdChange}
                     onUpdateProduct={onUpdateProduct}
                   />
-                </CardContent>
-              </Card>
-            )
-          })}
-        </div>
+                </div>
+              </ParticleCard>
+            ))}
+          </MagicBento>
+        ) : (
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {featuredProducts[featuredCategory].slice(0, 3).map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                featuredCategory={featuredCategory}
+                cropSettings={cropSettings}
+                getImageUrl={getImageUrl}
+              />
+            ))}
+          </div>
+        )}
         
         {/* MORE button */}
         <div className="flex justify-center mt-12">

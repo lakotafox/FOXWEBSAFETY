@@ -26,58 +26,62 @@ export default function ProductEditor({
 }: ProductEditorProps) {
   return (
     <>
-      {/* Title */}
-      {editingId === product.id ? (
-        <input
-          type="text"
-          value={product.title}
-          onChange={(e) => onUpdateProduct(featuredCategory, product.id, 'title', e.target.value)}
-          className="text-xl font-black mb-3 tracking-wide w-full p-1 border rounded"
-          onBlur={() => onEditingIdChange(null)}
-          autoFocus
-        />
-      ) : (
-        <h3 
-          className="text-xl font-black mb-1 tracking-wide cursor-pointer hover:bg-yellow-100 p-1 rounded"
-          onClick={() => onEditingIdChange(product.id)}
-        >
-          {product.title}
-        </h3>
-      )}
+      {/* Title - use card__title class like main page */}
+      <h2 className="card__title">
+        {editingId === product.id ? (
+          <input
+            type="text"
+            value={product.title}
+            onChange={(e) => onUpdateProduct(featuredCategory, product.id, 'title', e.target.value)}
+            className="w-full bg-transparent border-b border-white"
+            onBlur={() => onEditingIdChange(null)}
+            autoFocus
+          />
+        ) : (
+          <span 
+            className="cursor-pointer hover:text-yellow-400"
+            onClick={() => onEditingIdChange(product.id)}
+          >
+            {product.title}
+          </span>
+        )}
+      </h2>
 
-      {/* Description */}
-      {editingId === -product.id ? (
-        <textarea
-          value={product.description}
-          onChange={(e) => onUpdateProduct(featuredCategory, product.id, 'description', e.target.value)}
-          className="text-slate-600 mb-1 font-semibold w-full p-1 border rounded resize-none"
-          rows={2}
-          onBlur={() => onEditingIdChange(null)}
-          autoFocus
-        />
-      ) : (
-        <p 
-          className="text-slate-600 mb-1 font-semibold cursor-pointer hover:bg-yellow-100 p-1 rounded"
-          onClick={() => onEditingIdChange(-product.id)}
-        >
-          {product.description}
+      {/* Description - use card__description class like main page */}
+      {product.description && (
+        <p className="card__description">
+          {editingId === -product.id ? (
+            <textarea
+              value={product.description}
+              onChange={(e) => onUpdateProduct(featuredCategory, product.id, 'description', e.target.value)}
+              className="w-full bg-transparent border rounded resize-none text-sm"
+              rows={2}
+              onBlur={() => onEditingIdChange(null)}
+              autoFocus
+            />
+          ) : (
+            <span 
+              className="cursor-pointer hover:text-yellow-400"
+              onClick={() => onEditingIdChange(-product.id)}
+            >
+              {product.description}
+            </span>
+          )}
         </p>
       )}
 
-      {/* Features */}
+      {/* Features - use card__features class like main page */}
       {product.features && (
-        <ul className="text-sm text-slate-500 space-y-0.5">
+        <ul className="card__features">
           {product.features.map((feature, index) => (
-            <li key={index} className="flex items-center">
-              <span
-                className={`w-2 h-2 rounded-full mr-2 ${
-                  featuredCategory === "new"
-                    ? "bg-red-600"
-                    : featuredCategory === "battleTested"
-                      ? "bg-blue-600"
-                      : "bg-green-600"
-                }`}
-              ></span>
+            <li key={index}>
+              <span style={{
+                backgroundColor: featuredCategory === "new"
+                  ? "rgb(220, 38, 38)"
+                  : featuredCategory === "battleTested"
+                    ? "rgb(37, 99, 235)"
+                    : "rgb(34, 197, 94)"
+              }}></span>
               {editingId === product.id * 1000 + index ? (
                 <input
                   type="text"
@@ -89,25 +93,31 @@ export default function ProductEditor({
                   }}
                   onBlur={() => onEditingIdChange(null)}
                   onKeyPress={(e) => e.key === 'Enter' && onEditingIdChange(null)}
-                  className="flex-1 p-1 border rounded text-sm"
+                  className="flex-1 bg-transparent border-b border-gray-400 text-sm"
                   autoFocus
                 />
               ) : (
-                <span 
-                  className="cursor-pointer hover:bg-yellow-100 p-1 rounded"
+                <div 
+                  className="cursor-pointer hover:text-yellow-400 flex-1"
                   onClick={() => onEditingIdChange(product.id * 1000 + index)}
                 >
                   {feature}
-                </span>
+                </div>
               )}
             </li>
           ))}
         </ul>
       )}
 
-      {/* Price */}
-      {(product.price || true) && (
-        <div className="flex justify-between items-center">
+      {/* Price - use card__price class and style like main page */}
+      {product.price && (
+        <div className="card__price" style={{
+          color: featuredCategory === "new"
+            ? "rgb(220, 38, 38)"
+            : featuredCategory === "battleTested"
+              ? "rgb(37, 99, 235)"
+              : "rgb(34, 197, 94)"
+        }}>
           {editingId === product.id * 10000 ? (
             <input
               type="text"
@@ -115,25 +125,20 @@ export default function ProductEditor({
               onChange={(e) => onUpdateProduct(featuredCategory, product.id, 'price', e.target.value)}
               onBlur={() => onEditingIdChange(null)}
               onKeyPress={(e) => e.key === 'Enter' && onEditingIdChange(null)}
-              className={`text-2xl font-black p-1 border rounded ${
-                featuredCategory === "new"
-                  ? "text-red-600"
+              className="w-full bg-transparent border-b"
+              style={{
+                color: featuredCategory === "new"
+                  ? "rgb(220, 38, 38)"
                   : featuredCategory === "battleTested"
-                    ? "text-blue-600"
-                    : "text-green-600"
-              }`}
+                    ? "rgb(37, 99, 235)"
+                    : "rgb(34, 197, 94)"
+              }}
               placeholder="e.g., $1,299"
               autoFocus
             />
           ) : (
             <span
-              className={`text-2xl font-black cursor-pointer hover:bg-yellow-100 p-1 rounded ${
-                featuredCategory === "new"
-                  ? "text-red-600"
-                  : featuredCategory === "battleTested"
-                    ? "text-blue-600"
-                    : "text-green-600"
-              }`}
+              className="cursor-pointer hover:opacity-70"
               onClick={() => onEditingIdChange(product.id * 10000)}
             >
               {product.price}

@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import CroppedImageWithLoader from '@/components/ui/CroppedImageWithLoader'
 import { Edit2 } from 'lucide-react'
 
 interface Product {
@@ -36,23 +37,16 @@ export default function CropControls({
 
   return (
     <div className="relative h-56 group overflow-hidden bg-black">
-      <div 
-        className="absolute inset-0"
-        style={{
-          transform: `translate(${crop.x - 50}%, ${crop.y - 50}%) scale(${crop.scale})`,
-          transition: isEditing ? 'none' : 'transform 0.3s'
-        }}
-      >
-        <Image 
-          src={getImageUrl(product.image, false)} 
-          alt={product.title} 
-          width={500}
-          height={500}
-          className="w-full h-full object-contain"
-          unoptimized
-          key={product.image}
-        />
-      </div>
+      {/* Use CroppedImageWithLoader exactly like main page */}
+      <CroppedImageWithLoader 
+        src={getImageUrl(product.image, false)} 
+        alt={product.title} 
+        crop={cropSettings[product.image] || { scale: 1, x: 50, y: 50 }}
+        width={500}
+        height={500}
+        className="w-full h-full object-contain"
+        unoptimized
+      />
       
       {!isEditing && (
         <>
