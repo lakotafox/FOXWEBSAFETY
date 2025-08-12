@@ -48,18 +48,8 @@ export default function CategorySelector({
         />
       </div>
       
-      {/* Global View button - replaces tap/click text */}
-      <div className="flex flex-col items-center gap-3 mb-10">
-        <Button
-          onClick={() => {
-            router.push('/global-view')
-          }}
-          className="bg-purple-600 hover:bg-purple-700 text-white font-black text-sm md:text-base px-6 py-3 tracking-wider transition-all shadow-lg hover:shadow-xl"
-        >
-          GLOBAL VIEW
-        </Button>
-        
-        {/* List View button */}
+      {/* List View button */}
+      <div className="flex flex-col items-center gap-3 mb-4">
         <Button
           onClick={() => {
             router.push('/list-view')

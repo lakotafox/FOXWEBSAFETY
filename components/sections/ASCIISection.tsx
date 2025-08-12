@@ -1,14 +1,28 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import ASCIIText from '@/components/ui/ASCIIText'
 
 export default function ASCIISection() {
   const sectionRef = useRef<HTMLElement>(null)
+  const [isDuckDuckGo, setIsDuckDuckGo] = useState(false)
 
   useEffect(() => {
-    // Only on desktop
-    if (typeof window === 'undefined' || window.innerWidth < 768) return
+    // Detect DuckDuckGo browser
+    if (typeof navigator !== 'undefined') {
+      const userAgent = navigator.userAgent.toLowerCase()
+      // DuckDuckGo browser includes 'duckduckgo' in the user agent
+      const isDDG = userAgent.includes('duckduckgo') || 
+                    userAgent.includes('ddg') ||
+                    // Also check for DuckDuckGo on desktop which might use modified Chrome/Safari UA
+                    (userAgent.includes('chrome') && window.navigator.vendor === 'DuckDuckGo')
+      setIsDuckDuckGo(isDDG)
+    }
+  }, [])
+
+  useEffect(() => {
+    // Skip mouse tracking on mobile or DuckDuckGo browser
+    if (typeof window === 'undefined' || window.innerWidth < 768 || isDuckDuckGo) return
 
     const handleGlobalMouseMove = (e: MouseEvent) => {
       if (!sectionRef.current) return
@@ -45,7 +59,7 @@ export default function ASCIISection() {
     return () => {
       document.removeEventListener('mousemove', handleGlobalMouseMove)
     }
-  }, [])
+  }, [isDuckDuckGo])
 
   return (
     <section ref={sectionRef} className="relative bg-slate-900 py-8 overflow-hidden">

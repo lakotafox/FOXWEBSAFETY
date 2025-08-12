@@ -66,6 +66,14 @@ in float vAlpha;
 flat in int vInstanceId;
 
 void main() {
+    // Check if this is a back face
+    if (!gl_FrontFacing) {
+        // Back face - show grey
+        outColor = vec4(0.3, 0.3, 0.3, vAlpha);
+        return;
+    }
+    
+    // Front face - show image as before
     int itemIndex = vInstanceId % uItemCount;
     int cellsPerRow = uAtlasSize;
     int cellX = itemIndex % cellsPerRow;
@@ -390,6 +398,9 @@ class ArcballControl {
   EPSILON = 0.1;
   IDENTITY_QUAT = quat.create();
   isMobile = false;
+  clickStartTime = 0;
+  clickStartPos: vec2 = vec2.create();
+  onCircleClick?: (clickPos: vec2) => void;
   
   canvas: HTMLCanvasElement;
   updateCallback: (deltaTime: number) => void;
@@ -419,10 +430,23 @@ class ArcballControl {
       }
       vec2.set(this.pointerPos, e.clientX, e.clientY);
       vec2.copy(this.previousPointerPos, this.pointerPos);
+      vec2.copy(this.clickStartPos, this.pointerPos);
+      this.clickStartTime = Date.now();
       this.isPointerDown = true;
     });
-    canvas.addEventListener('pointerup', () => {
+    canvas.addEventListener('pointerup', (e) => {
       this.isPointerDown = false;
+      
+      // Check if this was a click (not a drag)
+      const clickDuration = Date.now() - this.clickStartTime;
+      const dragDistance = vec2.distance(this.clickStartPos, [e.clientX, e.clientY]);
+      
+      // If pointer was held for less than 300ms and moved less than 10 pixels, it's a click
+      if (clickDuration < 300 && dragDistance < 10) {
+        if (this.onCircleClick) {
+          this.onCircleClick(vec2.fromValues(e.clientX, e.clientY));
+        }
+      }
     });
     canvas.addEventListener('pointerleave', () => {
       this.isPointerDown = false;
@@ -547,6 +571,7 @@ class ArcballControl {
 class InfiniteGridMenu {
   TARGET_FRAME_DURATION = 1000 / 60;
   SPHERE_RADIUS = 2;
+  isMobile = false;
 
   private time = 0;
   private deltaTime = 0;
@@ -615,6 +640,11 @@ class InfiniteGridMenu {
     this.onMovementChange = onMovementChange || (() => { });
     this.onInfoIconChange = onInfoIconChange || (() => { });
     this.onStateChange = onStateChange || (() => { });
+    
+    // Detect mobile device
+    this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                    (window.innerWidth <= 768);
+    
     this.init(onInit);
   }
 
@@ -658,6 +688,168 @@ class InfiniteGridMenu {
     this.render();
 
     requestAnimationFrame((t) => this.run(t));
+  }
+
+  private findClickedVertex(clickPos: vec2): number | null {
+    // Convert screen coordinates to normalized device coordinates
+    const x = (clickPos[0] / this.canvas.clientWidth) * 2 - 1;
+    const y = -(clickPos[1] / this.canvas.clientHeight) * 2 + 1;
+    
+    // Create ray in clip space
+    const rayClip = vec3.fromValues(x, y, -1);
+    
+    // Transform to view space
+    const rayEye = vec3.create();
+    vec3.transformMat4(rayEye, rayClip, this.camera.matrices.inversProjection);
+    rayEye[2] = -1; // Forward direction in view space
+    
+    // Transform to world space
+    const invView = mat4.invert(mat4.create(), this.camera.matrices.view);
+    const rayWorld = vec3.create();
+    vec3.transformMat4(rayWorld, rayEye, invView);
+    vec3.sub(rayWorld, rayWorld, this.camera.position);
+    vec3.normalize(rayWorld, rayWorld);
+    
+    // Find the closest FRONT-FACING vertex to the ray
+    let closestVertex = -1;
+    let closestDistance = Infinity;
+    
+    // Adjust threshold based on zoom level (camera distance)
+    const cameraDistance = vec3.length(this.camera.position);
+    const threshold = Math.max(3, cameraDistance * 0.1); // Dynamic threshold based on zoom
+    
+    // Get all vertices and sort by Z position (front to back)
+    const frontVertices: { index: number; worldPos: vec3; z: number }[] = [];
+    
+    for (let i = 0; i < this.instancePositions.length; i++) {
+      const worldPos = this.getVertexWorldPosition(i);
+      frontVertices.push({
+        index: i,
+        worldPos: worldPos,
+        z: worldPos[2]
+      });
+    }
+    
+    // Sort by Z position (largest Z first = closest to camera)
+    frontVertices.sort((a, b) => b.z - a.z);
+    
+    // Only check the front 7 vertices (center + 6 surrounding)
+    const maxVerticesToCheck = 7;
+    
+    for (let i = 0; i < Math.min(maxVerticesToCheck, frontVertices.length); i++) {
+      const vertex = frontVertices[i];
+      const worldPos = vertex.worldPos;
+      
+      // Only consider vertices that are actually facing the camera
+      if (vertex.z > 0) {
+        // Calculate distance from ray to vertex
+        const toVertex = vec3.sub(vec3.create(), worldPos, this.camera.position);
+        const projection = vec3.dot(toVertex, rayWorld);
+        
+        if (projection > 0) { // Only consider vertices in front of camera
+          // Point on ray closest to vertex
+          const closestPointOnRay = vec3.scaleAndAdd(vec3.create(), this.camera.position, rayWorld, projection);
+          const distance = vec3.distance(closestPointOnRay, worldPos);
+          
+          // Check if this vertex is closer and within clicking threshold
+          if (distance < closestDistance && distance < threshold) {
+            closestDistance = distance;
+            closestVertex = vertex.index;
+          }
+        }
+      }
+    }
+    
+    return closestVertex >= 0 ? closestVertex : null;
+  }
+
+  private rotateToVertex(vertexIndex: number) {
+    // Get the world position of the clicked vertex
+    const targetWorldPos = this.getVertexWorldPosition(vertexIndex);
+    
+    // Check if this vertex is already very close to the front
+    const distanceFromFront = Math.abs(targetWorldPos[2] - this.SPHERE_RADIUS);
+    if (distanceFromFront < 0.5) {
+      // Already at front, just zoom in
+      this.hasInteracted = true;
+      this.isIdle = false;
+      this.lastInteractionTime = Date.now();
+      this.isReleasedButZoomedIn = true;
+      this.onInfoIconChange(true);
+      this.onStateChange(false);
+      return;
+    }
+    
+    // Get the local position of the vertex
+    const localPos = this.instancePositions[vertexIndex];
+    
+    // Calculate the current world position after rotation
+    const currentWorldPos = vec3.transformQuat(vec3.create(), localPos, this.control.orientation);
+    
+    // We want to rotate this vertex to face the camera (z = SPHERE_RADIUS)
+    // Find the rotation that brings currentWorldPos to [0, 0, SPHERE_RADIUS]
+    const targetDirection = vec3.fromValues(0, 0, 1);
+    const currentDirection = vec3.normalize(vec3.create(), currentWorldPos);
+    
+    // Calculate rotation axis and angle
+    const rotationAxis = vec3.cross(vec3.create(), currentDirection, targetDirection);
+    const dotProduct = vec3.dot(currentDirection, targetDirection);
+    const angle = Math.acos(Math.max(-1, Math.min(1, dotProduct)));
+    
+    // Only rotate if there's a significant angle to rotate
+    if (angle > 0.1 && vec3.length(rotationAxis) > 0.001) {
+      vec3.normalize(rotationAxis, rotationAxis);
+      
+      // Create rotation quaternion
+      const rotationQuat = quat.create();
+      quat.setAxisAngle(rotationQuat, rotationAxis, angle);
+      
+      // Calculate target orientation
+      const targetOrientation = quat.multiply(quat.create(), rotationQuat, this.control.orientation);
+      quat.normalize(targetOrientation, targetOrientation);
+      
+      // Animate the rotation
+      const startOrientation = quat.clone(this.control.orientation);
+      const startTime = Date.now();
+      const duration = 800; // Slightly faster animation
+      
+      const animateRotation = () => {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        // Use easing function for smooth animation
+        const eased = 1 - Math.pow(1 - progress, 3); // Cubic ease-out
+        
+        // Slerp between start and target orientation
+        quat.slerp(this.control.orientation, startOrientation, targetOrientation, eased);
+        quat.normalize(this.control.orientation, this.control.orientation);
+        
+        if (progress < 1) {
+          requestAnimationFrame(animateRotation);
+        } else {
+          // Animation complete - zoom in
+          this.hasInteracted = true;
+          this.isIdle = false;
+          this.lastInteractionTime = Date.now();
+          this.isReleasedButZoomedIn = true;
+          this.onInfoIconChange(true);
+        }
+      };
+      
+      animateRotation();
+    } else {
+      // No significant rotation needed, just zoom in
+      this.isReleasedButZoomedIn = true;
+      this.onInfoIconChange(true);
+    }
+    
+    // Mark interaction immediately
+    this.hasInteracted = true;
+    this.isIdle = false;
+    this.lastInteractionTime = Date.now();
+    
+    // Trigger state change
+    this.onStateChange(false);
   }
 
   private init(onInit: ((menu: InfiniteGridMenu) => void) | null) {
@@ -733,13 +925,10 @@ class InfiniteGridMenu {
           this.isIdle = false;
           this.onStateChange(false); // Notify no longer idle
         }
-        this.isReleasedButZoomedIn = false; // Hide info icon when dragging
-        this.onInfoIconChange(false);
-      } else if (this.hasInteracted && !this.isIdle) {
-        // User has released but hasn't gone idle yet - show info icon
-        if (!this.isReleasedButZoomedIn) {
-          this.isReleasedButZoomedIn = true;
-          this.onInfoIconChange(true);
+        // If user starts dragging while zoomed in, zoom back out immediately
+        if (this.isReleasedButZoomedIn) {
+          this.isReleasedButZoomedIn = false; // Reset zoom state
+          this.onInfoIconChange(false); // Hide info icon
         }
       }
       
@@ -757,6 +946,14 @@ class InfiniteGridMenu {
       autoRotate();
       this.onControlUpdate(deltaTime);
     });
+
+    // Set up click handler to rotate to clicked circle
+    this.control.onCircleClick = (clickPos: vec2) => {
+      const clickedVertex = this.findClickedVertex(clickPos);
+      if (clickedVertex !== null) {
+        this.rotateToVertex(clickedVertex);
+      }
+    };
 
     this.updateCameraMatrix();
     this.updateProjectionMatrix(gl);
@@ -872,7 +1069,8 @@ class InfiniteGridMenu {
     const gl = this.gl;
     gl.useProgram(this.discProgram);
 
-    gl.enable(gl.CULL_FACE);
+    // Disable backface culling to show back sides of circles
+    gl.disable(gl.CULL_FACE);
     gl.enable(gl.DEPTH_TEST);
 
     gl.clearColor(0, 0, 0, 0);
@@ -937,24 +1135,28 @@ class InfiniteGridMenu {
     const timeScale = deltaTime / this.TARGET_FRAME_DURATION + 0.0001;
     let damping = 5 / timeScale;
     let cameraTargetZ: number;
+    
+    // Different multipliers for desktop vs mobile
+    const isDesktop = this.camera.aspect > 1;
+    const zoomMultiplier = isDesktop ? 1.65 : 1.5; // Slightly more zoom out for desktop
 
     // Determine camera position based on state
     if (this.isIdle) {
-      // When idle, zoom way out to see full globe (2x more than before)
-      cameraTargetZ = 60;
+      // When idle, zoom way out to see full globe
+      cameraTargetZ = 60 * zoomMultiplier; // 99 for desktop, 90 for mobile
       damping = 3 / timeScale; // Slower transition
-    } else if (this.hasInteracted) {
-      // After interaction, zoom in proportionally (doubled from 15 to 30 to match 2x scale)
-      cameraTargetZ = 30;
-      
-      // Add dynamic zoom based on rotation velocity (adjusted for new scale)
-      if (this.control.isPointerDown) {
-        cameraTargetZ += this.control.rotationVelocity * 40 + 2;
-        damping = 7 / timeScale;
-      }
+    } else if (this.isReleasedButZoomedIn) {
+      // After clicking/tapping a circle, zoom in
+      cameraTargetZ = 30 * zoomMultiplier; // 49.5 for desktop, 45 for mobile
+      damping = 5 / timeScale; // Normal transition speed
+    } else if (this.control.isPointerDown && this.camera.position[2] < 60 * zoomMultiplier) {
+      // If dragging while zoomed in, quickly zoom out to prevent motion sickness
+      cameraTargetZ = 60 * zoomMultiplier; // 99 for desktop, 90 for mobile
+      damping = 2 / timeScale; // Very fast transition to reduce motion sickness
     } else {
-      // Initial state - zoomed way out to see full globe (2x more)
-      cameraTargetZ = 60;
+      // Default state - stay zoomed out (during drag and after release)
+      cameraTargetZ = 60 * zoomMultiplier; // 99 for desktop, 90 for mobile
+      damping = 5 / timeScale; // Normal transition speed
     }
 
     const isMoving = this.control.isPointerDown || Math.abs(this.smoothRotationVelocity) > 0.01;

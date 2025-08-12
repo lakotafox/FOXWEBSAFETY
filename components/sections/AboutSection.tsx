@@ -37,7 +37,7 @@ export default function AboutSection({ showAddress, setShowAddress, onToggleAddr
                   enableTilt={true}
                   enableMobileTilt={false}
                   onContactClick={() => {
-                    window.location.href = 'tel:+17146809130'
+                    window.location.href = 'tel:+18018999406'
                   }}
                 />
               </div>

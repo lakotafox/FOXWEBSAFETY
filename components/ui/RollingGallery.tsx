@@ -31,6 +31,7 @@ export default function RollingGallery({
   const rotationRef = useRef(0)
   const autoplayTimelineRef = useRef<gsap.core.Timeline | null>(null)
   const isDraggingRef = useRef(false)
+  const autoplayResumeTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   
   // Animated loading bar frames
   const frames = [
@@ -139,6 +140,24 @@ export default function RollingGallery({
     // Don't enable dragging until images are ready
     if (!imagesReady) return
 
+    // Define startAutoplay function inside the effect
+    const startAutoplay = () => {
+      if (!trackRef.current || !autoplay) return
+
+      // Kill existing timeline
+      if (autoplayTimelineRef.current) {
+        autoplayTimelineRef.current.kill()
+      }
+
+      // Create new timeline - slow rotation
+      autoplayTimelineRef.current = gsap.timeline({ repeat: -1 })
+      autoplayTimelineRef.current.to(trackRef.current, {
+        rotateY: '-=360',
+        duration: 60, // 60 seconds for one full rotation (very slow)
+        ease: 'none'
+      })
+    }
+
     let startX = 0
     let startY = 0
     let currentRotation = 0
@@ -167,6 +186,12 @@ export default function RollingGallery({
       if (autoplayTimelineRef.current) {
         autoplayTimelineRef.current.kill()
         autoplayTimelineRef.current = null
+      }
+      
+      // Clear any pending resume timeout
+      if (autoplayResumeTimeoutRef.current) {
+        clearTimeout(autoplayResumeTimeoutRef.current)
+        autoplayResumeTimeoutRef.current = null
       }
       
       // Kill any ongoing animations to prevent jumping
@@ -222,6 +247,16 @@ export default function RollingGallery({
         duration: 0.5,
         ease: 'power2.out'
       })
+      
+      // Resume autoplay after 750ms on mobile
+      if (autoplay) {
+        if (autoplayResumeTimeoutRef.current) {
+          clearTimeout(autoplayResumeTimeoutRef.current)
+        }
+        autoplayResumeTimeoutRef.current = setTimeout(() => {
+          startAutoplay()
+        }, 750)
+      }
     }
     
     const element = trackRef.current

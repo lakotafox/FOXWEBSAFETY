@@ -134,7 +134,7 @@ function ProductsPageContent() {
       <div className="h-20"></div>
 
       {/* Category Selector and Products Section */}
-      <section className="py-20 bg-slate-800">
+      <section className="pb-10 bg-slate-800" style={{ paddingTop: '60px' }}>
         <div className="container mx-auto px-4">
           <CategorySelector 
             selectedCategory={productCategory}
@@ -163,10 +163,17 @@ function ProductsPageContent() {
 
       {/* Footer */}
       <footer className="bg-slate-800 border-t-4 border-red-600 text-zinc-400 py-6">
-        <div className="container mx-auto px-4">
-          <p className="text-sm font-bold">&copy; 2025, FOXBUILT. ESTABLISHED 1999. BUILT IN AMERICA.</p>
-          <p className="text-xs text-zinc-500 mt-1">THIS SITE IS A PRODUCT OF LAKOTA.CODE.CO. USER ACCEPTS IT IS WHAT IT IS.</p>
+        <div className="container mx-auto px-4 relative">
+          <p className="text-sm font-bold">&copy; 2025, FOXBUILT.</p>
           <p className="text-xs text-yellow-500 mt-1">Want a free website? Email lakota.code@gmail.com</p>
+          
+          {/* Global View button - positioned in bottom right of footer */}
+          <button
+            onClick={() => router.push('/global-view')}
+            className="absolute top-2 right-4 bg-purple-600 hover:bg-purple-700 text-white font-black text-sm px-4 py-2 rounded-lg tracking-wider transition-all shadow-lg hover:shadow-xl"
+          >
+            GLOBAL VIEW
+          </button>
         </div>
       </footer>
       

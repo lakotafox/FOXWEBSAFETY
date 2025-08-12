@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Phone, MapPin, Mail } from 'lucide-react'
 
@@ -18,16 +19,16 @@ export default function ProductsHeader({ isScrolled }: ProductsHeaderProps) {
       <div className="container mx-auto px-4">
         {/* Desktop Header - No dynamic sizing */}
         <div className="hidden md:flex items-center justify-between">
-          {/* Logo on left */}
-          <div>
+          {/* Logo on left - clickable to go home */}
+          <Link href="/" className="hover:opacity-80 transition-opacity">
             <Image
               src="/images/foxbuilt-logo.png"
               alt="FoxBuilt Logo"
               width={120}
               height={45}
-              className="h-auto"
+              className="h-auto cursor-pointer"
             />
-          </div>
+          </Link>
           
           {/* Centered PRODUCTS text */}
           <h1 className="text-2xl font-black text-white tracking-tight absolute left-1/2 transform -translate-x-1/2">
@@ -62,19 +63,19 @@ export default function ProductsHeader({ isScrolled }: ProductsHeaderProps) {
 
         {/* Mobile Header */}
         <div className="md:hidden flex items-center justify-between">
-          {/* Logo */}
-          <button 
-            onClick={() => window.location.href = '/'}
-            className={`transition-all duration-500 ${isScrolled ? "scale-75" : "scale-100"}`}
+          {/* Logo - clickable to go home */}
+          <Link 
+            href="/"
+            className={`transition-all duration-500 hover:opacity-80 ${isScrolled ? "scale-75" : "scale-100"}`}
           >
             <Image
               src="/images/foxbuilt-logo.png"
               alt="FoxBuilt Logo"
               width={isScrolled ? 80 : 120}
               height={isScrolled ? 30 : 45}
-              className="h-auto"
+              className="h-auto cursor-pointer"
             />
-          </button>
+          </Link>
 
           {/* Center Title */}
           <h1 className={`font-black text-white tracking-tight ${isScrolled ? "text-xl" : "text-2xl"}`}>
