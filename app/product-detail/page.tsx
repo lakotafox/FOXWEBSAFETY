@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import ProductInfoModal from '@/components/ui/ProductInfoModal'
 
@@ -13,7 +13,7 @@ interface Product {
   category?: string
 }
 
-export default function ProductDetailPage() {
+function ProductDetailContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const [product, setProduct] = useState<Product | null>(null)
@@ -85,5 +85,17 @@ export default function ProductDetailPage() {
         category={category as 'new' | 'battleTested' | 'seating'}
       />
     </div>
+  )
+}
+
+export default function ProductDetailPage() {
+  return (
+    <Suspense fallback={
+      <div className="fixed inset-0 bg-black flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    }>
+      <ProductDetailContent />
+    </Suspense>
   )
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 import AnimatedList from '@/components/ui/AnimatedList'
@@ -22,7 +22,7 @@ interface Product {
   price: string
 }
 
-export default function ListView() {
+function ListViewContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [allProducts, setAllProducts] = useState<Product[]>([])
@@ -234,5 +234,17 @@ export default function ListView() {
         />
       </VoidModal>
     </div>
+  )
+}
+
+export default function ListView() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-yellow-500 flex items-center justify-center">
+        <div className="text-black text-xl font-bold">Loading...</div>
+      </div>
+    }>
+      <ListViewContent />
+    </Suspense>
   )
 }

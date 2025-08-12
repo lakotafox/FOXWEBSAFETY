@@ -1,11 +1,11 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { ArrowLeft } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import FlyingPosters from '@/components/ui/FlyingPosters'
 
-export default function GalleryPage() {
+function GalleryContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const initialIndex = parseInt(searchParams.get('index') || '0')
@@ -87,5 +87,17 @@ export default function GalleryPage() {
         </div>
       )}
     </div>
+  )
+}
+
+export default function GalleryPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-slate-800 flex items-center justify-center">
+        <div className="text-white">Loading...</div>
+      </div>
+    }>
+      <GalleryContent />
+    </Suspense>
   )
 }

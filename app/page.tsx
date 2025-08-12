@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useSearchParams } from 'next/navigation'
 import { getProducts, defaultProducts } from "@/lib/products-data"
 
@@ -23,7 +23,7 @@ declare global {
   }
 }
 
-export default function FoxBuiltWebsite() {
+function FoxBuiltWebsiteContent() {
   const searchParams = useSearchParams()
   const [showAddress, setShowAddress] = useState(false)
   const [featuredProducts, setFeaturedProducts] = useState(defaultProducts)
@@ -156,5 +156,17 @@ export default function FoxBuiltWebsite() {
       <ASCIISection />
       <Footer />
     </div>
+  )
+}
+
+export default function FoxBuiltWebsite() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-zinc-100 flex items-center justify-center">
+        <div className="text-black text-xl">Loading...</div>
+      </div>
+    }>
+      <FoxBuiltWebsiteContent />
+    </Suspense>
   )
 }

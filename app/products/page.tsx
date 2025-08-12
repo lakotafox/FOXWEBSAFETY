@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import FlyingPosters from '@/components/ui/FlyingPosters'
 import VoidModal from '@/components/ui/VoidModal'
@@ -15,7 +15,7 @@ import ContactForm from '@/components/products/ContactForm'
 import ASCIISection from '@/components/sections/ASCIISection'
 import { getProductsPageItems } from '@/lib/products-data'
 
-export default function ProductsPage() {
+function ProductsPageContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const [productCategory, setProductCategory] = useState('new')
@@ -212,5 +212,17 @@ export default function ProductsPage() {
       </VoidModal>
 
     </div>
+  )
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    }>
+      <ProductsPageContent />
+    </Suspense>
   )
 }
