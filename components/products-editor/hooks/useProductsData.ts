@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { defaultProductsPageItems } from '@/components/products-editor/constants/default-products'
+import { defaultProductsPageItems, getProductsPageItems as getProductsData, saveProductsPageItems as saveProductsData } from '@/lib/products-page-data'
 
 // Helper functions to get/save products page items
 async function getProductsPageItems() {
@@ -15,46 +15,19 @@ async function getProductsPageItems() {
       }
     }
   } catch (e) {
-    console.log('No published products file, checking localStorage')
+    console.log('No published products file, using defaults')
   }
   
-  // Fallback to localStorage
-  if (typeof window !== 'undefined') {
-    const saved = localStorage.getItem('foxbuilt-products-page')
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved)
-        // Organize into categories
-        return {
-          new: parsed.new || defaultProductsPageItems.slice(0, 9),
-          battleTested: parsed.battleTested || defaultProductsPageItems.slice(9, 18),
-          seating: parsed.seating || defaultProductsPageItems.slice(18, 27)
-        }
-      } catch (e) {
-        console.error('Error parsing saved products page items:', e)
-      }
-    }
-  }
-  // Return organized default products
-  return {
-    new: defaultProductsPageItems.slice(0, 9),
-    battleTested: defaultProductsPageItems.slice(9, 18),
-    seating: defaultProductsPageItems.slice(18, 27)
-  }
+  // Use the library function which handles localStorage
+  return getProductsData()
 }
 
 function saveProductsPageItems(products: any) {
-  if (typeof window !== 'undefined') {
-    localStorage.setItem('foxbuilt-products-page', JSON.stringify(products))
-  }
+  saveProductsData(products)
 }
 
 export function useProductsData() {
-  const [products, setProducts] = useState({
-    new: defaultProductsPageItems.slice(0, 9),
-    battleTested: defaultProductsPageItems.slice(9, 18),
-    seating: defaultProductsPageItems.slice(18, 27)
-  })
+  const [products, setProducts] = useState(defaultProductsPageItems)
   const [productCategory, setProductCategory] = useState('new')
 
   // Load products on mount

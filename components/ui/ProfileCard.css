@@ -350,11 +350,8 @@
   0% {
     transform: translate3d(0, 0, 0.1px) rotateX(0deg) rotateY(0deg);
   }
-  25% {
+  50% {
     transform: translate3d(0, 0, 0.1px) rotateX(5deg) rotateY(-8deg);
-  }
-  75% {
-    transform: translate3d(0, 0, 0.1px) rotateX(-5deg) rotateY(8deg);
   }
   100% {
     transform: translate3d(0, 0, 0.1px) rotateX(0deg) rotateY(0deg);
@@ -363,7 +360,7 @@
 
 
 .pc-card-wrapper.mobile-tilt-animation .pc-card {
-  animation: mobile-tilt 1.2s ease-in-out;
+  animation: mobile-tilt 600ms ease-in-out;
 }
 
 .pc-card-wrapper.mobile-tilt-animation {
@@ -515,5 +512,22 @@
     padding: 4px 8px;
     font-size: 9px;
     border-radius: 50px;
+  }
+}
+/* Glare animation keyframes */
+@keyframes glareSwipe {
+  0% {
+    background-position: -200% -200%;
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    background-position: 200% 200%;
+    opacity: 0;
   }
 }

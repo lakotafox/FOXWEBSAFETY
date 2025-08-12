@@ -299,6 +299,7 @@ interface CanvAsciiOptions {
   textColor: string;
   planeBaseHeight: number;
   enableWaves: boolean;
+  enableTilt: boolean;
 }
 
 class CanvAscii {
@@ -311,6 +312,7 @@ class CanvAscii {
   width: number;
   height: number;
   enableWaves: boolean;
+  enableTilt: boolean;
   camera: THREE.PerspectiveCamera;
   scene: THREE.Scene;
   mouse: { x: number; y: number };
@@ -338,6 +340,7 @@ class CanvAscii {
       textColor,
       planeBaseHeight,
       enableWaves,
+      enableTilt,
     }: CanvAsciiOptions,
     containerElem: HTMLElement,
     width: number,
@@ -352,6 +355,7 @@ class CanvAscii {
     this.width = width;
     this.height = height;
     this.enableWaves = enableWaves;
+    this.enableTilt = enableTilt;
 
     this.camera = new THREE.PerspectiveCamera(
       45,
@@ -447,7 +451,7 @@ class CanvAscii {
   }
 
   onMouseMove(evt: MouseEvent | TouchEvent) {
-    if (this.isAnimating || this.isMobile) return; // Don't update mouse during animation or on mobile
+    if (this.isAnimating || this.isMobile || !this.enableTilt) return; // Don't update mouse during animation, on mobile, or when tilt is disabled
     const e = (evt as TouchEvent).touches
       ? (evt as TouchEvent).touches[0]
       : (evt as MouseEvent);
@@ -571,27 +575,34 @@ class CanvAscii {
         this.isAnimating = false;
         // Return to normal tracking
       }
-    } else if (this.isMobile) {
-      // Use device tilt for mobile
-      // Map tilt values to rotation
-      const targetRotationX = this.tiltX * 0.3; // Forward/backward tilt
-      const targetRotationY = this.tiltY * 0.4; // Left/right tilt
+    } else if (this.enableTilt) {
+      // Only apply tilt if enabled
+      if (this.isMobile) {
+        // Use device tilt for mobile
+        // Map tilt values to rotation
+        const targetRotationX = this.tiltX * 0.3; // Forward/backward tilt
+        const targetRotationY = this.tiltY * 0.4; // Left/right tilt
 
-      // Smooth rotation
-      this.mesh.rotation.x += (targetRotationX - this.mesh.rotation.x) * 0.1;
-      this.mesh.rotation.y += (targetRotationY - this.mesh.rotation.y) * 0.1;
+        // Smooth rotation
+        this.mesh.rotation.x += (targetRotationX - this.mesh.rotation.x) * 0.1;
+        this.mesh.rotation.y += (targetRotationY - this.mesh.rotation.y) * 0.1;
+      } else {
+        // Desktop: use mouse tracking
+        // Limit rotation range to prevent flipping
+        const x = map(this.mouse.y, 0, this.height, 0.3, -0.3);
+        const y = map(this.mouse.x, 0, this.width, -0.4, 0.4);
+
+        // Clamp rotation values to prevent full flip
+        const targetRotationX = Math.max(-0.3, Math.min(0.3, x));
+        const targetRotationY = Math.max(-0.4, Math.min(0.4, y));
+
+        this.mesh.rotation.x += (targetRotationX - this.mesh.rotation.x) * 0.05;
+        this.mesh.rotation.y += (targetRotationY - this.mesh.rotation.y) * 0.05;
+      }
     } else {
-      // Desktop: use mouse tracking
-      // Limit rotation range to prevent flipping
-      const x = map(this.mouse.y, 0, this.height, 0.3, -0.3);
-      const y = map(this.mouse.x, 0, this.width, -0.4, 0.4);
-
-      // Clamp rotation values to prevent full flip
-      const targetRotationX = Math.max(-0.3, Math.min(0.3, x));
-      const targetRotationY = Math.max(-0.4, Math.min(0.4, y));
-
-      this.mesh.rotation.x += (targetRotationX - this.mesh.rotation.x) * 0.05;
-      this.mesh.rotation.y += (targetRotationY - this.mesh.rotation.y) * 0.05;
+      // No tilt - keep flat
+      this.mesh.rotation.x = 0;
+      this.mesh.rotation.y = 0;
     }
   }
 
@@ -644,6 +655,7 @@ interface ASCIITextProps {
   textColor?: string;
   planeBaseHeight?: number;
   enableWaves?: boolean;
+  enableTilt?: boolean;
 }
 
 export default function ASCIIText({
@@ -653,6 +665,7 @@ export default function ASCIIText({
   textColor = "#fdf9f3",
   planeBaseHeight = 8,
   enableWaves = false,
+  enableTilt = true,
 }: ASCIITextProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const asciiRef = useRef<CanvAscii | null>(null);
@@ -680,6 +693,7 @@ export default function ASCIIText({
                 textColor,
                 planeBaseHeight,
                 enableWaves,
+                enableTilt,
               },
               containerRef.current!,
               w,
@@ -711,6 +725,7 @@ export default function ASCIIText({
         textColor,
         planeBaseHeight,
         enableWaves,
+        enableTilt,
       },
       containerRef.current,
       width,

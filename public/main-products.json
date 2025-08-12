@@ -1,0 +1,83 @@
+{
+  "products": {
+    "new": [
+      {
+        "id": 1,
+        "title": "Executive Desk Series",
+        "image": "/images/desk grey L showroom.jpg",
+        "description": "",
+        "features": ["Solid wood construction", "Cable management", "5-year warranty"],
+        "price": ""
+      },
+      {
+        "id": 2,
+        "title": "Ergonomic Task Chair",
+        "image": "/images/reception-area.jpg",
+        "description": "",
+        "features": ["Lumbar support", "Adjustable arms", "Breathable mesh"],
+        "price": ""
+      },
+      {
+        "id": 3,
+        "title": "Conference Table",
+        "image": "/images/tanconf.jpg",
+        "description": "",
+        "features": ["Seats 8-12", "Power integration", "Premium finishes"],
+        "price": ""
+      }
+    ],
+    "battleTested": [
+      {
+        "id": 10,
+        "title": "Pre-Owned Executive Desk",
+        "image": "/images/showroom-2.jpg",
+        "description": "",
+        "features": ["Inspected & certified", "Like-new condition", "50% off retail"],
+        "price": ""
+      },
+      {
+        "id": 11,
+        "title": "Refurbished Conference Set",
+        "image": "/images/desk grey L showroom.jpg",
+        "description": "",
+        "features": ["Table & 8 chairs", "Professionally cleaned", "1-year warranty"],
+        "price": ""
+      },
+      {
+        "id": 12,
+        "title": "Pre-Owned Task Chairs",
+        "image": "/images/reception-area.jpg",
+        "description": "",
+        "features": ["Fully functional", "New casters", "Bulk discounts"],
+        "price": ""
+      }
+    ],
+    "seating": [
+      {
+        "id": 19,
+        "title": "Executive Office Chair",
+        "image": "/images/showfacinggarage.jpg",
+        "description": "",
+        "features": ["Premium leather", "Memory foam", "Lifetime frame warranty"],
+        "price": ""
+      },
+      {
+        "id": 20,
+        "title": "Ergonomic Mesh Chair",
+        "image": "/images/desk grey L showroom.jpg",
+        "description": "",
+        "features": ["3D armrests", "Synchro-tilt", "Weight-activated"],
+        "price": ""
+      },
+      {
+        "id": 21,
+        "title": "Conference Room Chairs",
+        "image": "/images/reception-area.jpg",
+        "description": "",
+        "features": ["Set of 6", "Matching design", "Commercial grade"],
+        "price": ""
+      }
+    ]
+  },
+  "crops": {}
+}

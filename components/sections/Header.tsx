@@ -61,16 +61,35 @@ export default function Header({ showAddress, setShowAddress }: HeaderProps) {
         </div>
 
         <div className="flex items-center space-x-4">
-          {/* Desktop Buttons */}
-          <div className="hidden md:flex items-center space-x-4">
-            <Button
-              className={`bg-red-600 hover:bg-red-700 text-white font-bold tracking-wide border-2 border-red-600 hover:border-red-700 transition-all duration-500 ${
-                isScrolled ? "px-3 py-1 text-sm" : "px-6 py-2"
+          {/* Desktop Buttons - Three action buttons */}
+          <div className="hidden md:flex items-center space-x-2">
+            <button
+              onClick={() => window.location.href = 'tel:+18018999406'}
+              className={`bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center transition-all duration-500 ${
+                isScrolled ? "w-10 h-10" : "w-12 h-12"
               }`}
-              onClick={() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })}
+              aria-label="Call us"
             >
-              GET QUOTE
-            </Button>
+              <Phone className={isScrolled ? "w-5 h-5" : "w-6 h-6"} />
+            </button>
+            <button
+              onClick={() => setShowMapConfirm(true)}
+              className={`bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center transition-all duration-500 ${
+                isScrolled ? "w-10 h-10" : "w-12 h-12"
+              }`}
+              aria-label="View on map"
+            >
+              <MapPin className={isScrolled ? "w-5 h-5" : "w-6 h-6"} />
+            </button>
+            <button
+              onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+              className={`bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center justify-center transition-all duration-500 ${
+                isScrolled ? "w-10 h-10" : "w-12 h-12"
+              }`}
+              aria-label="Send message"
+            >
+              <Mail className={isScrolled ? "w-5 h-5" : "w-6 h-6"} />
+            </button>
           </div>
 
           {/* Mobile Action Buttons */}

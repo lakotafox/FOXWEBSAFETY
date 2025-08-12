@@ -13,7 +13,7 @@ import ProductsHeader from '@/components/products/ProductsHeader'
 import FloatingCategoryButtons from '@/components/products/FloatingCategoryButtons'
 import ContactForm from '@/components/products/ContactForm'
 import ASCIISection from '@/components/sections/ASCIISection'
-import { getProductsPageItems } from '@/lib/products-data'
+import { getPublishedProductsPageItems } from '@/lib/products-page-data'
 
 function ProductsPageContent() {
   const searchParams = useSearchParams()
@@ -56,7 +56,7 @@ function ProductsPageContent() {
   useEffect(() => {
     // Load products when component mounts
     const loadProducts = async () => {
-      const data = await getProductsPageItems()
+      const data = await getPublishedProductsPageItems()
       setProductsByCategory(data.products)
       setCropSettings(data.crops || {})
     }

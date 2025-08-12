@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect } from "react"
-import { saveProducts } from "@/lib/products-data"
+import { saveMainProducts } from "@/lib/main-products-data"
 import { publishToGitHub } from '@/components/carrie/services/github-publish'
 import { 
   processProductImageUpload, 
@@ -134,7 +134,7 @@ export const useCarrieEditor = () => {
     
     if (result.success) {
       // Also save to localStorage as backup
-      saveProducts(featuredProducts)
+      saveMainProducts(featuredProducts)
       localStorage.setItem('foxbuilt-gallery', JSON.stringify(pendingGalleryImages))
       localStorage.setItem('foxbuilt-mobile-gallery', JSON.stringify(pendingMobileGalleryImages))
       setGalleryImages(pendingGalleryImages)
@@ -227,7 +227,7 @@ export const useCarrieEditor = () => {
       .then(data => {
         if (data.products) {
           setFeaturedProducts(data.products)
-          saveProducts(data.products)
+          saveMainProducts(data.products)
           
           // Load crop settings from products
           const crops: {[key: string]: {scale: number, x: number, y: number}} = {}
@@ -252,7 +252,7 @@ export const useCarrieEditor = () => {
           .then(data => {
             if (data.products) {
               setFeaturedProducts(data.products)
-              saveProducts(data.products)
+              saveMainProducts(data.products)
               
               // Load crop settings from products
               const crops: {[key: string]: {scale: number, x: number, y: number}} = {}

@@ -58,6 +58,7 @@ export default function ASCIISection() {
             textColor="#fdf9f3"
             planeBaseHeight={8}
             enableWaves={false}
+            enableTilt={false}
           />
         </div>
       </div>

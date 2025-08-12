@@ -1,0 +1,41 @@
+.glare-effect {
+  width: var(--ge-width);
+  height: var(--ge-height);
+  background: var(--ge-bg);
+  border-radius: var(--ge-br);
+  border: 1px solid var(--ge-border);
+  overflow: hidden;
+  position: relative;
+  display: block;
+  cursor: pointer;
+}
+
+.glare-effect::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(var(--ge-angle),
+      hsla(0, 0%, 0%, 0) 60%,
+      var(--ge-rgba) 70%,
+      hsla(0, 0%, 0%, 0),
+      hsla(0, 0%, 0%, 0) 100%);
+  transition: none;
+  background-size: var(--ge-size) var(--ge-size), 100% 100%;
+  background-repeat: no-repeat;
+  background-position: -100% -100%, 0 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Animation state - triggered by click/tap */
+.glare-effect--animating::before {
+  transition: background-position var(--ge-duration) ease;
+  background-position: 100% 100%, 0 0;
+}
+
+/* Optional: Add hover effect for desktop */
+@media (hover: hover) {
+  .glare-effect:hover::before {
+    opacity: 0.5;
+  }
+}

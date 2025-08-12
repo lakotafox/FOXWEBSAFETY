@@ -20,7 +20,7 @@ export async function publishToGitHub({
     const GITHUB_TOKEN = process.env.NEXT_PUBLIC_GITHUB_TOKEN || 'SET_IN_NETLIFY_ENV'
     const OWNER = 'lakotafox'
     const REPO = 'FOXSITE'
-    const PRODUCTS_PATH = 'public/products.json'
+    const PRODUCTS_PATH = 'public/main-products.json'
     const CONTENT_PATH = 'public/content.json'
     
     // First, get the current content.json file to get its SHA
@@ -40,7 +40,7 @@ export async function publishToGitHub({
       contentSha = currentFile.sha
     }
 
-    // Get current products.json file SHA
+    // Get current main-products.json file SHA
     const currentProductsResponse = await fetch(
       `https://api.github.com/repos/${OWNER}/${REPO}/contents/${PRODUCTS_PATH}`,
       {
@@ -77,7 +77,7 @@ export async function publishToGitHub({
       updatedBy: "Kyle"
     }
 
-    // Prepare products.json content (just products with embedded crops)
+    // Prepare main-products.json content (just products with embedded crops)
     const productsContent = {
       products: convertedProducts,
       productsCrops: cropSettings
@@ -106,7 +106,7 @@ export async function publishToGitHub({
       }
     )
 
-    // Update products.json file on GitHub (for products data)
+    // Update main-products.json file on GitHub (for main page products data)
     const updateProductsResponse = await fetch(
       `https://api.github.com/repos/${OWNER}/${REPO}/contents/${PRODUCTS_PATH}`,
       {
@@ -117,7 +117,7 @@ export async function publishToGitHub({
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          message: `Update products via main editor - ${new Date().toLocaleString()}`,
+          message: `Update main page products via carrie editor - ${new Date().toLocaleString()}`,
           content: productsBase64,
           sha: productsSha,
           branch: 'main'

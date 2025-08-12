@@ -9,7 +9,7 @@ export default function FloatingActionButtons() {
   
   return (
     <>
-    <div className="hidden md:flex fixed left-8 flex-col gap-3 z-50" style={{ top: '200px' }}>
+    <div className="hidden fixed left-8 flex-col gap-3 z-50" style={{ top: '200px' }}>
       <ActionButton
         icon="phone"
         size="lg"

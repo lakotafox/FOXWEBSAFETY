@@ -7,7 +7,7 @@ import AnimatedList from '@/components/ui/AnimatedList'
 import FloatingActionButtons from '@/components/sections/FloatingActionButtons'
 import ASCIISection from '@/components/sections/ASCIISection'
 import ContactForm from '@/components/products/ContactForm'
-import { getProductsPageItems } from '@/lib/products-data'
+import { getPublishedProductsPageItems } from '@/lib/products-page-data'
 import VoidModal from '@/components/ui/VoidModal'
 import FlyingPosters from '@/components/ui/FlyingPosters'
 import { X } from 'lucide-react'
@@ -35,7 +35,7 @@ function ListViewContent() {
   useEffect(() => {
     // Load products when component mounts - this will load from products.json (published data)
     const loadProducts = async () => {
-      const data = await getProductsPageItems()
+      const data = await getPublishedProductsPageItems()
       
       // Combine all products from all categories with alternating colors
       const combinedProducts: any[] = []

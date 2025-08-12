@@ -34,13 +34,30 @@ export default function ProductsHeader({ isScrolled }: ProductsHeaderProps) {
             <span className="text-red-600">PRODUCTS</span>
           </h1>
           
-          {/* Home button - Desktop */}
-          <Button
-            onClick={() => window.location.href = '/'}
-            className="bg-red-600 hover:bg-red-700 text-white font-black px-6 py-2"
-          >
-            HOME
-          </Button>
+          {/* Three action buttons - Desktop */}
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => window.location.href = 'tel:+18018999406'}
+              className="w-12 h-12 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center transition-all"
+              aria-label="Call us"
+            >
+              <Phone className="w-6 h-6" />
+            </button>
+            <button
+              onClick={() => window.open('https://www.google.com/maps/search/?api=1&query=420+W+Industrial+Dr+Building+LL+Pleasant+Grove+UT+84062', '_blank')}
+              className="w-12 h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center transition-all"
+              aria-label="View on map"
+            >
+              <MapPin className="w-6 h-6" />
+            </button>
+            <button
+              onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+              className="w-12 h-12 bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center justify-center transition-all"
+              aria-label="Send message"
+            >
+              <Mail className="w-6 h-6" />
+            </button>
+          </div>
         </div>
 
         {/* Mobile Header */}

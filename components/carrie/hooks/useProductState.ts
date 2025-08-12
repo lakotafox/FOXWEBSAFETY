@@ -1,10 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { getProducts } from '@/lib/products-data'
+import { getMainProducts } from '@/lib/main-products-data'
 
 export const useProductState = () => {
-  const [featuredProducts, setFeaturedProducts] = useState(getProducts())
+  const [featuredProducts, setFeaturedProducts] = useState(getMainProducts())
   const [featuredCategory, setFeaturedCategory] = useState("new")
   const [editingId, setEditingId] = useState<number | null>(null)
 

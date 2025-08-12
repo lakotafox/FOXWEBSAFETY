@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useRef, useCallback, useMemo } from "react";
+import React, { useEffect, useRef, useCallback, useMemo, useState } from "react";
 import "./ProfileCard.css";
 
 const DEFAULT_BEHIND_GRADIENT =
@@ -78,6 +78,8 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
 }) => {
   const wrapRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLElement>(null);
+  const [glareKey, setGlareKey] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
 
   const animationHandlers = useMemo(() => {
     if (!enableTilt) return null;
@@ -220,13 +222,60 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
     audio.volume = 0.5; // Set volume to 50% so it's not too loud
     audio.play().catch(err => console.log('Audio play failed:', err));
     
+    // No glare animation for mobile - removed setGlareKey
+    
     // Add a class to trigger CSS animation
     wrap.classList.add('mobile-tilt-animation');
     
-    // Remove the class after animation completes (1.5s for full glow cycle)
+    // Animate background position for logo movement
+    const animateBackgroundPosition = (progress: number) => {
+      // Only do first half of circular motion (0 to π instead of 0 to 2π)
+      const angle = progress * Math.PI;
+      const radius = 15; // Percentage of movement
+      const centerX = 50 + Math.sin(angle) * radius;
+      const centerY = 50 + Math.cos(angle) * radius;
+      
+      wrap.style.setProperty('--background-x', `${centerX}%`);
+      wrap.style.setProperty('--background-y', `${centerY}%`);
+    };
+    
+    // Animate over 600ms (normal speed for half motion)
+    const duration = 600;
+    const startTime = performance.now();
+    
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      animateBackgroundPosition(progress);
+      
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        // Smoothly return to center
+        wrap.style.setProperty('--background-x', '50%');
+        wrap.style.setProperty('--background-y', '50%');
+      }
+    };
+    
+    requestAnimationFrame(animate);
+    
+    // Remove the class after animation completes
     setTimeout(() => {
       wrap.classList.remove('mobile-tilt-animation');
-    }, 1500);
+    }, 800);
+  }, []);
+
+  // Set isMobile on mount
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   useEffect(() => {
@@ -244,11 +293,15 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
     // Check if mobile/touch device
     const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
-    // Add click handler for sound on desktop
+    // Add click handler for sound and glare effect
     const handleCardClick = () => {
+      // Play sound
       const audio = new Audio('/METALSHIMMER.mp3');
       audio.volume = 0.5;
       audio.play().catch(err => console.log('Audio play failed:', err));
+      
+      // Trigger glare animation by updating the key
+      setGlareKey(prev => prev + 1);
     };
 
     if (isTouchDevice) {
@@ -322,6 +375,22 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
         <div className="pc-inside">
           <div className="pc-shine" />
           <div className="pc-glare" />
+          <div 
+            key={`glare-${glareKey}`}
+            className="pc-custom-glare"
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: `linear-gradient(-30deg, transparent 40%, rgba(255, 255, 255, 0.5) 50%, rgba(255, 255, 255, 0.4) 60%, transparent 70%)`,
+              backgroundSize: isMobile ? '200% 200%' : '300% 300%',
+              backgroundPosition: '-200% -200%',
+              transition: 'none',
+              pointerEvents: 'none',
+              zIndex: 100,
+              animation: glareKey > 0 ? 'glareSwipe 1200ms cubic-bezier(0.4, 0, 0.2, 1) forwards' : 'none',
+              opacity: glareKey > 0 ? 1 : 0,
+            }}
+          />
           <div className="pc-content pc-avatar-content">
             <img
               className="avatar"

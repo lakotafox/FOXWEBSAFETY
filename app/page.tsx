@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react"
 import { useSearchParams } from 'next/navigation'
-import { getProducts, defaultProducts } from "@/lib/products-data"
+import { getMainProducts, defaultMainProducts } from "@/lib/main-products-data"
 
 // Import all our extracted components
 import FloatingActionButtons from "@/components/sections/FloatingActionButtons"
@@ -26,7 +26,7 @@ declare global {
 function FoxBuiltWebsiteContent() {
   const searchParams = useSearchParams()
   const [showAddress, setShowAddress] = useState(false)
-  const [featuredProducts, setFeaturedProducts] = useState(defaultProducts)
+  const [featuredProducts, setFeaturedProducts] = useState(defaultMainProducts)
   const [cropSettings, setCropSettings] = useState<{[key: string]: {scale: number, x: number, y: number}}>({})
   const [galleryCrops, setGalleryCrops] = useState<{[key: string]: {scale: number, x: number, y: number}}>({})
   const [openCarouselData, setOpenCarouselData] = useState<{open: boolean, category?: string, index?: number}>({open: false})
@@ -56,8 +56,8 @@ function FoxBuiltWebsiteContent() {
 
   // Load products from products.json (published by editor) and gallery from content.json
   useEffect(() => {
-    // Load products from products.json (what the editor publishes)
-    fetch('/products.json')
+    // Load products from main-products.json (what the carrie editor publishes)
+    fetch('/main-products.json')
       .then(response => response.json())
       .then(data => {
         if (data.products) {
@@ -81,8 +81,8 @@ function FoxBuiltWebsiteContent() {
         }
       })
       .catch(error => {
-        console.error('Error loading products.json, falling back to defaults:', error)
-        setFeaturedProducts(getProducts())
+        console.error('Error loading main-products.json, falling back to defaults:', error)
+        setFeaturedProducts(getMainProducts())
       })
     
     // Load gallery images from content.json
