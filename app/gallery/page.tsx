@@ -80,7 +80,7 @@ export default function GalleryPage() {
         <div className="w-full max-w-7xl px-4">
           <FlyingPosters 
             items={images}
-            height={typeof window !== 'undefined' && window.innerWidth < 768 ? '400px' : '600px'}
+            height={isMobile ? '400px' : '600px'}
             initialIndex={initialIndex}
             onFullImageToggle={() => {}}
           />
