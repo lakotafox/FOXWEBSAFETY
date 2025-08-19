@@ -1,6 +1,7 @@
 // Products page items - 9 different items per category (not shown on main page)
 export const defaultProductsPageItems = {
-  new: [
+  // Keep the old format for main page compatibility
+  executiveDesks: [
     {
       id: 4,
       title: "Storage Cabinet",
@@ -221,6 +222,81 @@ export const defaultProductsPageItems = {
       features: ["Active sitting", "Core strength", "Includes pump"],
       price: ""
     }
+  ],
+  // Also add kebab-case version for new products pages
+  'executive-desks': [
+    {
+      id: 4,
+      title: "Storage Cabinet",
+      image: "/images/showroom-1.jpg",
+      description: "",
+      features: ["Locking drawers", "Adjustable shelves", "Anti-tip design"],
+      price: ""
+    },
+    {
+      id: 5,
+      title: "Reception Desk",
+      image: "/images/reception tan.jpg",
+      description: "",
+      features: ["ADA compliant", "Built-in storage", "Custom sizes"],
+      price: ""
+    },
+    {
+      id: 6,
+      title: "Standing Desk",
+      image: "/images/showfacinggarage.jpg",
+      description: "",
+      features: ["Electric lift", "Memory settings", "Anti-collision"],
+      price: ""
+    },
+    {
+      id: 7,
+      title: "Lounge Seating",
+      image: "/images/Showroomwglassboard.jpg",
+      description: "",
+      features: ["Stain resistant", "Modular design", "USB charging"],
+      price: ""
+    },
+    {
+      id: 8,
+      title: "File Cabinet",
+      image: "/images/small desk.jpg",
+      description: "",
+      features: ["Fire resistant", "Full extension", "Lock system"],
+      price: ""
+    },
+    {
+      id: 9,
+      title: "Training Table",
+      image: "/images/conference-room.jpg",
+      description: "",
+      features: ["Flip-top design", "Nesting storage", "Mobile casters"],
+      price: ""
+    },
+    {
+      id: 28,
+      title: "Bookshelf Unit",
+      image: "/images/tanconf.jpg",
+      description: "",
+      features: ["5 adjustable shelves", "Anti-sag design", "Wall anchor included"],
+      price: ""
+    },
+    {
+      id: 29,
+      title: "Mobile Pedestal",
+      image: "/images/reception-area.jpg",
+      description: "",
+      features: ["3 drawers", "Lock system", "Cushion top option"],
+      price: ""
+    },
+    {
+      id: 30,
+      title: "Privacy Screen",
+      image: "/images/desk grey L showroom.jpg",
+      description: "",
+      features: ["Acoustic panels", "Modular system", "Tool-free assembly"],
+      price: ""
+    }
   ]
 }
 
@@ -252,7 +328,7 @@ export async function getPublishedProductsPageItems() {
     if (response.ok) {
       const data = await response.json()
       if (data.products) {
-        return { products: data.products, crops: data.productsCrops || {} }
+        return { products: data.products, crops: data.productsCrops || {}, pageName: data.pageName }
       }
     }
   } catch (e) {

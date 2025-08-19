@@ -37,37 +37,15 @@ function ListViewContent() {
     const loadProducts = async () => {
       const data = await getPublishedProductsPageItems()
       
-      // Combine all products from all categories with alternating colors
+      // Only load products from 'executiveDesks' category
       const combinedProducts: any[] = []
-      const categories = ['new', 'battleTested', 'seating']
-      let colorIndex = 0
       
-      // Add products with their category info for color coding
-      if (data.products.new) {
-        data.products.new.forEach((product: any) => {
+      if (data.products.executiveDesks) {
+        data.products.executiveDesks.forEach((product: any) => {
           combinedProducts.push({
             ...product,
-            category: categories[colorIndex % 3]
+            category: 'executiveDesks'
           })
-          colorIndex++
-        })
-      }
-      if (data.products.battleTested) {
-        data.products.battleTested.forEach((product: any) => {
-          combinedProducts.push({
-            ...product,
-            category: categories[colorIndex % 3]
-          })
-          colorIndex++
-        })
-      }
-      if (data.products.seating) {
-        data.products.seating.forEach((product: any) => {
-          combinedProducts.push({
-            ...product,
-            category: categories[colorIndex % 3]
-          })
-          colorIndex++
         })
       }
       

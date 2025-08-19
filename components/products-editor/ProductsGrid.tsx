@@ -1,9 +1,8 @@
 'use client'
 
-import CategoryButtons from '@/components/products-editor/ui/CategoryButtons'
 import MagicBento, { ParticleCard } from '@/components/ui/MagicBento'
 import Image from 'next/image'
-import { getImageTransform } from '@/lib/utils/imageTransform'
+import CroppedImageWithLoader from '@/components/ui/CroppedImageWithLoader'
 import { getCategoryColor } from '@/lib/utils/categoryColors'
 import EditableField from '@/components/products-editor/ui/EditableField'
 import { Edit2 } from 'lucide-react'
@@ -14,6 +13,7 @@ interface ProductsGridProps {
   editingId: number | null
   editingCrop: string | null
   cropSettings: {[key: string]: {scale: number, x: number, y: number}}
+  setCropSettings: (settings: any) => void
   setProductCategory: (category: string) => void
   setEditingId: (id: number | null) => void
   setEditingCrop: (crop: string | null) => void
@@ -28,6 +28,7 @@ export default function ProductsGrid({
   editingId,
   editingCrop,
   cropSettings,
+  setCropSettings,
   setProductCategory,
   setEditingId,
   setEditingCrop,
@@ -35,29 +36,14 @@ export default function ProductsGrid({
   handleImageUpload,
   getImageUrl
 }: ProductsGridProps) {
-  // Get glow color based on category
+  // Get glow color - always red for executive desks
   const getGlowColor = () => {
-    switch(productCategory) {
-      case 'new': return '220, 38, 38' // red-600
-      case 'battleTested': return '37, 99, 235' // blue-600
-      case 'seating': return '34, 197, 94' // green-600
-      default: return '132, 0, 255' // purple
-    }
+    return '220, 38, 38' // red-600
   }
 
   return (
     <section className="py-20 bg-slate-800">
       <div className="container mx-auto px-4">
-        {/* Category Buttons */}
-        <div className="flex justify-center mb-12">
-          <div className="bg-slate-700 border-4 border-slate-600 p-2 flex flex-wrap justify-center">
-            <CategoryButtons 
-              productCategory={productCategory as 'new' | 'battleTested' | 'seating'}
-              onCategoryChange={setProductCategory}
-            />
-          </div>
-        </div>
-
         {/* Products Grid with MagicBento - Show 9 products (3x3) */}
         <MagicBento
           textAutoHide={false}
@@ -86,19 +72,23 @@ export default function ProductsGrid({
               enableMagnetism={false}
             >
               <div className="card__image relative group">
-                <div 
-                  className="absolute inset-0"
-                  style={{ transform: getImageTransform(product.image, cropSettings) }}
-                >
-                  <Image 
-                    src={getImageUrl(product.image)} 
-                    alt={product.title} 
-                    width={500}
-                    height={500}
-                    className="w-full h-full object-contain"
-                    unoptimized
-                  />
-                </div>
+                <CroppedImageWithLoader 
+                  src={getImageUrl(product.image)} 
+                  alt={product.title} 
+                  crop={cropSettings[product.image] || { scale: 1, x: 50, y: 50 }}
+                  isEditing={editingCrop === product.image}
+                  onCropChange={(newCrop) => {
+                    // Update crop settings for this specific image only
+                    setCropSettings((prev: any) => ({
+                      ...prev,
+                      [product.image]: newCrop
+                    }))
+                  }}
+                  width={500}
+                  height={500}
+                  className="w-full h-full object-contain"
+                  unoptimized
+                />
                 
                 {/* Edit Controls */}
                 <>

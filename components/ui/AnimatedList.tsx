@@ -143,10 +143,8 @@ const AnimatedList: React.FC<AnimatedListProps> = ({
   // Get category color for a specific item
   const getCategoryColor = (itemCategory?: string) => {
     switch(itemCategory) {
-      case 'new': return 'rgb(220, 38, 38)' // red-600
-      case 'battleTested': return 'rgb(37, 99, 235)' // blue-600
-      case 'seating': return 'rgb(34, 197, 94)' // green-600
-      default: return 'rgb(132, 0, 255)' // purple
+      case 'executiveDesks': return 'rgb(220, 38, 38)' // red-600
+      default: return 'rgb(220, 38, 38)' // red-600
     }
   }
 

@@ -1,15 +1,37 @@
 'use client'
 
+import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Phone, MapPin, Mail } from 'lucide-react'
+import { Phone, MapPin, Mail, ChevronDown, Menu, X, ChevronRight } from 'lucide-react'
 
 interface ProductsHeaderProps {
   isScrolled: boolean
+  pageName?: string
+  category?: string
 }
 
-export default function ProductsHeader({ isScrolled }: ProductsHeaderProps) {
+export default function ProductsHeader({ isScrolled, pageName = 'EXECUTIVE DESKS', category = '' }: ProductsHeaderProps) {
+  // Get color class based on category
+  const getTitleColorClass = () => {
+    if (category.includes('desk') || category.includes('executive') || category.includes('reception')) {
+      return 'text-red-600'
+    }
+    if (category.includes('chair') || category.includes('seat') || category.includes('stool') || category.includes('sofa') || category.includes('lounge')) {
+      return 'text-green-500'
+    }
+    if (category.includes('cubicle') || category.includes('panel') || category.includes('workstation') || category.includes('privacy')) {
+      return 'text-pink-500'
+    }
+    if (category.includes('storage') || category.includes('filing') || category.includes('cabinet') || category.includes('shelf') || category.includes('bookcase') || category.includes('locker') || category.includes('credenza')) {
+      return 'text-blue-500'
+    }
+    if (category.includes('conference') || category.includes('meeting') || category.includes('collaborative') || category.includes('table')) {
+      return 'text-amber-400'
+    }
+    return 'text-red-600' // default
+  }
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 bg-slate-900 border-b-4 border-red-600 shadow-xl transition-all duration-500 ${
@@ -30,9 +52,9 @@ export default function ProductsHeader({ isScrolled }: ProductsHeaderProps) {
             />
           </Link>
           
-          {/* Centered PRODUCTS text */}
+          {/* Centered page name text */}
           <h1 className="text-2xl font-black text-white tracking-tight absolute left-1/2 transform -translate-x-1/2">
-            <span className="text-red-600">PRODUCTS</span>
+            <span className={getTitleColorClass()}>{pageName.toUpperCase()}</span>
           </h1>
           
           {/* Three action buttons - Desktop */}
@@ -79,7 +101,7 @@ export default function ProductsHeader({ isScrolled }: ProductsHeaderProps) {
 
           {/* Center Title */}
           <h1 className={`font-black text-white tracking-tight ${isScrolled ? "text-xl" : "text-2xl"}`}>
-            <span className="text-red-600">PRODUCTS</span>
+            <span className={getTitleColorClass()}>{pageName.toUpperCase()}</span>
           </h1>
 
           {/* Mobile Action Buttons */}

@@ -35,19 +35,6 @@ export default function CategorySelector({
 
   return (
     <>
-      <div ref={categoryButtonsRef}>
-        <CategorySlider
-          categories={[
-            { id: 'new', label: 'NEW', color: 'text-white', bgColor: 'bg-red-600' },
-            { id: 'battleTested', label: 'PRE-OWNED', color: 'text-white', bgColor: 'bg-blue-600' },
-            { id: 'seating', label: 'SEATING', color: 'text-white', bgColor: 'bg-green-600' }
-          ]}
-          selectedCategory={selectedCategory}
-          onCategoryChange={onCategoryChange}
-          className="mb-2"
-        />
-      </div>
-      
       {/* List View button */}
       <div className="flex flex-col items-center gap-3 mb-4">
         <Button

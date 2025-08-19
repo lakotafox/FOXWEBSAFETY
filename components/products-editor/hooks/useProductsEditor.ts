@@ -6,10 +6,10 @@ import { useProductsUpload } from './useProductsUpload'
 import { useProductsCrop } from './useProductsCrop'
 import { useProductsPublish } from './useProductsPublish'
 
-export function useProductsEditor() {
+export function useProductsEditor(category?: string) {
   // Use focused hooks
   const uiState = useProductsUI()
-  const dataState = useProductsData()
+  const dataState = useProductsData(category)
   const cropState = useProductsCrop()
   const uploadState = useProductsUpload(uiState.showSaveMessage)
   const publishState = useProductsPublish()
@@ -55,6 +55,8 @@ export function useProductsEditor() {
     publishState.handlePublish({
       products: dataState.products,
       cropSettings: cropState.cropSettings,
+      pageName: dataState.pageName,
+      categoryId: category,
       saveProductsPageItems: dataState.saveProductsPageItems,
       saveCropSettings: cropState.saveCropSettings,
       showSaveMessage: uiState.showSaveMessage,

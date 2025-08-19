@@ -1,5 +1,8 @@
 'use client'
 
+import { Suspense } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 import Image from 'next/image'
 import { useProductsEditor } from '@/components/products-editor/hooks/useProductsEditor'
 import ProductsGrid from '@/components/products-editor/ProductsGrid'
@@ -10,7 +13,17 @@ import YellowHeader from '@/components/products-editor/ui/YellowHeader'
 import SaveMessage from '@/components/products-editor/ui/SaveMessage'
 import '@/components/ui/MagicBento.css'
 
-export default function ProductsEditorPage() {
+function ProductsEditorContent() {
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const categoryParam = searchParams.get('category')
+  
+  // If no category is specified, redirect to the select page
+  useEffect(() => {
+    if (!categoryParam) {
+      router.push('/products-editor/select')
+    }
+  }, [categoryParam, router])
   const {
     // State
     saveMessage,
@@ -24,6 +37,7 @@ export default function ProductsEditorPage() {
     editingId,
     editingCrop,
     cropSettings,
+    pageName,
     
     // Setters
     setShowHelp,
@@ -31,13 +45,15 @@ export default function ProductsEditorPage() {
     setProductCategory,
     setEditingId,
     setEditingCrop,
+    setPageName,
+    setCropSettings,
     
     // Functions
     handlePublish,
     updateProduct,
     handleImageUpload,
     getImageUrl
-  } = useProductsEditor()
+  } = useProductsEditor(categoryParam || 'executive-desks')
 
 
   return (
@@ -65,9 +81,12 @@ export default function ProductsEditorPage() {
       {/* Header */}
       <div className="bg-slate-900 py-8 pt-20">
         <div className="container mx-auto px-4">
-          <h1 className="text-5xl font-black text-center text-white tracking-tight">
-            PRODUCTS <span className="text-red-600">EDITOR</span>
-          </h1>
+          <div className="text-center">
+            <span className="text-5xl font-black text-white tracking-tight">
+              {pageName || 'Executive Desks'}
+            </span>
+            <span className="text-5xl font-black text-red-600 tracking-tight ml-4">EDITOR</span>
+          </div>
         </div>
       </div>
 
@@ -78,6 +97,7 @@ export default function ProductsEditorPage() {
         editingId={editingId}
         editingCrop={editingCrop}
         cropSettings={cropSettings}
+        setCropSettings={setCropSettings}
         setProductCategory={setProductCategory}
         setEditingId={setEditingId}
         setEditingCrop={setEditingCrop}
@@ -113,5 +133,17 @@ export default function ProductsEditorPage() {
         onClose={() => setShowHelp(false)}
       />
     </div>
+  )
+}
+
+export default function ProductsEditorPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    }>
+      <ProductsEditorContent />
+    </Suspense>
   )
 }

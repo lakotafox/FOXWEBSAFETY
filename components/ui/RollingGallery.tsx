@@ -25,7 +25,6 @@ export default function RollingGallery({
   const [imagesReady, setImagesReady] = useState(false)
   const [loadedImagesCount, setLoadedImagesCount] = useState(0)
   const [loadingFrame, setLoadingFrame] = useState(0)
-  const [minimumTimePassed, setMinimumTimePassed] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const trackRef = useRef<HTMLDivElement>(null)
   const rotationRef = useRef(0)
@@ -97,14 +96,7 @@ export default function RollingGallery({
     return () => clearTimeout(timer)
   }, [])
   
-  // Ensure minimum 2.5 seconds loading time
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setMinimumTimePassed(true)
-    }, 2500)
-    
-    return () => clearTimeout(timer)
-  }, [])
+  // No forced minimum loading time - removed per user request
 
   // Animate loading frames
   useEffect(() => {
@@ -117,21 +109,14 @@ export default function RollingGallery({
     return () => clearInterval(interval)
   }, [imagesReady, frames.length])
   
-  // Set images ready when all images have loaded AND minimum time has passed
+  // Set images ready when all images have loaded
   useEffect(() => {
-    // Check if all images have loaded AND minimum time has passed
-    if (loadedImagesCount === images.length && images.length > 0 && minimumTimePassed) {
-      // Add a small delay to ensure transforms are applied
-      const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
-      const delay = isMobile ? 300 : 100
-      
-      const timer = setTimeout(() => {
-        setImagesReady(true)
-      }, delay)
-
-      return () => clearTimeout(timer)
+    // Check if all images have loaded
+    if (loadedImagesCount === images.length && images.length > 0) {
+      // Set ready immediately - no artificial delay
+      setImagesReady(true)
     }
-  }, [loadedImagesCount, images.length, minimumTimePassed])
+  }, [loadedImagesCount, images.length])
 
   // Setup draggable (mobile only)
   useEffect(() => {
@@ -404,7 +389,7 @@ export default function RollingGallery({
                   fill
                   className="object-cover"
                   sizes="(max-width: 640px) 300px, 400px"
-                  unoptimized
+                  priority={true}
                   onLoadComplete={handleImageLoad}
                   hideLoadingAnimation={true}
                 />

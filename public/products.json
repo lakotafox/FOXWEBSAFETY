@@ -1,6 +1,6 @@
 {
   "products": {
-    "new": [
+    "executiveDesks": [
       {
         "id": 1,
         "title": "Executive Desk Series",
@@ -346,6 +346,126 @@
           "Mobile base",
           "Tablet arm option",
           "Flexible design"
+        ],
+        "price": ""
+      }
+    ],
+    "executive-desks": [
+      {
+        "id": 1,
+        "title": "Executive Desk Series",
+        "image": "/images/desk grey L showroom.jpg",
+        "description": "",
+        "features": [
+          "Solid wood construction",
+          "Cable management",
+          "5-year warranty"
+        ],
+        "price": "",
+        "imageCrop": {
+          "scale": 3.045213915504014,
+          "x": 44,
+          "y": 28
+        }
+      },
+      {
+        "id": 2,
+        "title": "Ergonomic Task Chair",
+        "image": "/images/product-2-1754595166035.jpg",
+        "description": "",
+        "features": [
+          "Lumbar support",
+          "Adjustable arms",
+          "Breathable mesh"
+        ],
+        "price": "",
+        "imageCrop": {
+          "scale": 1,
+          "x": 50,
+          "y": 50
+        }
+      },
+      {
+        "id": 3,
+        "title": "Conference Table",
+        "image": "/images/tanconf.jpg",
+        "description": "",
+        "features": [
+          "Seats 8-12",
+          "Power integration",
+          "Premium finishes"
+        ],
+        "price": ""
+      },
+      {
+        "id": 4,
+        "title": "Storage Cabinet",
+        "image": "/images/showroom-1.jpg",
+        "description": "",
+        "features": [
+          "Locking drawers",
+          "Adjustable shelves",
+          "Anti-tip design"
+        ],
+        "price": ""
+      },
+      {
+        "id": 5,
+        "title": "Reception Desk",
+        "image": "/images/reception tan.jpg",
+        "description": "",
+        "features": [
+          "ADA compliant",
+          "Built-in storage",
+          "Custom sizes"
+        ],
+        "price": ""
+      },
+      {
+        "id": 6,
+        "title": "Standing Desk",
+        "image": "/images/showfacinggarage.jpg",
+        "description": "",
+        "features": [
+          "Electric lift",
+          "Memory settings",
+          "Anti-collision"
+        ],
+        "price": ""
+      },
+      {
+        "id": 7,
+        "title": "Lounge Seating",
+        "image": "/images/Showroomwglassboard.jpg",
+        "description": "",
+        "features": [
+          "Stain resistant",
+          "Modular design",
+          "USB charging"
+        ],
+        "price": ""
+      },
+      {
+        "id": 8,
+        "title": "File Cabinet",
+        "image": "/images/small desk.jpg",
+        "description": "",
+        "features": [
+          "Fire resistant",
+          "Full extension",
+          "Lock system"
+        ],
+        "price": ""
+      },
+      {
+        "id": 9,
+        "title": "Training Table",
+        "image": "/images/conference-room.jpg",
+        "description": "",
+        "features": [
+          "Flip-top design",
+          "Nesting storage",
+          "Mobile casters"
         ],
         "price": ""
       }

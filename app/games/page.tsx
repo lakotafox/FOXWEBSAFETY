@@ -3,9 +3,16 @@
 import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
+import dynamic from "next/dynamic"
 import SnakeGame from "./snake/SnakeGame"
 import PongGame from "./pong/PongGame"
 import GalagaGame from "./galaga/GalagaGame"
+
+// Dynamically import DitherSimple to avoid SSR issues
+const DitherSimple = dynamic(() => import("@/components/ui/DitherSimple"), {
+  ssr: false,
+  loading: () => <div className="w-full h-full bg-black" />
+})
 
 export default function GamesPage() {
   const [gameMode, setGameMode] = useState<'select' | 'snake' | 'pong' | 'galaga'>('select')
@@ -43,9 +50,15 @@ export default function GamesPage() {
 
   if (gameMode === 'select') {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center p-4">
-        <div className="text-center">
-          <h1 className="text-4xl md:text-6xl lg:text-8xl font-bold text-white mb-8 md:mb-12">CHOOSE YOUR GAME</h1>
+      <div className="min-h-screen bg-black relative">
+        {/* Dithered wave background */}
+        <div className="absolute inset-0 z-0">
+          <DitherSimple />
+        </div>
+        
+        {/* Game content */}
+        <div className="relative z-10 min-h-screen flex items-center justify-center p-4" style={{ pointerEvents: 'none' }}>
+          <div className="text-center" style={{ pointerEvents: 'auto' }}>
           <div className="flex flex-col md:flex-row gap-6 md:gap-12">
             <Button 
               onClick={() => setGameMode('snake')} 
@@ -197,7 +210,7 @@ export default function GamesPage() {
               onMouseEnter={() => setIsJumping(true)}
               onMouseLeave={() => setIsJumping(false)}
             >
-              {jumpCount === 0 ? 'CLICK ME!' : jumpCount < 10 ? `${10 - jumpCount} more...` : 'WARNING!'}
+              {jumpCount < 10 ? 'EXIT' : 'WARNING!'}
             </Button>
           </div>
           {/* Error images */}
@@ -247,6 +260,7 @@ export default function GamesPage() {
               </div>
             </div>
           )}
+          </div>
         </div>
       </div>
     )

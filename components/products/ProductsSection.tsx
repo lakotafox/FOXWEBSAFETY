@@ -37,12 +37,24 @@ export default function ProductsSection({
 
   // Get glow color based on category
   const getGlowColor = () => {
-    switch(category) {
-      case 'new': return '220, 38, 38' // red-600
-      case 'battleTested': return '37, 99, 235' // blue-600
-      case 'seating': return '34, 197, 94' // green-600
-      default: return '132, 0, 255' // purple
+    // Map categories to colors
+    if (category.includes('desk') || category.includes('executive') || category.includes('reception')) {
+      return '220, 38, 38' // red-600 for desk-related
     }
+    if (category.includes('chair') || category.includes('seat') || category.includes('stool') || category.includes('sofa') || category.includes('lounge')) {
+      return '34, 197, 94' // green-500 for seating
+    }
+    if (category.includes('cubicle') || category.includes('panel') || category.includes('workstation') || category.includes('privacy')) {
+      return '249, 115, 22' // orange-500 for cubicles
+    }
+    if (category.includes('storage') || category.includes('filing') || category.includes('cabinet') || category.includes('shelf') || category.includes('bookcase') || category.includes('locker') || category.includes('credenza')) {
+      return '59, 130, 246' // blue-500 for storage
+    }
+    if (category.includes('conference') || category.includes('meeting') || category.includes('collaborative') || category.includes('table')) {
+      return '251, 146, 60' // amber-400 for conference
+    }
+    // Default to red
+    return '220, 38, 38'
   }
 
   return (
@@ -65,12 +77,13 @@ export default function ProductsSection({
           {products.map((product, index) => (
             <ParticleCard
               key={product.id}
-              className={`card featured-card card--border-glow ${
-                category === "new"
-                  ? "ring-2 ring-red-500"
-                  : category === "battleTested"
-                    ? "ring-2 ring-blue-500"
-                    : "ring-2 ring-green-500"
+              className={`card featured-card card--border-glow ring-2 ${
+                category.includes('desk') || category.includes('executive') || category.includes('reception') ? "ring-red-500" :
+                category.includes('chair') || category.includes('seat') || category.includes('stool') || category.includes('sofa') || category.includes('lounge') ? "ring-green-500" :
+                category.includes('cubicle') || category.includes('panel') || category.includes('workstation') || category.includes('privacy') ? "ring-orange-500" :
+                category.includes('storage') || category.includes('filing') || category.includes('cabinet') || category.includes('shelf') || category.includes('bookcase') || category.includes('locker') || category.includes('credenza') ? "ring-blue-500" :
+                category.includes('conference') || category.includes('meeting') || category.includes('collaborative') || category.includes('table') ? "ring-amber-400" :
+                "ring-red-500"
               }`}
               style={{
                 backgroundColor: '#060010',

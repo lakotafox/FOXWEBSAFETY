@@ -29,26 +29,6 @@ export default function FloatingCategoryButtons({
       >
         NEW
       </Button>
-      <Button
-        className={`font-black text-sm px-3 py-3 tracking-wide transition-all shadow-lg ${
-          productCategory === "battleTested"
-            ? "bg-blue-600 text-white border-2 border-blue-600"
-            : "bg-slate-700 text-zinc-300 hover:text-white border-2 border-slate-600 hover:bg-slate-600"
-        }`}
-        onClick={() => onCategoryChange("battleTested")}
-      >
-        PRE OWN
-      </Button>
-      <Button
-        className={`font-black text-sm px-3 py-3 tracking-wide transition-all shadow-lg ${
-          productCategory === "seating"
-            ? "bg-green-600 text-white border-2 border-green-600"
-            : "bg-slate-700 text-zinc-300 hover:text-white border-2 border-slate-600 hover:bg-slate-600"
-        }`}
-        onClick={() => onCategoryChange("seating")}
-      >
-        SEAT
-      </Button>
     </div>
   )
 }

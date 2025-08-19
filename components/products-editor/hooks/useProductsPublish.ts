@@ -5,6 +5,8 @@ import { CONSTRUCTION_MESSAGES } from '@/components/products-editor/constants/de
 interface PublishOptions {
   products: any
   cropSettings: any
+  pageName?: string
+  categoryId?: string
   saveProductsPageItems: (products: any) => void
   saveCropSettings: (settings: any) => void
   showSaveMessage: (msg: string, duration?: number) => void
@@ -21,6 +23,8 @@ export function useProductsPublish() {
     const {
       products,
       cropSettings,
+      pageName,
+      categoryId,
       saveProductsPageItems,
       saveCropSettings,
       showSaveMessage,
@@ -37,7 +41,7 @@ export function useProductsPublish() {
       const GITHUB_TOKEN = process.env.NEXT_PUBLIC_GITHUB_TOKEN || 'SET_IN_NETLIFY_ENV'
       const OWNER = 'lakotafox'
       const REPO = 'FOXSITE'
-      const PATH = 'public/products.json'
+      const PATH = categoryId ? `public/products-${categoryId}.json` : 'public/products.json'
       
       // Get current file SHA
       let sha = ''
@@ -74,6 +78,7 @@ export function useProductsPublish() {
       const content = {
         products: convertedProducts,
         productsCrops: cropSettings,
+        pageName: pageName || 'Executive Desks',
         lastUpdated: new Date().toISOString(),
         updatedBy: "Kyle"
       }

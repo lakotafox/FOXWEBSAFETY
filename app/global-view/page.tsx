@@ -25,21 +25,19 @@ export default function GlobalViewPage() {
     fetch('/products.json')
       .then(response => response.json())
       .then(data => {
-        if (data.products) {
+        if (data.products && data.products.executiveDesks) {
           const items: any[] = []
           
-          // Extract all products from all categories with metadata
-          Object.keys(data.products).forEach(category => {
-            data.products[category].forEach((product: Product, index: number) => {
-              items.push({
-                image: product.image || '/placeholder.svg',
-                title: product.title || '',
-                description: product.price || '',
-                link: '', // No link functionality for now
-                category: category,
-                categoryIndex: index,
-                productData: product
-              })
+          // Only extract products from 'executiveDesks' category
+          data.products.executiveDesks.forEach((product: Product, index: number) => {
+            items.push({
+              image: product.image || '/placeholder.svg',
+              title: product.title || '',
+              description: product.price || '',
+              link: '', // No link functionality for now
+              category: 'executiveDesks',
+              categoryIndex: index,
+              productData: product
             })
           })
           

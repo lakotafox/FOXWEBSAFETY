@@ -11,6 +11,7 @@ import HeroSection from "@/components/sections/HeroSection"
 import InteractiveParticles from "@/components/sections/InteractiveParticles"
 import GallerySection from "@/components/sections/GallerySection"
 import FeaturedProducts from "@/components/sections/FeaturedProducts"
+import CatalogSection from "@/components/sections/CatalogSection"
 import AboutSection from "@/components/sections/AboutSection"
 import ContactSection from "@/components/sections/ContactSection"
 import ASCIISection from "@/components/sections/ASCIISection"
@@ -132,29 +133,31 @@ function FoxBuiltWebsiteContent() {
   }, [searchParams])
 
   return (
-    <div className="min-h-screen bg-zinc-100">
+    <div className="min-h-screen bg-slate-800">
       <FloatingActionButtons />
       <Header showAddress={showAddress} setShowAddress={setShowAddress} />
-      <HeroSection />
-      <GallerySection 
-        galleryImages={isMobile ? mobileGalleryImages : galleryImages}
-        galleryCrops={galleryCrops}
-        getImageUrl={getImageUrl}
-      />
-      <FeaturedProducts 
-        featuredProducts={featuredProducts}
-        cropSettings={cropSettings}
-        getImageUrl={getImageUrl}
-        openCarouselData={openCarouselData}
-      />
-      <InteractiveParticles />
-      <AboutSection 
-        showAddress={showAddress}
-        setShowAddress={setShowAddress}
-      />
-      <ContactSection />
-      <ASCIISection />
-      <Footer />
+      <div style={{ marginTop: isMobile ? '80px' : '90px' }}>
+        <GallerySection 
+          galleryImages={isMobile ? mobileGalleryImages : galleryImages}
+          galleryCrops={galleryCrops}
+          getImageUrl={getImageUrl}
+        />
+        <FeaturedProducts 
+          featuredProducts={featuredProducts}
+          cropSettings={cropSettings}
+          getImageUrl={getImageUrl}
+          openCarouselData={openCarouselData}
+        />
+        <CatalogSection />
+        <InteractiveParticles />
+        <AboutSection 
+          showAddress={showAddress}
+          setShowAddress={setShowAddress}
+        />
+        <ContactSection />
+        <ASCIISection />
+        <Footer />
+      </div>
     </div>
   )
 }

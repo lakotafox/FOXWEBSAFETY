@@ -22,18 +22,14 @@ export default function GallerySection({
   }
 
   return (
-    <section id="gallery" className="pt-20 pb-20 mb-8 bg-zinc-100">
-      <div className="container mx-auto px-4">
-        <div className="relative max-w-6xl mx-auto">
-          <RollingGallery
-            images={galleryImages.map(img => getImageUrl(img))}
-            autoplay={true}
-            pauseOnHover={false}
-            onImageClick={handleRollingGalleryClick}
-            className="border-8 border-slate-700 bg-black"
-          />
-        </div>
-      </div>
+    <section id="gallery" className="bg-black">
+      <RollingGallery
+        images={galleryImages.map(img => getImageUrl(img))}
+        autoplay={true}
+        pauseOnHover={false}
+        onImageClick={handleRollingGalleryClick}
+        className="bg-black"
+      />
     </section>
   )
 }

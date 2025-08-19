@@ -8,28 +8,62 @@ import { X } from 'lucide-react'
 import FloatingActionButtons from '@/components/sections/FloatingActionButtons'
 import ProductsSection from '@/components/products/ProductsSection'
 import CategorySelector from '@/components/products/CategorySelector'
-import ShowroomCTA from '@/components/products/ShowroomCTA'
-import ProductsHeader from '@/components/products/ProductsHeader'
+import Header from '@/components/sections/Header'
 import FloatingCategoryButtons from '@/components/products/FloatingCategoryButtons'
 import ContactForm from '@/components/products/ContactForm'
 import ASCIISection from '@/components/sections/ASCIISection'
 import { getPublishedProductsPageItems } from '@/lib/products-page-data'
+import { getCategoryNames } from '@/lib/category-names'
+
+// Fallback category names if not loaded from file
+function getCategoryDefaultName(categoryId: string): string {
+  const defaultNames: Record<string, string> = {
+    'executive-desks': 'Executive Desks',
+    'computer-desks': 'Computer Desks',
+    'standing-desks': 'Standing Desks',
+    'modular-benching': 'Modular Benching Systems',
+    'cubicle-workstations': 'Cubicle Workstations',
+    'panel-systems': 'Panel Systems',
+    'modular-cubicles': 'Modular Cubicles',
+    'privacy-screens': 'Privacy Screens',
+    'task-chairs': 'Task Chairs',
+    'executive-chairs': 'Executive Chairs',
+    'conference-chairs': 'Conference Chairs',
+    'drafting-stools': 'Drafting Stools',
+    'ergonomic-seating': 'Ergonomic Seating',
+    'filing-cabinets': 'Filing Cabinets',
+    'shelving-units': 'Shelving Units',
+    'bookcases': 'Bookcases',
+    'lockers': 'Lockers',
+    'credenzas': 'Credenzas',
+    'conference-tables': 'Conference Tables',
+    'meeting-chairs': 'Meeting Room Chairs',
+    'collaborative-tables': 'Collaborative Tables',
+    'av-carts': 'AV Carts',
+    'reception-desks': 'Reception Desks',
+    'sofas': 'Sofas',
+    'lounge-chairs': 'Lounge Chairs',
+    'coffee-tables': 'Coffee Tables',
+    'side-tables': 'Side Tables'
+  }
+  return defaultNames[categoryId] || 'Products'
+}
 
 function ProductsPageContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const [productCategory, setProductCategory] = useState('new')
+  const categoryParam = searchParams.get('category') || 'executive-desks'
+  const [productCategory, setProductCategory] = useState(categoryParam)
   const [cropSettings, setCropSettings] = useState<{[key: string]: {scale: number, x: number, y: number}}>({})
   const [isScrolled, setIsScrolled] = useState(false)
   const [showFlyingPosters, setShowFlyingPosters] = useState(false)
   const [clickedCategory, setClickedCategory] = useState('')
   const [clickedIndex, setClickedIndex] = useState(0)
   const [showFloatingCategories, setShowFloatingCategories] = useState(false)
-  const [productsByCategory, setProductsByCategory] = useState<any>({
-    new: [],
-    battleTested: [],
-    seating: []
-  })
+  const [productsByCategory, setProductsByCategory] = useState<any>({})
+  const [pageName, setPageName] = useState('')
+  const [showAddress, setShowAddress] = useState(false)
+  const [categoryNames, setCategoryNames] = useState<any>(null)
   
   useEffect(() => {
     // Load crop settings from localStorage
@@ -41,6 +75,13 @@ function ProductsPageContent() {
         console.error('Error loading crop settings:', e)
       }
     }
+    
+    // Load category names
+    const loadCategoryNames = async () => {
+      const names = await getCategoryNames()
+      setCategoryNames(names)
+    }
+    loadCategoryNames()
   }, [])
 
   // Handle scroll effects
@@ -54,14 +95,64 @@ function ProductsPageContent() {
   }, [])
   
   useEffect(() => {
-    // Load products when component mounts
+    // Load products when component mounts or category changes
     const loadProducts = async () => {
-      const data = await getPublishedProductsPageItems()
-      setProductsByCategory(data.products)
-      setCropSettings(data.crops || {})
+      try {
+        // Try to load category-specific products file
+        const response = await fetch(`/products-${categoryParam}.json`, { cache: 'no-store' })
+        if (response.ok) {
+          const data = await response.json()
+          setProductsByCategory(data.products || {})
+          setCropSettings(data.productsCrops || {})
+          if (data.pageName) {
+            setPageName(data.pageName)
+          }
+          return
+        }
+      } catch (e) {
+        console.log(`No products file for ${categoryParam}, trying default`)
+      }
+      
+      // Fallback to main products.json for executive-desks
+      if (categoryParam === 'executive-desks') {
+        const data = await getPublishedProductsPageItems()
+        setProductsByCategory(data.products)
+        setCropSettings(data.crops || {})
+        // Set page name from data or use default
+        setPageName(data.pageName || 'Executive Desks')
+      } else {
+        // No products available for this category yet - use default products
+        const defaultImages = [
+          '/images/showroom-1.jpg',
+          '/images/tanconf.jpg',
+          '/images/reception tan.jpg',
+          '/images/small desk.jpg',
+          '/images/showfacinggarage.jpg',
+          '/images/Showroomwglassboard.jpg',
+          '/images/conference-room.jpg',
+          '/images/desk grey L showroom.jpg',
+          '/images/reception-area.jpg'
+        ]
+        
+        const defaultProducts = {
+          [categoryParam]: Array.from({ length: 9 }, (_, i) => ({
+            id: i + 1,
+            title: `${categoryNames?.subcategories?.[categoryParam] || getCategoryDefaultName(categoryParam)} ${i + 1}`,
+            image: defaultImages[i] || '/images/showroom-1.jpg',
+            description: '',
+            features: ['Premium Quality', 'Professional Grade', 'Warranty Included'],
+            price: ''
+          }))
+        }
+        
+        setProductsByCategory(defaultProducts)
+        setPageName(categoryNames?.subcategories?.[categoryParam] || getCategoryDefaultName(categoryParam))
+      }
     }
     loadProducts()
-    
+  }, [categoryParam])
+  
+  useEffect(() => {
     // Check if we should open carousel (returning from product detail)
     if (searchParams.get('openCarousel') === 'true') {
       const categoryParam = searchParams.get('category')
@@ -83,16 +174,14 @@ function ProductsPageContent() {
   }, [searchParams])
 
 
-  // Get current products based on selected category
-  const currentProducts = productsByCategory[productCategory as keyof typeof productsByCategory] || []
+  // Get current products using kebab-case key directly
+  const currentProducts = productsByCategory[categoryParam] || []
   
   // Get glow color based on category
   const getGlowColor = () => {
     switch(clickedCategory || productCategory) {
-      case 'new': return '220, 38, 38' // red-600
-      case 'battleTested': return '37, 99, 235' // blue-600
-      case 'seating': return '34, 197, 94' // green-600
-      default: return '132, 0, 255' // purple
+      case 'executiveDesks': return '220, 38, 38' // red-600
+      default: return '220, 38, 38' // red-600
     }
   }
   
@@ -120,27 +209,42 @@ function ProductsPageContent() {
       {/* Floating Action Buttons */}
       <FloatingActionButtons />
 
-      {/* Floating Category Buttons - Desktop Only */}
-      <FloatingCategoryButtons 
-        showFloatingCategories={showFloatingCategories}
-        productCategory={productCategory}
-        onCategoryChange={setProductCategory}
-      />
 
-      {/* Header */}
-      <ProductsHeader isScrolled={isScrolled} />
+      {/* Header with full navigation */}
+      <Header showAddress={showAddress} setShowAddress={setShowAddress} />
 
-      {/* Spacer for fixed header */}
-      <div className="h-20"></div>
-
-      {/* Category Selector and Products Section */}
-      <section className="pb-10 bg-slate-800" style={{ paddingTop: '60px' }}>
+      {/* Page Title - with proper spacing from fixed header */}
+      <section className="bg-slate-900 py-8 border-b-4 border-red-600 mt-14 md:mt-[200px]">
         <div className="container mx-auto px-4">
-          <CategorySelector 
-            selectedCategory={productCategory}
-            onCategoryChange={setProductCategory}
-            onFloatingVisibilityChange={setShowFloatingCategories}
-          />
+          <h1 className="text-5xl font-black text-center tracking-tight text-white">
+            <span 
+              className={(() => {
+                if (categoryParam.includes('desk') || categoryParam.includes('executive') || categoryParam.includes('reception')) return 'text-red-600'
+                if (categoryParam.includes('chair') || categoryParam.includes('seat') || categoryParam.includes('stool') || categoryParam.includes('sofa') || categoryParam.includes('lounge')) return 'text-green-500'
+                if (categoryParam.includes('cubicle') || categoryParam.includes('panel') || categoryParam.includes('workstation') || categoryParam.includes('privacy')) return 'text-orange-500'
+                if (categoryParam.includes('storage') || categoryParam.includes('filing') || categoryParam.includes('cabinet') || categoryParam.includes('shelf') || categoryParam.includes('bookcase') || categoryParam.includes('locker') || categoryParam.includes('credenza')) return 'text-blue-500'
+                if (categoryParam.includes('conference') || categoryParam.includes('meeting') || categoryParam.includes('collaborative') || categoryParam.includes('table')) return 'text-amber-400'
+                return 'text-red-600'
+              })()}
+              style={{ color: categoryParam.includes('cubicle') || categoryParam.includes('panel') || categoryParam.includes('workstation') || categoryParam.includes('privacy') ? '#f97316' : undefined }}
+            >
+              {pageName.toUpperCase()}
+            </span>
+          </h1>
+        </div>
+      </section>
+
+      {/* List View button */}
+      <section className="py-8 bg-slate-800">
+        <div className="container mx-auto px-4">
+          <div className="flex justify-center">
+            <button
+              onClick={() => router.push('/list-view')}
+              className="bg-yellow-500 hover:bg-yellow-600 text-black font-black text-sm md:text-base px-6 py-3 tracking-wider transition-all shadow-lg hover:shadow-xl rounded"
+            >
+              LIST VIEW
+            </button>
+          </div>
         </div>
       </section>
       
@@ -152,8 +256,6 @@ function ProductsPageContent() {
         isCarouselOpen={showFlyingPosters}
       />
 
-      {/* Visit Our Showroom CTA */}
-      <ShowroomCTA />
 
       {/* Contact Form */}
       <ContactForm />

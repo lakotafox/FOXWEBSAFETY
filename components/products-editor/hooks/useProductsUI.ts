@@ -14,15 +14,10 @@ export function useProductsUI() {
   
   const messageTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Check if coming from main page editor to show welcome message
+  // Disabled welcome message - no longer needed
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const fromCarrie = sessionStorage.getItem('foxbuilt-authenticated')
-      if (fromCarrie === 'true') {
-        sessionStorage.removeItem('foxbuilt-authenticated')
-        setShowWelcomeMessage(true)
-      }
-    }
+    // Welcome message disabled
+    setShowWelcomeMessage(false)
   }, [])
 
   // Show save message with auto-clear

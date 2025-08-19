@@ -13,12 +13,12 @@
   --icon: none;
   --behind-gradient: none;
   --inner-gradient: none;
-  --sunpillar-1: hsl(2, 100%, 73%);
-  --sunpillar-2: hsl(53, 100%, 69%);
-  --sunpillar-3: hsl(93, 100%, 69%);
-  --sunpillar-4: hsl(176, 100%, 76%);
-  --sunpillar-5: hsl(228, 100%, 74%);
-  --sunpillar-6: hsl(283, 100%, 73%);
+  --sunpillar-1: hsl(0, 0%, 70%);     /* Light Silver */
+  --sunpillar-2: hsl(0, 0%, 80%);     /* Bright Silver */
+  --sunpillar-3: hsl(0, 0%, 60%);     /* Medium Silver */
+  --sunpillar-4: hsl(0, 0%, 75%);     /* Silver */
+  --sunpillar-5: hsl(0, 0%, 65%);     /* Dark Silver */
+  --sunpillar-6: hsl(0, 0%, 85%);     /* Platinum */
   --sunpillar-clr-1: var(--sunpillar-1);
   --sunpillar-clr-2: var(--sunpillar-2);
   --sunpillar-clr-3: var(--sunpillar-3);

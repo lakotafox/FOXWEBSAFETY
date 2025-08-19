@@ -6,7 +6,6 @@ import Image from 'next/image'
 import CroppedImageWithLoader from '@/components/ui/CroppedImageWithLoader'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import ComingSoonModal from '@/components/ui/ComingSoonModal'
 import FlyingPosters from '@/components/ui/FlyingPosters'
 import BaseModal from '@/components/ui/BaseModal'
 import VoidModal from '@/components/ui/VoidModal'
@@ -30,7 +29,6 @@ export default function FeaturedProducts({
 }: FeaturedProductsProps) {
   const router = useRouter()
   const [featuredCategory, setFeaturedCategory] = useState("battleTested")
-  const [showComingSoon, setShowComingSoon] = useState(false)
   const [showFlyingPosters, setShowFlyingPosters] = useState(false)
   const [clickedIndex, setClickedIndex] = useState(0)
   const [activeCardIndex, setActiveCardIndex] = useState<number | null>(null)
@@ -98,14 +96,9 @@ export default function FeaturedProducts({
   return (
     <section id="featured" className="pt-20 pb-8 bg-slate-800">
       <div className="container mx-auto px-4">
-        <ScrollFloat
-          containerClassName="text-5xl font-black text-center text-white mb-4 tracking-tight"
-          animationDuration={2}
-          ease='back.inOut(2)'
-          stagger={0.05}
-        >
+        <h2 className="text-5xl font-black text-center text-white mb-4 tracking-tight">
           OUR FAVORITES
-        </ScrollFloat>
+        </h2>
         
         {/* Pick a category text */}
         <p className="text-center text-zinc-400 text-sm mb-2">Pick a category</p>
@@ -278,19 +271,8 @@ export default function FeaturedProducts({
           ))}
         </MagicBento>
         
-        {/* MORE button */}
-        <div className="flex justify-center mt-8">
-          <Button
-            onClick={() => setShowComingSoon(true)}
-            className="bg-green-600 hover:bg-green-700 text-white font-black text-xl px-12 py-6 tracking-wide border-4 border-green-600 hover:border-green-700 transition-all"
-          >
-            MORE
-          </Button>
-        </div>
       </div>
       
-      {/* Coming Soon Modal */}
-      <ComingSoonModal isOpen={showComingSoon} onClose={() => setShowComingSoon(false)} />
       
       {/* Flying Posters Modal */}
       <VoidModal

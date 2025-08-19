@@ -121,15 +121,24 @@ export function useProductsUpload(showSaveMessage: (msg: string, duration?: numb
   const getImageUrl = (imagePath: string) => {
     if (!imagePath) return "/placeholder.svg"
     
+    // Check for temp previews first
     if (tempPreviews[imagePath]) {
       return tempPreviews[imagePath]
     }
     
+    // For local development and production, just use the path as-is
+    // The images should be served from the public folder
     if (imagePath.startsWith('/images/')) {
-      return `https://raw.githubusercontent.com/lakotafox/FOXSITE/main/public${imagePath}`
+      return imagePath
     }
     
-    return imagePath
+    // Handle full URLs
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+      return imagePath
+    }
+    
+    // Default to treating it as a path from root
+    return imagePath.startsWith('/') ? imagePath : `/${imagePath}`
   }
 
   return {
