@@ -57,7 +57,7 @@ export default function ProductsGrid({
           particleCount={1}
           glowColor={getGlowColor()}
         >
-          {currentProducts.slice(0, 9).map((product) => (
+          {currentProducts && currentProducts.length > 0 ? currentProducts.slice(0, 9).map((product) => (
             <ParticleCard
               key={product.id}
               className="card featured-card card--border-glow editor-card border-4 border-slate-600"
@@ -217,7 +217,7 @@ export default function ProductsGrid({
                 )}
               </div>
             </ParticleCard>
-          ))}
+          )) : null}
         </MagicBento>
       </div>
     </section>

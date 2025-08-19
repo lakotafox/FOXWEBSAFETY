@@ -7,13 +7,13 @@ import VoiceControls from './VoiceControls'
 import TypingIndicator from './TypingIndicator'
 import ProductCard from './ProductCard'
 import { Message } from '@/lib/foxbot/conversation-engine-v2'
-import { sendMessageToGemini } from '@/lib/foxbot/gemini-client'
+import { sendMessageToGemini, GeminiResponse } from '@/lib/foxbot/gemini-client'
 
 export default function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: "Hello! I'm FOXBOT, your FoxBuilt furniture assistant. I can help you find the perfect furniture for your space. What are you looking for today?",
+      text: "Hello, I'm FOXBOT. How can I help?",
       sender: 'bot',
       timestamp: new Date()
     }
@@ -24,6 +24,7 @@ export default function ChatInterface() {
   const [speechEnabled, setSpeechEnabled] = useState(false)
   const [isListening, setIsListening] = useState(false)
   const [ollamaAvailable, setOllamaAvailable] = useState(false)
+  const [lastResponseOffline, setLastResponseOffline] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const recognitionRef = useRef<any>(null)
 
@@ -117,11 +118,26 @@ export default function ChatInterface() {
         speakText(response.response)
       }
 
+      // Check if FOXBOT is offline and show buttons
+      if (response.showOfflineButtons) {
+        setLastResponseOffline(true)
+        setTimeout(() => {
+          const actionMessage: Message = {
+            id: (Date.now() + 2).toString(),
+            text: "Quick Actions:",
+            sender: 'bot',
+            timestamp: new Date()
+          }
+          setMessages(prev => [...prev, actionMessage])
+        }, 500)
+      }
       // Check if response suggests contacting human specialist
-      if (response.response.toLowerCase().includes('877') || 
+      else if (response.response.includes("I'll connect you with Kyle or Cyndee") ||
+          response.response.toLowerCase().includes('877') || 
           response.response.toLowerCase().includes('sales team') ||
           response.response.toLowerCase().includes('human specialist') ||
           response.response.toLowerCase().includes('call or message')) {
+        setLastResponseOffline(false)
         // Add a quick action button in the chat
         setTimeout(() => {
           const actionMessage: Message = {
@@ -132,6 +148,8 @@ export default function ChatInterface() {
           }
           setMessages(prev => [...prev, actionMessage])
         }, 500)
+      } else {
+        setLastResponseOffline(false)
       }
     }, 1000)
   }
@@ -150,8 +168,11 @@ export default function ChatInterface() {
                   // Trigger the contact form or messaging interface
                   const messageButton = document.querySelector('[data-message-button]') as HTMLElement
                   messageButton?.click()
+                } else if (action === 'website') {
+                  window.location.href = '/'
                 }
               }}
+              showWebsiteButton={lastResponseOffline && message.text === "Quick Actions:"}
             />
             {message.products && message.products.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4 ml-0 md:ml-12">

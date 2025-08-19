@@ -18,13 +18,12 @@ export async function POST(request: NextRequest) {
 
     // Check if Gemini API key is configured
     if (!GEMINI_API_KEY || GEMINI_API_KEY === 'your_gemini_api_key_here') {
-      // Fallback to built-in conversation engine
-      const { processMessageV2 } = await import('@/lib/foxbot/conversation-engine-v2')
-      const result = await processMessageV2(message)
+      // Return offline message when no API key
       return NextResponse.json({ 
-        response: result.text,
-        products: result.products,
-        source: 'built-in'
+        response: "FOXBOT has gone offline. Please contact our team or return to the website.",
+        products: [],
+        source: 'offline',
+        showOfflineButtons: true
       })
     }
 
@@ -107,21 +106,12 @@ export async function POST(request: NextRequest) {
         hasKey: !!GEMINI_API_KEY
       })
       
-      // Fallback to built-in engine
-      const { processMessageV2 } = await import('@/lib/foxbot/conversation-engine-v2')
-      const result = await processMessageV2(message)
-      
-      // For server-side product search in fallback
-      let products = result.products || []
-      if (products.length > 0) {
-        products = await searchProductsServer(message)
-        products = products.slice(0, 3)
-      }
-      
+      // Return offline message
       return NextResponse.json({ 
-        response: result.text,
-        products: products,
-        source: 'built-in-fallback'
+        response: "FOXBOT has gone offline. Please contact our team or return to the website.",
+        products: [],
+        source: 'offline',
+        showOfflineButtons: true
       })
     }
 

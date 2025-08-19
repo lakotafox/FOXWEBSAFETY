@@ -245,29 +245,73 @@ export default function CategoryVisibilityEditor() {
     }
     
     try {
+      // Use the same GitHub API approach as products editor
+      const GITHUB_TOKEN = process.env.NEXT_PUBLIC_GITHUB_TOKEN || 'SET_IN_NETLIFY_ENV'
+      const OWNER = 'lakotafox'
+      const REPO = 'FOXSITE'
+      
+      // Helper function to update a file on GitHub
+      const updateGitHubFile = async (path: string, content: any, message: string) => {
+        // Get current file SHA
+        let sha = ''
+        try {
+          const currentFileResponse = await fetch(
+            `https://api.github.com/repos/${OWNER}/${REPO}/contents/public/${path}`,
+            {
+              headers: {
+                'Authorization': `token ${GITHUB_TOKEN}`,
+                'Accept': 'application/vnd.github.v3+json'
+              }
+            }
+          )
+          
+          if (currentFileResponse.ok) {
+            const currentFile = await currentFileResponse.json()
+            sha = currentFile.sha
+          }
+        } catch (e) {
+          console.log(`File ${path} doesn't exist yet, will create`)
+        }
+        
+        // Encode content to base64
+        const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2))))
+        
+        // Update file on GitHub
+        const updateResponse = await fetch(
+          `https://api.github.com/repos/${OWNER}/${REPO}/contents/public/${path}`,
+          {
+            method: 'PUT',
+            headers: {
+              'Authorization': `token ${GITHUB_TOKEN}`,
+              'Accept': 'application/vnd.github.v3+json',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              message,
+              content: contentBase64,
+              sha: sha || undefined
+            })
+          }
+        )
+        
+        return updateResponse.ok
+      }
+      
       // Publish visibility settings
-      const visibilityResponse = await fetch('/api/github', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          path: 'category-visibility.json',
-          content: btoa(JSON.stringify(visibilitySettingsToPublish, null, 2)),
-          message: 'Update category visibility settings'
-        })
-      })
-
+      const visibilitySuccess = await updateGitHubFile(
+        'category-visibility.json',
+        visibilitySettingsToPublish,
+        'Update category visibility settings'
+      )
+      
       // Publish category names
-      const namesResponse = await fetch('/api/github', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          path: 'category-names.json',
-          content: btoa(JSON.stringify(categoryNames, null, 2)),
-          message: 'Update category names'
-        })
-      })
+      const namesSuccess = await updateGitHubFile(
+        'category-names.json',
+        categoryNames,
+        'Update category names'
+      )
 
-      if (visibilityResponse.ok && namesResponse.ok) {
+      if (visibilitySuccess && namesSuccess) {
         setPublishMessage('Settings published successfully!')
         setTimeout(() => {
           setShowPublishLoadingOverlay(false)

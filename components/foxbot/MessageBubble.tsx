@@ -3,10 +3,11 @@ import QuickActions from './QuickActions'
 
 interface MessageBubbleProps {
   message: Message
-  onQuickAction?: (action: 'call' | 'message') => void
+  onQuickAction?: (action: 'call' | 'message' | 'website') => void
+  showWebsiteButton?: boolean
 }
 
-export default function MessageBubble({ message, onQuickAction }: MessageBubbleProps) {
+export default function MessageBubble({ message, onQuickAction, showWebsiteButton = false }: MessageBubbleProps) {
   const isBot = message.sender === 'bot'
   const showQuickActions = isBot && message.text === "Quick Actions:"
 
@@ -30,7 +31,7 @@ export default function MessageBubble({ message, onQuickAction }: MessageBubbleP
             <div>
               <p className="mb-2">Connect with our team:</p>
               {onQuickAction && (
-                <QuickActions onAction={onQuickAction} />
+                <QuickActions onAction={onQuickAction} showWebsiteButton={showWebsiteButton} />
               )}
             </div>
           ) : (

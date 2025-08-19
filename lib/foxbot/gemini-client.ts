@@ -3,7 +3,8 @@ import { Product } from './product-search'
 export interface GeminiResponse {
   response: string
   products?: Product[]
-  source: 'gemini' | 'built-in' | 'built-in-fallback'
+  source: 'gemini' | 'offline'
+  showOfflineButtons?: boolean
 }
 
 export async function sendMessageToGemini(message: string): Promise<GeminiResponse> {
@@ -29,15 +30,13 @@ export async function sendMessageToGemini(message: string): Promise<GeminiRespon
   } catch (error) {
     console.error('Error calling Gemini API:', error)
     
-    // Fallback to built-in engine
-    const { processMessageV2 } = await import('./conversation-engine-v2')
-    const result = await processMessageV2(message)
-    
-    console.log('Using fallback engine')
+    // Return offline message
+    console.log('FOXBOT is offline')
     return {
-      response: result.text,
-      products: result.products,
-      source: 'built-in-fallback'
+      response: "FOXBOT has gone offline. Please contact our team or return to the website.",
+      products: [],
+      source: 'offline',
+      showOfflineButtons: true
     }
   }
 }

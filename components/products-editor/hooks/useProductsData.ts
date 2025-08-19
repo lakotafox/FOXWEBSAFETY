@@ -114,7 +114,8 @@ export function useProductsData(categoryId?: string) {
   }, [categoryId])
 
   // Get current products based on selected category using kebab-case
-  const currentProducts = products[productCategory] || []
+  // Ensure products is an object and the category exists
+  const currentProducts = (products && products[productCategory]) ? products[productCategory] : []
 
   // Update a specific product field
   const updateProduct = (productId: number, field: string, value: any) => {
