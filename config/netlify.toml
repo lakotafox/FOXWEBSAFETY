@@ -12,3 +12,7 @@
 # Enable Netlify Functions
 [functions]
   directory = "netlify/functions"
+  
+# Enable Next.js plugin for proper API route handling
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
