@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Eye, EyeOff, Save, ArrowLeft, Edit2 } from 'lucide-react'
 import LoadingOverlay from '@/components/ui/LoadingOverlay'
-import { waitForClearWindow } from '@/lib/github-utils'
+import { updateGitHubFile } from '@/lib/github-api-client'
 
 interface CategoryVisibility {
   [key: string]: boolean
@@ -327,7 +327,7 @@ export default function CategoryVisibilityEditor() {
 
   const publishToGitHub = async () => {
     setShowPublishLoadingOverlay(true)
-    setPublishMessage('Checking for recent commits...')
+    setPublishMessage('Publishing settings to GitHub...')
     
     // Include all visibility settings
     const visibilitySettingsToPublish = {
@@ -343,16 +343,6 @@ export default function CategoryVisibilityEditor() {
     }
     
     try {
-      // Use the same GitHub API approach as products editor
-      const GITHUB_TOKEN = process.env.NEXT_PUBLIC_GITHUB_TOKEN || 'SET_IN_NETLIFY_ENV'
-      const OWNER = 'lakotafox'
-      const REPO = 'FOXSITE'
-      
-      // Check for recent commits and wait if needed
-      await waitForClearWindow(GITHUB_TOKEN, setPublishMessage)
-      setPublishMessage('Publishing settings to GitHub...')
-      
-      // Only update category-visibility.json (single file, single commit)
       // Store names in the same file to avoid multiple commits
       const allSettings = {
         ...visibilitySettingsToPublish,
@@ -360,53 +350,15 @@ export default function CategoryVisibilityEditor() {
         lastUpdated: new Date().toISOString()
       }
       
-      // Get current file SHA
-      let sha = ''
-      try {
-        const currentResponse = await fetch(
-          `https://api.github.com/repos/${OWNER}/${REPO}/contents/public/category-visibility.json`,
-          {
-            headers: {
-              'Authorization': `token ${GITHUB_TOKEN}`,
-              'Accept': 'application/vnd.github.v3+json'
-            }
-          }
-        )
-        
-        if (currentResponse.ok) {
-          const currentFile = await currentResponse.json()
-          sha = currentFile.sha
-        }
-      } catch (e) {
-        console.log('Visibility file does not exist yet')
-      }
-      
-      // Encode content to base64
-      const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(allSettings, null, 2))))
-      
-      // Update file on GitHub (single commit)
-      const updateResponse = await fetch(
-        `https://api.github.com/repos/${OWNER}/${REPO}/contents/public/category-visibility.json`,
-        {
-          method: 'PUT',
-          headers: {
-            'Authorization': `token ${GITHUB_TOKEN}`,
-            'Accept': 'application/vnd.github.v3+json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            message: `Update category visibility and names - ${new Date().toLocaleString()}`,
-            content: contentBase64,
-            sha: sha || undefined,
-            branch: 'main'
-          })
-        }
+      // Use our API route instead of direct GitHub calls
+      const result = await updateGitHubFile(
+        'category-visibility.json',
+        allSettings,
+        `Update category visibility and names - ${new Date().toLocaleString()}`
       )
       
-      if (!updateResponse.ok) {
-        const errorData = await updateResponse.json()
-        console.error('GitHub API Error:', errorData)
-        throw new Error(errorData.message || 'Failed to publish')
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to publish')
       }
 
       // Success

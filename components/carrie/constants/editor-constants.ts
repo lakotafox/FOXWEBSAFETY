@@ -1,7 +1,7 @@
 export const GITHUB_CONFIG = {
   OWNER: 'lakotafox',
-  REPO: 'FOXSITE',
-  TOKEN: process.env.NEXT_PUBLIC_GITHUB_TOKEN || 'SET_IN_NETLIFY_ENV'
+  REPO: 'FOXSITE'
+  // Token removed - now handled by server-side API route
 }
 
 export const DEFAULT_GALLERY_IMAGES = [

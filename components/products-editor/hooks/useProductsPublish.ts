@@ -1,6 +1,7 @@
 'use client'
 
 import { CONSTRUCTION_MESSAGES } from '@/components/products-editor/constants/default-products'
+import { updateGitHubFile } from '@/lib/github-api-client'
 
 interface PublishOptions {
   products: any
@@ -37,32 +38,7 @@ export function useProductsPublish() {
     try {
       showSaveMessage("🚀 Publishing to live site...", 30000)
       
-      // GitHub API configuration
-      const GITHUB_TOKEN = process.env.NEXT_PUBLIC_GITHUB_TOKEN || 'SET_IN_NETLIFY_ENV'
-      const OWNER = 'lakotafox'
-      const REPO = 'FOXSITE'
-      const PATH = categoryId ? `public/products-${categoryId}.json` : 'public/products.json'
-      
-      // Get current file SHA
-      let sha = ''
-      try {
-        const currentFileResponse = await fetch(
-          `https://api.github.com/repos/${OWNER}/${REPO}/contents/${PATH}`,
-          {
-            headers: {
-              'Authorization': `token ${GITHUB_TOKEN}`,
-              'Accept': 'application/vnd.github.v3+json'
-            }
-          }
-        )
-        
-        if (currentFileResponse.ok) {
-          const currentFile = await currentFileResponse.json()
-          sha = currentFile.sha
-        }
-      } catch (e) {
-        console.error('Error fetching current products.json:', e)
-      }
+      const PATH = categoryId ? `products-${categoryId}.json` : 'products.json'
       
       // Prepare products with crop settings
       const convertedProducts = JSON.parse(JSON.stringify(products))
@@ -83,29 +59,14 @@ export function useProductsPublish() {
         updatedBy: "Kyle"
       }
       
-      // Encode to base64
-      const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2))))
-      
-      // Update file on GitHub
-      const updateResponse = await fetch(
-        `https://api.github.com/repos/${OWNER}/${REPO}/contents/${PATH}`,
-        {
-          method: 'PUT',
-          headers: {
-            'Authorization': `token ${GITHUB_TOKEN}`,
-            'Accept': 'application/vnd.github.v3+json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            message: `Update products via products editor - ${new Date().toLocaleString()}`,
-            content: contentBase64,
-            sha: sha,
-            branch: 'main'
-          })
-        }
+      // Use our API route instead of direct GitHub calls
+      const result = await updateGitHubFile(
+        PATH,
+        content,
+        `Update products via products editor - ${new Date().toLocaleString()}`
       )
       
-      if (updateResponse.ok) {
+      if (result.success) {
         // Save to localStorage as backup
         saveProductsPageItems(convertedProducts)
         saveCropSettings(cropSettings)
@@ -137,8 +98,7 @@ export function useProductsPublish() {
         // Clear temp previews
         setTempPreviews({})
       } else {
-        const error = await updateResponse.json()
-        console.error('GitHub update error:', error)
+        console.error('GitHub update error:', result.error)
         
         // Keep animation playing forever on error
         setShowPublishLoadingOverlay(true)

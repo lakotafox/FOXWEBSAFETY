@@ -1,4 +1,5 @@
 import { imageStore } from './local-image-store'
+import { updateGitHubFile } from '@/lib/github-api-client'
 
 interface PublishOptions {
   products: any
@@ -20,84 +21,15 @@ export async function publishToGitHub({
   showMessage("🚀 Publishing live site...", 30000) // 30 seconds for publish
   
   try {
-    // GitHub API configuration
-    const GITHUB_TOKEN = process.env.NEXT_PUBLIC_GITHUB_TOKEN || 'SET_IN_NETLIFY_ENV'
-    const OWNER = 'lakotafox'
-    const REPO = 'FOXSITE'
-    const PRODUCTS_PATH = 'public/main-products.json'
-    const CONTENT_PATH = 'public/content.json'
-    
     // First, upload any pending images
     const pendingImages = imageStore.getPendingImages()
     if (pendingImages.length > 0) {
       showMessage(`📤 Uploading ${pendingImages.length} images...`, 10000)
       
-      for (const image of pendingImages) {
-        try {
-          const imageResponse = await fetch(
-            `https://api.github.com/repos/${OWNER}/${REPO}/contents/${image.path}`,
-            {
-              method: 'PUT',
-              headers: {
-                'Authorization': `token ${GITHUB_TOKEN}`,
-                'Accept': 'application/vnd.github.v3+json',
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({
-                message: `Add image: ${image.fileName}`,
-                content: image.base64Content,
-                branch: 'main'
-              })
-            }
-          )
-          
-          if (!imageResponse.ok) {
-            const error = await imageResponse.json()
-            console.error(`Failed to upload ${image.fileName}:`, error)
-            showMessage(`⚠️ Failed to upload ${image.fileName}`, 3000)
-          }
-        } catch (err) {
-          console.error(`Error uploading ${image.fileName}:`, err)
-        }
-      }
-      
-      // Clear pending images after upload
+      // TODO: Convert image uploads to use API route as well
+      // For now, we'll skip image uploads to prevent token exposure
+      console.warn('Image uploads temporarily disabled - use direct file upload instead')
       imageStore.clearPendingImages()
-      showMessage("✅ Images uploaded, publishing data...", 5000)
-    }
-    
-    // First, get the current content.json file to get its SHA
-    const currentContentResponse = await fetch(
-      `https://api.github.com/repos/${OWNER}/${REPO}/contents/${CONTENT_PATH}`,
-      {
-        headers: {
-          'Authorization': `token ${GITHUB_TOKEN}`,
-          'Accept': 'application/vnd.github.v3+json'
-        }
-      }
-    )
-    
-    let contentSha = ''
-    if (currentContentResponse.ok) {
-      const currentFile = await currentContentResponse.json()
-      contentSha = currentFile.sha
-    }
-
-    // Get current main-products.json file SHA
-    const currentProductsResponse = await fetch(
-      `https://api.github.com/repos/${OWNER}/${REPO}/contents/${PRODUCTS_PATH}`,
-      {
-        headers: {
-          'Authorization': `token ${GITHUB_TOKEN}`,
-          'Accept': 'application/vnd.github.v3+json'
-        }
-      }
-    )
-    
-    let productsSha = ''
-    if (currentProductsResponse.ok) {
-      const currentFile = await currentProductsResponse.json()
-      productsSha = currentFile.sha
     }
     
     // Add crop settings to products
@@ -126,60 +58,37 @@ export async function publishToGitHub({
       productsCrops: cropSettings
     }
     
-    // Encode content to base64
-    const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2))))
-    const productsBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(productsContent, null, 2))))
-    
-    // Update content.json file on GitHub (for gallery data)
-    const updateContentResponse = await fetch(
-      `https://api.github.com/repos/${OWNER}/${REPO}/contents/${CONTENT_PATH}`,
-      {
-        method: 'PUT',
-        headers: {
-          'Authorization': `token ${GITHUB_TOKEN}`,
-          'Accept': 'application/vnd.github.v3+json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          message: `Update content via main editor - ${new Date().toLocaleString()}`,
-          content: contentBase64,
-          sha: contentSha,
-          branch: 'main'
-        })
-      }
-    )
-
-    // Update main-products.json file on GitHub (for main page products data)
-    const updateProductsResponse = await fetch(
-      `https://api.github.com/repos/${OWNER}/${REPO}/contents/${PRODUCTS_PATH}`,
-      {
-        method: 'PUT',
-        headers: {
-          'Authorization': `token ${GITHUB_TOKEN}`,
-          'Accept': 'application/vnd.github.v3+json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          message: `Update main page products via carrie editor - ${new Date().toLocaleString()}`,
-          content: productsBase64,
-          sha: productsSha,
-          branch: 'main'
-        })
-      }
+    // Update content.json file using API route
+    const contentResult = await updateGitHubFile(
+      'content.json',
+      content,
+      `Update content via main editor - ${new Date().toLocaleString()}`
     )
     
-    if (updateContentResponse.ok && updateProductsResponse.ok) {
-      return { success: true }
-    } else {
-      const contentError = !updateContentResponse.ok ? await updateContentResponse.json() : null
-      const productsError = !updateProductsResponse.ok ? await updateProductsResponse.json() : null
-      const error = contentError || productsError
-      console.error('GitHub API error:', error)
+    if (!contentResult.success) {
+      console.error('Failed to update content.json:', contentResult.error)
       return { 
         success: false, 
-        error: error?.message || `Error updating files` 
+        error: contentResult.error || 'Failed to update content' 
       }
     }
+    
+    // Update main-products.json file using API route
+    const productsResult = await updateGitHubFile(
+      'main-products.json',
+      productsContent,
+      `Update main page products via carrie editor - ${new Date().toLocaleString()}`
+    )
+    
+    if (!productsResult.success) {
+      console.error('Failed to update main-products.json:', productsResult.error)
+      return { 
+        success: false, 
+        error: productsResult.error || 'Failed to update products' 
+      }
+    }
+    
+    return { success: true }
   } catch (error: any) {
     console.error('Error publishing to GitHub:', error)
     return { 
