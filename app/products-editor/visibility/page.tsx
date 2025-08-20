@@ -282,210 +282,77 @@ export default function CategoryVisibilityEditor() {
     }
     
     try {
-      // Use the same GitHub API approach as products editor
+      // Use the same GitHub API approach as products editor - simple file updates
       const GITHUB_TOKEN = process.env.NEXT_PUBLIC_GITHUB_TOKEN || 'SET_IN_NETLIFY_ENV'
       const OWNER = 'lakotafox'
       const REPO = 'FOXSITE'
       
-      // Get both files' SHAs first
-      const visibilityPath = 'public/category-visibility.json'
-      const namesPath = 'public/category-names.json'
-      
-      let visibilitySha = ''
-      let namesSha = ''
-      
-      // Get visibility file SHA
-      try {
-        const visResponse = await fetch(
-          `https://api.github.com/repos/${OWNER}/${REPO}/contents/${visibilityPath}`,
-          {
-            headers: {
-              'Authorization': `token ${GITHUB_TOKEN}`,
-              'Accept': 'application/vnd.github.v3+json'
-            }
-          }
-        )
-        if (visResponse.ok) {
-          const visFile = await visResponse.json()
-          visibilitySha = visFile.sha
-        }
-      } catch (e) {
-        console.log('Visibility file does not exist yet')
-      }
-      
-      // Get names file SHA
-      try {
-        const namesResponse = await fetch(
-          `https://api.github.com/repos/${OWNER}/${REPO}/contents/${namesPath}`,
-          {
-            headers: {
-              'Authorization': `token ${GITHUB_TOKEN}`,
-              'Accept': 'application/vnd.github.v3+json'
-            }
-          }
-        )
-        if (namesResponse.ok) {
-          const namesFile = await namesResponse.json()
-          namesSha = namesFile.sha
-        }
-      } catch (e) {
-        console.log('Names file does not exist yet')
-      }
-      
-      // Update both files in a single commit using the trees API
-      // First create blobs for both files
-      const visibilityBlob = await fetch(
-        `https://api.github.com/repos/${OWNER}/${REPO}/git/blobs`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `token ${GITHUB_TOKEN}`,
-            'Accept': 'application/vnd.github.v3+json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            content: JSON.stringify(visibilitySettingsToPublish, null, 2),
-            encoding: 'utf-8'
-          })
-        }
-      )
-      
-      const namesBlob = await fetch(
-        `https://api.github.com/repos/${OWNER}/${REPO}/git/blobs`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `token ${GITHUB_TOKEN}`,
-            'Accept': 'application/vnd.github.v3+json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            content: JSON.stringify(categoryNames, null, 2),
-            encoding: 'utf-8'
-          })
-        }
-      )
-      
-      if (!visibilityBlob.ok || !namesBlob.ok) {
-        throw new Error('Failed to create blobs')
-      }
-      
-      const visBlobData = await visibilityBlob.json()
-      const namesBlobData = await namesBlob.json()
-      
-      // Get the current commit SHA
-      const refResponse = await fetch(
-        `https://api.github.com/repos/${OWNER}/${REPO}/git/ref/heads/main`,
-        {
-          headers: {
-            'Authorization': `token ${GITHUB_TOKEN}`,
-            'Accept': 'application/vnd.github.v3+json'
-          }
-        }
-      )
-      
-      if (!refResponse.ok) {
-        throw new Error('Failed to get current ref')
-      }
-      
-      const refData = await refResponse.json()
-      const currentCommitSha = refData.object.sha
-      
-      // Get the tree of the current commit
-      const commitResponse = await fetch(
-        `https://api.github.com/repos/${OWNER}/${REPO}/git/commits/${currentCommitSha}`,
-        {
-          headers: {
-            'Authorization': `token ${GITHUB_TOKEN}`,
-            'Accept': 'application/vnd.github.v3+json'
-          }
-        }
-      )
-      
-      if (!commitResponse.ok) {
-        throw new Error('Failed to get current commit')
-      }
-      
-      const commitData = await commitResponse.json()
-      const baseTreeSha = commitData.tree.sha
-      
-      // Create a new tree with both files
-      const treeResponse = await fetch(
-        `https://api.github.com/repos/${OWNER}/${REPO}/git/trees`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `token ${GITHUB_TOKEN}`,
-            'Accept': 'application/vnd.github.v3+json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            base_tree: baseTreeSha,
-            tree: [
-              {
-                path: visibilityPath,
-                mode: '100644',
-                type: 'blob',
-                sha: visBlobData.sha
-              },
-              {
-                path: namesPath,
-                mode: '100644',
-                type: 'blob',
-                sha: namesBlobData.sha
+      // Helper function to update a file on GitHub
+      const updateGitHubFile = async (path: string, content: any, message: string) => {
+        // Get current file SHA
+        let sha = ''
+        try {
+          const currentFileResponse = await fetch(
+            `https://api.github.com/repos/${OWNER}/${REPO}/contents/public/${path}`,
+            {
+              headers: {
+                'Authorization': `token ${GITHUB_TOKEN}`,
+                'Accept': 'application/vnd.github.v3+json'
               }
-            ]
-          })
+            }
+          )
+          
+          if (currentFileResponse.ok) {
+            const currentFile = await currentFileResponse.json()
+            sha = currentFile.sha
+          }
+        } catch (e) {
+          console.log(`File ${path} doesn't exist yet, will create`)
         }
-      )
-      
-      if (!treeResponse.ok) {
-        throw new Error('Failed to create tree')
+        
+        // Encode content to base64
+        const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2))))
+        
+        // Update file on GitHub
+        const updateResponse = await fetch(
+          `https://api.github.com/repos/${OWNER}/${REPO}/contents/public/${path}`,
+          {
+            method: 'PUT',
+            headers: {
+              'Authorization': `token ${GITHUB_TOKEN}`,
+              'Accept': 'application/vnd.github.v3+json',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              message,
+              content: contentBase64,
+              sha: sha || undefined
+            })
+          }
+        )
+        
+        return updateResponse.ok
       }
       
-      const treeData = await treeResponse.json()
-      
-      // Create a new commit
-      const newCommitResponse = await fetch(
-        `https://api.github.com/repos/${OWNER}/${REPO}/git/commits`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `token ${GITHUB_TOKEN}`,
-            'Accept': 'application/vnd.github.v3+json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            message: `Update category visibility and names - ${new Date().toLocaleString()}`,
-            tree: treeData.sha,
-            parents: [currentCommitSha]
-          })
-        }
+      // Publish visibility settings first
+      const visibilitySuccess = await updateGitHubFile(
+        'category-visibility.json',
+        visibilitySettingsToPublish,
+        'Update category visibility settings'
       )
       
-      if (!newCommitResponse.ok) {
-        throw new Error('Failed to create commit')
+      if (!visibilitySuccess) {
+        throw new Error('Failed to publish visibility settings')
       }
       
-      const newCommitData = await newCommitResponse.json()
-      
-      // Update the reference to point to the new commit
-      const updateRefResponse = await fetch(
-        `https://api.github.com/repos/${OWNER}/${REPO}/git/refs/heads/main`,
-        {
-          method: 'PATCH',
-          headers: {
-            'Authorization': `token ${GITHUB_TOKEN}`,
-            'Accept': 'application/vnd.github.v3+json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            sha: newCommitData.sha
-          })
-        }
+      // Then publish category names (separate commit, but quick succession)
+      const namesSuccess = await updateGitHubFile(
+        'category-names.json',
+        categoryNames,
+        'Update category names'
       )
       
-      const success = updateRefResponse.ok
+      const success = visibilitySuccess && namesSuccess
 
       if (success) {
         // Clear localStorage after successful publish
