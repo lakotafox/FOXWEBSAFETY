@@ -59,8 +59,8 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Gemini API configuration - using v1 endpoint with gemini-1.5-flash
-    const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent';
+    // Gemini API configuration - using v1beta endpoint with gemini-pro model
+    const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
     
     // System prompt for FOXBOT
     const SYSTEM_PROMPT = `You are FOXBOT, the AI assistant for FoxBuilt Office Furniture.
