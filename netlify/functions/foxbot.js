@@ -210,29 +210,52 @@ User: "show me the catalog" → "The catalog book is on the homepage."`;
       detectedCategory = 'all';
     }
 
-    // Try to load and search products - simplified for testing
+    // Load real products from products.json structure
     let products = [];
     
-    // For now, return mock products based on category
+    // Sample real products from your actual products.json
+    const allProducts = {
+      "chairs": [
+        { id: 2, title: "Ergonomic Task Chair", image: "/images/product-2-1754595166035.jpg", description: "", features: ["Lumbar support", "Adjustable arms", "Breathable mesh"], category: "chairs" },
+        { id: 11, title: "Mesh Back Task Chair", image: "/images/mesh backed confy chair.jpg", description: "", features: ["Ergonomic design", "Adjustable height", "360° swivel"], category: "chairs" },
+        { id: 12, title: "Executive Leather Chair", image: "/images/DSCN1126 (1).jpg", description: "Premium leather executive seating", features: ["Premium leather", "High back design", "Padded armrests"], category: "chairs" }
+      ],
+      "desks": [
+        { id: 1, title: "Executive Desk Series", image: "/images/desk grey L showroom.jpg", description: "", features: ["Solid wood construction", "Cable management", "5-year warranty"], category: "desks" },
+        { id: 4, title: "Premium Desk Collection", image: "/images/light grey and walnut desks2.jpg", description: "", features: ["Modern design", "Spacious surface", "Built-in storage"], category: "desks" },
+        { id: 9, title: "L-Shaped Executive Desk", image: "/images/u shaped dark cherry.jpg", description: "", features: ["U-shaped design", "Dark cherry finish", "Executive style"], category: "desks" }
+      ],
+      "storage": [
+        { id: 5, title: "File Cabinet", image: "/images/greystorage.jpg", description: "", features: ["Lockable drawers", "Heavy duty", "Letter/Legal size"], category: "storage" },
+        { id: 6, title: "Storage Cabinet", image: "/images/grey storage corner thingy.jpg", description: "", features: ["Corner design", "Multiple shelves", "Grey finish"], category: "storage" },
+        { id: 7, title: "Mobile Pedestal", image: "/images/mobile pedestal grey.jpg", description: "", features: ["Mobile design", "3 drawers", "Lock included"], category: "storage" }
+      ],
+      "tables": [
+        { id: 3, title: "Conference Table", image: "/images/tanconf.jpg", description: "", features: ["Seats 8-12", "Power integration", "Premium finishes"], category: "tables" },
+        { id: 13, title: "Meeting Table", image: "/images/oval confernec tabel.jpg", description: "", features: ["Oval design", "Seats 6-8", "Cable management"], category: "tables" }
+      ]
+    };
+    
     if (detectedCategory === 'chairs') {
-      products = [
-        { id: 'task-chair-1', title: 'Ergonomic Task Chair', category: 'task-chairs', description: 'Comfortable office chair with lumbar support' },
-        { id: 'exec-chair-1', title: 'Executive Leather Chair', category: 'executive-chairs', description: 'Premium leather executive seating' },
-        { id: 'conf-chair-1', title: 'Conference Room Chair', category: 'conference-chairs', description: 'Sleek meeting room seating' }
-      ];
+      products = allProducts.chairs.slice(0, 3);
     } else if (detectedCategory === 'desks') {
-      products = [
-        { id: 'exec-desk-1', title: 'L-Shaped Executive Desk', category: 'executive-desks', description: 'Spacious L-shaped desk with storage' },
-        { id: 'stand-desk-1', title: 'Height Adjustable Desk', category: 'standing-desks', description: 'Electric sit-stand desk' },
-        { id: 'comp-desk-1', title: 'Computer Workstation', category: 'computer-desks', description: 'Compact computer desk' }
-      ];
+      products = allProducts.desks.slice(0, 3);
+    } else if (detectedCategory === 'storage') {
+      products = allProducts.storage.slice(0, 3);
+    } else if (detectedCategory === 'tables' || detectedCategory === 'conference') {
+      products = allProducts.tables.slice(0, 2);
     } else if (detectedCategory === 'all' || isShowRequest) {
+      // Show mix of products
       products = [
-        { id: 'task-chair-1', title: 'Task Chair', category: 'chairs', description: 'Ergonomic office seating' },
-        { id: 'exec-desk-1', title: 'Executive Desk', category: 'desks', description: 'Premium office desk' },
-        { id: 'file-cab-1', title: 'Filing Cabinet', category: 'storage', description: '4-drawer filing solution' }
-      ];
+        allProducts.chairs[0],
+        allProducts.desks[0],
+        allProducts.storage[0],
+        allProducts.tables[0]
+      ].filter(p => p);
     }
+    
+    // Ensure products is always an array
+    products = products || [];
 
     // Call Gemini API
     const geminiResponse = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
