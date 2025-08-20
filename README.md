@@ -1,4 +1,4 @@
-# FoxBuilt Office Furniture Website
+# FoxBuilt Office Furniture Website.
 
 ## About the Company
 FoxBuilt is an American office furniture company established in 1999 in Pleasant Grove, Utah. For over 25 years, we've been providing quality workspace solutions built tough, built right, and built to last.
