@@ -131,12 +131,28 @@ export default function ChatInterface() {
           setMessages(prev => [...prev, actionMessage])
         }, 500)
       }
+      // Check for new button flags from FOXBOT
+      else if (response.showContactButtons || response.showCatalogButton) {
+        setLastResponseOffline(false)
+        // Add quick action buttons
+        setTimeout(() => {
+          const actionMessage: Message = {
+            id: (Date.now() + 2).toString(),
+            text: "Quick Actions:",
+            sender: 'bot',
+            timestamp: new Date()
+          }
+          setMessages(prev => [...prev, actionMessage])
+        }, 500)
+      }
       // Check if response suggests contacting human specialist
       else if (response.response.includes("I'll connect you with Kyle or Cyndee") ||
           response.response.toLowerCase().includes('877') || 
           response.response.toLowerCase().includes('sales team') ||
           response.response.toLowerCase().includes('human specialist') ||
-          response.response.toLowerCase().includes('call or message')) {
+          response.response.toLowerCase().includes('call or message') ||
+          response.response.toLowerCase().includes('contact buttons below') ||
+          response.response.toLowerCase().includes('reach our team')) {
         setLastResponseOffline(false)
         // Add a quick action button in the chat
         setTimeout(() => {
