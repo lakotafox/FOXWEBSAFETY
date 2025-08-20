@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { searchProductsServer } from '@/lib/foxbot/product-search-server'
 import { getFoxbotSystemPrompt } from '@/lib/foxbot/foxbuilt-knowledge'
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent'
 
 // Get comprehensive system prompt from knowledge base
@@ -15,6 +14,9 @@ export async function POST(request: NextRequest) {
     if (!message) {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 })
     }
+
+    // Get API key at runtime
+    const GEMINI_API_KEY = process.env.GEMINI_API_KEY
 
     // Check if Gemini API key is configured
     if (!GEMINI_API_KEY || GEMINI_API_KEY === 'your_gemini_api_key_here') {
