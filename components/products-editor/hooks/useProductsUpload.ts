@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { updateGitHubFile } from '@/lib/github-api-client'
 
 interface UploadQueueItem {
   productId: number
@@ -15,7 +16,7 @@ export function useProductsUpload(showSaveMessage: (msg: string, duration?: numb
   const [loadingStartTime, setLoadingStartTime] = useState<number | null>(null)
   const [tempPreviews, setTempPreviews] = useState<{[key: string]: string}>({})
 
-  // Process image upload to GitHub
+  // Process image upload using API route
   const processImageUpload = async (productId: number, file: File, fileName: string) => {
     setActiveUploads(count => count + 1)
     showSaveMessage("📤 Uploading image...")
@@ -27,11 +28,6 @@ export function useProductsUpload(showSaveMessage: (msg: string, duration?: numb
     }, 30000)
     
     try {
-      const GITHUB_TOKEN = process.env.NEXT_PUBLIC_GITHUB_TOKEN || 'SET_IN_NETLIFY_ENV'
-      const OWNER = 'lakotafox'
-      const REPO = 'FOXSITE'
-      const PATH = `public/images/${fileName}`
-      
       // Convert file to base64
       const reader = new FileReader()
       reader.readAsDataURL(file)
@@ -40,31 +36,19 @@ export function useProductsUpload(showSaveMessage: (msg: string, duration?: numb
         const base64Data = reader.result as string
         const base64Content = base64Data.split(',')[1]
         
-        // Upload to GitHub
-        const response = await fetch(
-          `https://api.github.com/repos/${OWNER}/${REPO}/contents/${PATH}`,
-          {
-            method: 'PUT',
-            headers: {
-              'Authorization': `token ${GITHUB_TOKEN}`,
-              'Accept': 'application/vnd.github.v3+json',
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              message: `Upload product image ${fileName}`,
-              content: base64Content,
-              branch: 'main'
-            })
-          }
+        // Upload using API route
+        const result = await updateGitHubFile(
+          `images/${fileName}`,
+          base64Content,
+          `Upload product image ${fileName}`
         )
         
         clearTimeout(uploadTimeout)
         
-        if (response.ok) {
+        if (result.success) {
           showSaveMessage("✅ Image uploaded!", 3000)
         } else {
-          const errorData = await response.json()
-          console.error('Upload failed:', errorData)
+          console.error('Upload failed:', result.error)
           showSaveMessage("❌ Upload failed", 5000)
         }
         
@@ -99,60 +83,65 @@ export function useProductsUpload(showSaveMessage: (msg: string, duration?: numb
     const shouldShowOverlay = activeUploads > 0 || uploadQueue.length > 0
     
     if (shouldShowOverlay && !showLoadingOverlay) {
+      // Start showing overlay
       setShowLoadingOverlay(true)
       setLoadingStartTime(Date.now())
     } else if (!shouldShowOverlay && showLoadingOverlay && loadingStartTime) {
+      // Check if 4 seconds have passed
       const elapsed = Date.now() - loadingStartTime
       const remaining = 4000 - elapsed
       
       if (remaining > 0) {
+        // Wait for remaining time
         setTimeout(() => {
           setShowLoadingOverlay(false)
           setLoadingStartTime(null)
         }, remaining)
       } else {
+        // 4 seconds have passed, hide immediately
         setShowLoadingOverlay(false)
         setLoadingStartTime(null)
       }
     }
   }, [activeUploads, uploadQueue.length, showLoadingOverlay, loadingStartTime])
 
-  // Image URL helper function
-  const getImageUrl = (imagePath: string) => {
-    if (!imagePath) return "/placeholder.svg"
+  // Add image to upload queue
+  const addToUploadQueue = (productId: number, file: File) => {
+    // Generate unique filename with timestamp
+    const timestamp = Date.now()
+    const fileExt = file.name.split('.').pop()
+    const fileName = `product-${productId}-${timestamp}.${fileExt}`
     
-    // Check for temp previews first
+    // Create temporary preview immediately
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      setTempPreviews(prev => ({
+        ...prev,
+        [`/images/${fileName}`]: e.target?.result as string
+      }))
+    }
+    reader.readAsDataURL(file)
+    
+    setUploadQueue(prev => [...prev, { productId, file, fileName }])
+    
+    return `/images/${fileName}`
+  }
+
+  const getImageUrl = (imagePath: string) => {
+    // Check if we have a temporary preview for this image
     if (tempPreviews[imagePath]) {
       return tempPreviews[imagePath]
     }
-    
-    // For local development and production, just use the path as-is
     // The images should be served from the public folder
-    if (imagePath.startsWith('/images/')) {
-      return imagePath
-    }
-    
-    // Handle full URLs
-    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-      return imagePath
-    }
-    
-    // Default to treating it as a path from root
-    return imagePath.startsWith('/') ? imagePath : `/${imagePath}`
+    return imagePath
   }
 
   return {
     uploadQueue,
-    setUploadQueue,
     activeUploads,
-    setActiveUploads,
     showLoadingOverlay,
-    setShowLoadingOverlay,
-    loadingStartTime,
-    setLoadingStartTime,
     tempPreviews,
-    setTempPreviews,
-    processImageUpload,
+    addToUploadQueue,
     getImageUrl
   }
 }
