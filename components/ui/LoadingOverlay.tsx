@@ -9,6 +9,10 @@ interface LoadingOverlayProps {
   onPlayGame?: () => void
 }
 
+// Create a singleton audio instance that persists
+let globalAudioRef: HTMLAudioElement | null = null
+let isMusicPlaying = false
+
 export default function LoadingOverlay({ 
   show, 
   type = 'default', 
@@ -16,9 +20,17 @@ export default function LoadingOverlay({
   onPlayGame 
 }: LoadingOverlayProps) {
   const [canPlayVideo, setCanPlayVideo] = useState(true)
+  const [showMusicButton, setShowMusicButton] = useState(false)
+  const [showMusicCredit, setShowMusicCredit] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
+  const creditTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   
   useEffect(() => {
+    // Check if music is already playing on mount
+    if (isMusicPlaying) {
+      setShowMusicButton(true)
+    }
+    
     if (show && videoRef.current) {
       // Try to play the video to detect if autoplay is blocked
       videoRef.current.play()
@@ -30,13 +42,87 @@ export default function LoadingOverlay({
           setCanPlayVideo(false)
         })
     }
-  }, [show])
+    
+    // Play music for publish animation
+    if (show && type === 'publish') {
+      if (!globalAudioRef) {
+        globalAudioRef = new Audio('/LOADING MUSIC.mp3')
+        globalAudioRef.loop = true
+      }
+      
+      if (!isMusicPlaying) {
+        globalAudioRef.play().catch(() => {
+          console.log('Audio autoplay blocked')
+        })
+        isMusicPlaying = true
+        setShowMusicButton(true)
+        
+        // Show music credit with fade in/out
+        setShowMusicCredit(true)
+        
+        // Clear any existing timeout
+        if (creditTimeoutRef.current) {
+          clearTimeout(creditTimeoutRef.current)
+        }
+        
+        // Fade out after 5 seconds
+        creditTimeoutRef.current = setTimeout(() => {
+          setShowMusicCredit(false)
+        }, 5000)
+      }
+    }
+    
+    // Cleanup timeout on unmount
+    return () => {
+      if (creditTimeoutRef.current) {
+        clearTimeout(creditTimeoutRef.current)
+      }
+    }
+  }, [show, type])
+  
+  const stopMusic = () => {
+    if (globalAudioRef) {
+      globalAudioRef.pause()
+      globalAudioRef.currentTime = 0
+      isMusicPlaying = false
+      setShowMusicButton(false)
+    }
+  }
+  
+  // Show music button even when overlay is closed if music is playing
+  if (!show && showMusicButton) {
+    return (
+      <button
+        onClick={stopMusic}
+        className="fixed bottom-8 right-8 z-[100] bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3 rounded-full shadow-lg transition-all hover:scale-110 flex items-center gap-2"
+        title="Stop Music"
+      >
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+        </svg>
+        Stop Music
+      </button>
+    )
+  }
   
   if (!show) return null
 
   if (type === 'publish') {
     return (
       <div className="fixed inset-0 bg-black/95 z-[100] flex flex-col items-center justify-center pointer-events-auto" style={{ pointerEvents: 'all' }}>
+        {/* Music credit in bottom right */}
+        <div 
+          className={`fixed bottom-8 right-8 text-white text-sm transition-opacity duration-[2000ms] ${
+            showMusicCredit ? 'opacity-100' : 'opacity-0'
+          }`}
+          style={{ pointerEvents: 'none' }}
+        >
+          <div className="text-right">
+            <div className="font-bold">♪ Mind Yourself</div>
+            <div className="text-xs opacity-75">Brotheration Records • 2016</div>
+          </div>
+        </div>
+        
         {canPlayVideo ? (
           <video 
             ref={videoRef}

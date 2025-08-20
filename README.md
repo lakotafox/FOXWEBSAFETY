@@ -36,6 +36,9 @@ Built with modern web technologies:
 ## Support
 For website issues or updates, contact the development team. The admin panel includes built-in help documentation accessible via the question mark icon.
 
+## Credits
+**Loading Music**: "Mind Yourself" by Brotheration Records (2016)
+
 ## Project File Structure (After Refactoring)
 
 ```

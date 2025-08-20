@@ -306,6 +306,25 @@ export default function CategoryVisibilityEditor() {
     setTempValue('')
   }
 
+  // Construction messages for fox animation
+  const CONSTRUCTION_MESSAGES = [
+    "Counting kickplates...",
+    "This truck is diesel right?",
+    "Leveling...",
+    "Measuring...",
+    "Straightening spines...",
+    "Leveling again...",
+    "Adding cantilevers...",
+    "Smacking topcaps...",
+    "Switching bits...",
+    "Cleaning tiles...",
+    "Loading the truck...",
+    "Unloading the truck...",
+    "Checking measurements twice...",
+    "Torquing bolts...",
+    "Aligning panels..."
+  ]
+
   const publishToGitHub = async () => {
     setShowPublishLoadingOverlay(true)
     setPublishMessage('Checking for recent commits...')
@@ -395,17 +414,27 @@ export default function CategoryVisibilityEditor() {
       localStorage.removeItem('foxbuilt-category-visibility')
       localStorage.removeItem('foxbuilt-category-names')
       
-      setPublishMessage('✅ Settings published successfully!')
       setSaveMessage('✅ Published to live site!')
       
-      // Wait to ensure GitHub processes the commit
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
+      // Wait 2 seconds then start rotating construction messages
       setTimeout(() => {
-        setShowPublishLoadingOverlay(false)
-        setPublishMessage('')
-        setSaveMessage('')
-      }, 3000)
+        // Start rotating messages
+        let messageIndex = 0
+        setPublishMessage(CONSTRUCTION_MESSAGES[0])
+        
+        const messageInterval = setInterval(() => {
+          messageIndex = (messageIndex + 1) % CONSTRUCTION_MESSAGES.length
+          setPublishMessage(CONSTRUCTION_MESSAGES[messageIndex])
+        }, 4000) // Change message every 4 seconds
+        
+        // Hide overlay after 60 seconds (same as other editors)
+        setTimeout(() => {
+          clearInterval(messageInterval)
+          setShowPublishLoadingOverlay(false)
+          setPublishMessage("")
+          setSaveMessage('')
+        }, 60000) // 1 minute
+      }, 2000)
     } catch (error) {
       setPublishMessage('Failed to publish. Please try again.')
       setTimeout(() => {
