@@ -42,16 +42,16 @@ exports.handler = async (event, context) => {
     // Get API key from environment
     const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
     
-    console.log('API Key check:', GEMINI_API_KEY ? 'Found' : 'Missing');
+    console.log('API Key check:', GEMINI_API_KEY ? `Found (length: ${GEMINI_API_KEY.length})` : 'Missing');
     
     // Check if API key is configured
-    if (!GEMINI_API_KEY || GEMINI_API_KEY === 'your_gemini_api_key_here') {
+    if (!GEMINI_API_KEY || GEMINI_API_KEY === 'your_gemini_api_key_here' || GEMINI_API_KEY.trim() === '') {
       console.error('GEMINI_API_KEY not configured or invalid');
       return {
         statusCode: 200,
         headers,
         body: JSON.stringify({
-          response: "FOXBOT has gone offline. Please contact our team or return to the website.",
+          response: "FOXBOT cannot find API credentials. Please check Netlify environment variables.",
           products: [],
           source: 'offline',
           showOfflineButtons: true
@@ -59,8 +59,8 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Gemini API configuration - using gemini-pro model
-    const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
+    // Gemini API configuration - using v1 endpoint with gemini-1.5-flash
+    const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent';
     
     // System prompt for FOXBOT
     const SYSTEM_PROMPT = `You are FOXBOT, the AI assistant for FoxBuilt Office Furniture.
@@ -161,14 +161,28 @@ When answering:
   } catch (error) {
     console.error('Error in FOXBOT function:', error);
     
+    // Check for specific error types
+    let errorMessage = `FOXBOT error: ${error.message || 'Unknown error occurred'}`;
+    
+    if (error.message && error.message.includes('429')) {
+      errorMessage = "FOXBOT is temporarily unavailable due to high demand. Please try again in a moment.";
+    } else if (error.message && error.message.includes('403')) {
+      errorMessage = "FOXBOT API key error (403). Check if the API key is valid.";
+    } else if (error.message && error.message.includes('401')) {
+      errorMessage = "FOXBOT authentication failed (401). Check API key in Netlify.";
+    } else if (error.message && error.message.includes('400')) {
+      errorMessage = "FOXBOT request error (400). Invalid API request format.";
+    }
+    
     return {
       statusCode: 200,
       headers,
       body: JSON.stringify({
-        response: "FOXBOT has gone offline. Please contact our team or return to the website.",
+        response: errorMessage,
         products: [],
         source: 'offline',
-        showOfflineButtons: true
+        showOfflineButtons: true,
+        debug: process.env.NODE_ENV === 'development' ? error.message : undefined
       })
     };
   }
