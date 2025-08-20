@@ -8,6 +8,7 @@ import CroppedImageWithLoader from '@/components/ui/CroppedImageWithLoader'
 import ProductCard from './ProductCard'
 import ProductEditor from './ProductEditor'
 import CropControls from './CropControls'
+import { defaultMainProducts } from '@/lib/main-products-data'
 
 interface Product {
   id: number
@@ -48,6 +49,9 @@ export default function FeaturedProducts({
   getImageUrl
 }: FeaturedProductsProps) {
   const [showComingSoon, setShowComingSoon] = useState(false)
+  
+  // Use default products if the category is missing
+  const categoryProducts = featuredProducts[featuredCategory] || defaultMainProducts[featuredCategory] || []
   
   return (
     <section className="py-20 bg-slate-800">
@@ -108,7 +112,7 @@ export default function FeaturedProducts({
               "34, 197, 94"
             }
           >
-            {featuredProducts[featuredCategory].slice(0, 3).map((product) => (
+            {categoryProducts.length > 0 ? categoryProducts.slice(0, 3).map((product) => (
               <ParticleCard
                 key={product.id}
                 className={`card featured-card card--border-glow ${
@@ -159,11 +163,11 @@ export default function FeaturedProducts({
                   />
                 </div>
               </ParticleCard>
-            ))}
+            )) : null}
           </MagicBento>
         ) : (
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {featuredProducts[featuredCategory].slice(0, 3).map((product) => (
+            {categoryProducts.length > 0 ? categoryProducts.slice(0, 3).map((product) => (
               <ProductCard
                 key={product.id}
                 product={product}
@@ -171,7 +175,7 @@ export default function FeaturedProducts({
                 cropSettings={cropSettings}
                 getImageUrl={getImageUrl}
               />
-            ))}
+            )) : null}
           </div>
         )}
         

@@ -7,7 +7,12 @@
         "image": "/images/desk grey L showroom.jpg",
         "description": "",
         "features": ["Solid wood construction", "Cable management", "5-year warranty"],
-        "price": ""
+        "price": "",
+        "imageCrop": {
+          "scale": 3.045213915504014,
+          "x": 44,
+          "y": 28
+        }
       },
       {
         "id": 2,
@@ -15,7 +20,12 @@
         "image": "/images/reception-area.jpg",
         "description": "",
         "features": ["Lumbar support", "Adjustable arms", "Breathable mesh"],
-        "price": ""
+        "price": "",
+        "imageCrop": {
+          "scale": 1.5,
+          "x": 50,
+          "y": 45
+        }
       },
       {
         "id": 3,
@@ -33,7 +43,12 @@
         "image": "/images/showroom-2.jpg",
         "description": "",
         "features": ["Inspected & certified", "Like-new condition", "50% off retail"],
-        "price": ""
+        "price": "",
+        "imageCrop": {
+          "scale": 1.2,
+          "x": 50,
+          "y": 50
+        }
       },
       {
         "id": 11,
@@ -41,7 +56,12 @@
         "image": "/images/desk grey L showroom.jpg",
         "description": "",
         "features": ["Table & 8 chairs", "Professionally cleaned", "1-year warranty"],
-        "price": ""
+        "price": "",
+        "imageCrop": {
+          "scale": 3.045213915504014,
+          "x": 44,
+          "y": 28
+        }
       },
       {
         "id": 12,
@@ -49,7 +69,12 @@
         "image": "/images/reception-area.jpg",
         "description": "",
         "features": ["Fully functional", "New casters", "Bulk discounts"],
-        "price": ""
+        "price": "",
+        "imageCrop": {
+          "scale": 1.5,
+          "x": 50,
+          "y": 45
+        }
       }
     ],
     "seating": [
@@ -59,7 +84,12 @@
         "image": "/images/showfacinggarage.jpg",
         "description": "",
         "features": ["Premium leather", "Memory foam", "Lifetime frame warranty"],
-        "price": ""
+        "price": "",
+        "imageCrop": {
+          "scale": 1.3,
+          "x": 55,
+          "y": 50
+        }
       },
       {
         "id": 20,
@@ -67,7 +97,12 @@
         "image": "/images/desk grey L showroom.jpg",
         "description": "",
         "features": ["3D armrests", "Synchro-tilt", "Weight-activated"],
-        "price": ""
+        "price": "",
+        "imageCrop": {
+          "scale": 3.045213915504014,
+          "x": 44,
+          "y": 28
+        }
       },
       {
         "id": 21,
@@ -75,9 +110,35 @@
         "image": "/images/reception-area.jpg",
         "description": "",
         "features": ["Set of 6", "Matching design", "Commercial grade"],
-        "price": ""
+        "price": "",
+        "imageCrop": {
+          "scale": 1.5,
+          "x": 50,
+          "y": 45
+        }
       }
     ]
   },
-  "crops": {}
+  "productsCrops": {
+    "/images/desk grey L showroom.jpg": {
+      "scale": 3.045213915504014,
+      "x": 44,
+      "y": 28
+    },
+    "/images/reception-area.jpg": {
+      "scale": 1.5,
+      "x": 50,
+      "y": 45
+    },
+    "/images/showroom-2.jpg": {
+      "scale": 1.2,
+      "x": 50,
+      "y": 50
+    },
+    "/images/showfacinggarage.jpg": {
+      "scale": 1.3,
+      "x": 55,
+      "y": 50
+    }
+  }
 }

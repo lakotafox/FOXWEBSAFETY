@@ -221,8 +221,8 @@ export const useCarrieEditor = () => {
       }
     }
     
-    // First try to load from products.json (the main source of truth)
-    fetch('/products.json')
+    // First try to load from main-products.json (where this editor publishes to)
+    fetch('/main-products.json')
       .then(res => res.json())
       .then(data => {
         if (data.products) {

@@ -135,7 +135,7 @@ export default function FeaturedProducts({
           glowColor={getGlowColor()}
           disableAnimations={showFlyingPosters}  // Disable all animations when carousel is open
         >
-          {featuredProducts[featuredCategory] && featuredProducts[featuredCategory].slice(0, 3).map((product: any, index: number) => (
+          {featuredProducts[featuredCategory] && featuredProducts[featuredCategory].length > 0 ? featuredProducts[featuredCategory].slice(0, 3).map((product: any, index: number) => (
             <ParticleCard
               key={product.id}
               className={`card featured-card card--border-glow ${
@@ -268,7 +268,7 @@ export default function FeaturedProducts({
                 )}
               </div>
             </ParticleCard>
-          ))}
+          )) : null}
         </MagicBento>
         
       </div>
@@ -296,10 +296,10 @@ export default function FeaturedProducts({
         )}
         
         <FlyingPosters 
-          items={featuredProducts[featuredCategory] ? featuredProducts[featuredCategory].slice(0, 3).map((p: any) => getImageUrl(p.image)) : []}
+          items={featuredProducts[featuredCategory] && featuredProducts[featuredCategory].length > 0 ? featuredProducts[featuredCategory].slice(0, 3).map((p: any) => getImageUrl(p.image)) : []}
           height={typeof window !== 'undefined' && window.innerWidth < 768 ? '400px' : '600px'}
           initialIndex={clickedIndex}
-          products={featuredProducts[featuredCategory]?.slice(0, 3)}
+          products={featuredProducts[featuredCategory] && featuredProducts[featuredCategory].length > 0 ? featuredProducts[featuredCategory].slice(0, 3) : []}
           category={featuredCategory}
           onFullImageToggle={(isOpen) => {
             // Only hide close button on desktop
@@ -309,7 +309,7 @@ export default function FeaturedProducts({
           }}
           onInfoClick={(index) => {
             // Get the product at this index
-            const products = featuredProducts[featuredCategory]?.slice(0, 3)
+            const products = featuredProducts[featuredCategory] && featuredProducts[featuredCategory].length > 0 ? featuredProducts[featuredCategory].slice(0, 3) : []
             if (products && products[index]) {
               const product = products[index]
               const productWithCategory = {

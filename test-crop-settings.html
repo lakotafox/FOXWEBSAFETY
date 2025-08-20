@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Crop Settings Test</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #1e293b; color: white; }
+        pre { background: #334155; padding: 10px; border-radius: 5px; overflow: auto; }
+        h2 { color: #60a5fa; }
+        .error { color: #f87171; }
+        .success { color: #4ade80; }
+        .warning { color: #fbbf24; }
+    </style>
+</head>
+<body>
+    <h1>Crop Settings Test</h1>
+    
+    <h2>1. Main Products (main-products.json)</h2>
+    <div id="main-products"></div>
+    
+    <h2>2. Products Editor Data (products.json)</h2>
+    <div id="products"></div>
+    
+    <h2>3. Content Data (content.json)</h2>
+    <div id="content"></div>
+    
+    <h2>4. Analysis</h2>
+    <div id="analysis"></div>
+
+    <script>
+        async function loadAndAnalyze() {
+            let hasIssues = false;
+            
+            // Load main-products.json
+            try {
+                const mainRes = await fetch('/main-products.json');
+                const mainData = await mainRes.json();
+                
+                let mainHtml = '<pre>' + JSON.stringify(mainData, null, 2).substring(0, 500) + '...</pre>';
+                
+                // Check for crop settings
+                if (mainData.crops && Object.keys(mainData.crops).length === 0) {
+                    mainHtml += '<p class="error">❌ Empty crops object</p>';
+                    hasIssues = true;
+                } else if (mainData.productsCrops) {
+                    mainHtml += '<p class="success">✅ Has productsCrops: ' + Object.keys(mainData.productsCrops).length + ' entries</p>';
+                } else {
+                    mainHtml += '<p class="warning">⚠️ No crop settings found</p>';
+                }
+                
+                // Check if products have embedded crops
+                let embeddedCrops = 0;
+                if (mainData.products) {
+                    Object.values(mainData.products).forEach(category => {
+                        category.forEach(product => {
+                            if (product.imageCrop) embeddedCrops++;
+                        });
+                    });
+                }
+                
+                if (embeddedCrops > 0) {
+                    mainHtml += '<p class="success">✅ ' + embeddedCrops + ' products have embedded imageCrop</p>';
+                } else {
+                    mainHtml += '<p class="error">❌ No products have embedded imageCrop</p>';
+                    hasIssues = true;
+                }
+                
+                document.getElementById('main-products').innerHTML = mainHtml;
+            } catch (e) {
+                document.getElementById('main-products').innerHTML = '<p class="error">Error loading: ' + e + '</p>';
+            }
+            
+            // Load products.json
+            try {
+                const prodRes = await fetch('/products.json');
+                const prodData = await prodRes.json();
+                
+                let prodHtml = '<pre>' + JSON.stringify(prodData, null, 2).substring(0, 500) + '...</pre>';
+                
+                // Check for crop settings
+                if (prodData.productsCrops) {
+                    prodHtml += '<p class="success">✅ Has productsCrops: ' + Object.keys(prodData.productsCrops).length + ' entries</p>';
+                }
+                
+                // Check embedded crops
+                let embeddedCrops = 0;
+                if (prodData.products) {
+                    Object.values(prodData.products).forEach(category => {
+                        category.forEach(product => {
+                            if (product.imageCrop) embeddedCrops++;
+                        });
+                    });
+                }
+                
+                if (embeddedCrops > 0) {
+                    prodHtml += '<p class="success">✅ ' + embeddedCrops + ' products have embedded imageCrop</p>';
+                }
+                
+                document.getElementById('products').innerHTML = prodHtml;
+            } catch (e) {
+                document.getElementById('products').innerHTML = '<p class="error">Error loading: ' + e + '</p>';
+            }
+            
+            // Load content.json
+            try {
+                const contRes = await fetch('/content.json');
+                const contData = await contRes.json();
+                
+                let contHtml = '<pre>' + JSON.stringify(contData, null, 2).substring(0, 500) + '...</pre>';
+                
+                if (contData.galleryCrops) {
+                    contHtml += '<p class="success">✅ Has galleryCrops: ' + Object.keys(contData.galleryCrops).length + ' entries</p>';
+                }
+                
+                document.getElementById('content').innerHTML = contHtml;
+            } catch (e) {
+                document.getElementById('content').innerHTML = '<p class="error">Error loading: ' + e + '</p>';
+            }
+            
+            // Analysis
+            let analysisHtml = '';
+            if (hasIssues) {
+                analysisHtml = `
+                    <div class="error">
+                        <h3>Issues Found:</h3>
+                        <ol>
+                            <li>main-products.json has empty "crops" object instead of "productsCrops"</li>
+                            <li>Products don't have embedded imageCrop settings</li>
+                            <li>The carrie editor publish function creates "productsCrops" but the file has "crops"</li>
+                        </ol>
+                        <h3>Solution:</h3>
+                        <p>Need to manually fix main-products.json or re-publish from the editor with correct crop settings</p>
+                    </div>
+                `;
+            } else {
+                analysisHtml = '<p class="success">✅ All crop settings appear to be configured correctly</p>';
+            }
+            
+            document.getElementById('analysis').innerHTML = analysisHtml;
+        }
+        
+        loadAndAnalyze();
+    </script>
+</body>
+</html>
