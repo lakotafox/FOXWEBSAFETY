@@ -270,7 +270,19 @@ export default function LoadingOverlay({
         {/* Game button in top right corner */}
         <div className="fixed top-8 right-8">
           <button
-            onClick={onPlayGame || (() => window.open('/games', '_blank'))}
+            onClick={() => {
+              // Stop music before opening game page
+              if (globalAudioRef) {
+                globalAudioRef.pause()
+                globalAudioRef.currentTime = 0
+                isMusicPlaying = false
+              }
+              if (onPlayGame) {
+                onPlayGame()
+              } else {
+                window.open('/games', '_blank')
+              }
+            }}
             className="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3 rounded transition-all hover:scale-105 shadow-lg"
           >
             🎮 PLAY A GAME
