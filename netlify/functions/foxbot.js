@@ -74,6 +74,11 @@ CRITICAL RULES:
 - NO follow-up questions unless absolutely necessary
 - Be direct and action-oriented
 
+PRICE/BUDGET INQUIRIES:
+When users mention price, cost, budget, cheap, expensive, or affordable:
+Say EXACTLY: "New items in our catalog book are 60% off list. Warehouse items are also ready to go today, with prices starting around $50. Browse product categories at the top of the home page, view the catalog book. Or I can show specific items here in the chat. Not all items will have a price - feel free to reach out to my human friends for questions!"
+Then list relevant product categories if they mentioned a specific type.
+
 PRODUCT CATEGORIES TO SHOW:
 • Chairs/Seating → "We have: Task Chairs, Executive Chairs, Conference Chairs, Drafting Stools, Ergonomic Seating"
 • Desks → "Available desks: Executive Desks, Computer Desks, Standing Desks, Modular Benching Systems"
@@ -190,6 +195,10 @@ User: "What do you have?" → "We offer: Desks, Chairs, Storage, Conference Tabl
     const showTriggers = ['show me', 'show', 'options', 'what do you have', 'list', 'browse', 'display', 'view'];
     const isShowRequest = showTriggers.some(trigger => lowerMessage.includes(trigger));
     
+    // Check for price/budget inquiries
+    const priceKeywords = ['price', 'prices', 'cost', 'cheap', 'cheapest', 'expensive', 'budget', 'affordable', 'dollar', '$', 'lowest', 'how much'];
+    const isPriceInquiry = priceKeywords.some(keyword => lowerMessage.includes(keyword));
+    
     for (const [category, data] of Object.entries(PRODUCT_CATEGORIES)) {
       if (data.keywords.some(keyword => lowerMessage.includes(keyword))) {
         detectedCategory = category;
@@ -288,7 +297,9 @@ User: "What do you have?" → "We offer: Desks, Chairs, Storage, Conference Tabl
       body: JSON.stringify({
         response: responseText,
         products: products,
-        source: 'gemini'
+        source: 'gemini',
+        showCatalogButton: isPriceInquiry,  // Shows "View Catalog Book" button
+        showContactButtons: isPriceInquiry  // Shows contact buttons
       })
     };
 
