@@ -21,6 +21,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { path, content, message } = body
 
+    console.log('GitHub API request for path:', path)
+
     if (!path || !content || !message) {
       return NextResponse.json(
         { error: 'Missing required fields: path, content, or message' },
@@ -30,13 +32,11 @@ export async function POST(request: NextRequest) {
 
     // If no GitHub token, save to public folder directly (for local development)
     if (!GITHUB_TOKEN) {
-      console.log('No GitHub token, saving locally to public folder')
-      // In production, you'd want to handle this differently
-      // For now, we'll return success but log that we need the token
+      console.error('GITHUB_TOKEN not configured in environment variables')
       return NextResponse.json({ 
-        success: true, 
-        message: 'Saved locally (GitHub token not configured)' 
-      })
+        success: false, 
+        error: 'GitHub token not configured. Please set GITHUB_TOKEN environment variable.' 
+      }, { status: 500 })
     }
 
     // Get the current file (if it exists) to get its SHA
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
         `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/public/${path}`,
         {
           headers: {
-            'Authorization': `Bearer ${GITHUB_TOKEN}`,
+            'Authorization': `token ${GITHUB_TOKEN}`,
             'Accept': 'application/vnd.github.v3+json',
           },
         }
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
       {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${GITHUB_TOKEN}`,
+          'Authorization': `token ${GITHUB_TOKEN}`,
           'Accept': 'application/vnd.github.v3+json',
           'Content-Type': 'application/json',
         },
