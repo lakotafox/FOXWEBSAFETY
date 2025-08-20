@@ -17,9 +17,8 @@ export function useProductsEditor(category?: string) {
   // Handle image upload
   const handleImageUpload = async (file: File, productId: number) => {
     try {
-      const timestamp = Date.now()
-      const fileName = `product-${productId}-${timestamp}.jpg`
-      const githubPath = `/images/${fileName}`
+      // Use the addToUploadQueue function which handles preview creation
+      const githubPath = uploadState.addToUploadQueue(productId, file)
       
       // Update the product with the new image path immediately
       dataState.updateProduct(productId, 'image', githubPath)
@@ -29,21 +28,6 @@ export function useProductsEditor(category?: string) {
         ...prev,
         [githubPath]: { scale: 1, x: 50, y: 50 }
       }))
-      
-      // Create a temporary preview URL
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        if (e.target?.result) {
-          uploadState.setTempPreviews(prev => ({
-            ...prev,
-            [githubPath]: e.target.result as string
-          }))
-        }
-      }
-      reader.readAsDataURL(file)
-      
-      // Add to upload queue
-      uploadState.setUploadQueue(queue => [...queue, { productId, file, fileName }])
     } catch (error) {
       console.error('Error handling image:', error)
       uiState.showSaveMessage("Error preparing image")

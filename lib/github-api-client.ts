@@ -16,9 +16,27 @@ export async function updateGitHubFile(
 ): Promise<GitHubApiResponse> {
   try {
     // Convert content to base64 if it's not already
-    const contentBase64 = typeof content === 'string' 
-      ? content 
-      : btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2))))
+    let contentBase64: string
+    
+    if (typeof content === 'string') {
+      // Check if it's already base64 encoded
+      try {
+        // If we can decode it and it looks like JSON, it's already base64
+        const decoded = atob(content)
+        if (decoded.startsWith('{') || decoded.startsWith('[')) {
+          contentBase64 = content
+        } else {
+          // It's a raw string, encode it
+          contentBase64 = btoa(content)
+        }
+      } catch {
+        // Not base64, encode it
+        contentBase64 = btoa(content)
+      }
+    } else {
+      // It's an object, stringify and encode
+      contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2))))
+    }
     
     const response = await fetch('/api/github', {
       method: 'POST',
