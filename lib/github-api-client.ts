@@ -38,7 +38,8 @@ export async function updateGitHubFile(
       contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2))))
     }
     
-    const response = await fetch('/api/github', {
+    // Always use Netlify Function endpoint (works both locally and in production)
+    const response = await fetch('/.netlify/functions/github-update', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
