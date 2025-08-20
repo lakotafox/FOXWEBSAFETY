@@ -1,9 +1,6 @@
 // Netlify Function for FOXBOT
 // This replaces the Next.js API route and works with static export
 
-const fs = require('fs').promises;
-const path = require('path');
-
 exports.handler = async (event, context) => {
   // Handle CORS
   const headers = {
@@ -69,35 +66,30 @@ exports.handler = async (event, context) => {
     const SYSTEM_PROMPT = `You are FOXBOT, the AI assistant for FoxBuilt Office Furniture.
 
 CRITICAL RULES:
-- Keep responses to 1-2 sentences MAX
-- When users mention ANY furniture type, IMMEDIATELY list available options
-- NO follow-up questions unless absolutely necessary
-- Be direct and action-oriented
+- Keep responses to 1 sentence MAX
+- DO NOT list categories - the frontend will show product cards
+- Just acknowledge and let products display
+- Be extremely brief
 
-PRICE/BUDGET INQUIRIES:
-When users mention price, cost, budget, cheap, expensive, or affordable:
-Say EXACTLY: "New items in our catalog book are 60% off list. Warehouse items are also ready to go today, with prices starting around $50. Browse product categories at the top of the home page, view the catalog book. Or I can show specific items here in the chat. Not all items will have a price - feel free to reach out to my human friends for questions!"
-Then list relevant product categories if they mentioned a specific type.
+PRICE INQUIRIES (cheap/budget/cost):
+Say ONLY: "Items start around $50. Catalog book items are 60% off list."
+NO MORE TEXT - let product cards show
 
-PRODUCT CATEGORIES TO SHOW:
-• Chairs/Seating → "We have: Task Chairs, Executive Chairs, Conference Chairs, Drafting Stools, Ergonomic Seating"
-• Desks → "Available desks: Executive Desks, Computer Desks, Standing Desks, Modular Benching Systems"
-• Tables → "Our tables: Conference Tables, Collaborative Tables, Coffee Tables, Side Tables"
-• Storage → "Storage options: Filing Cabinets, Shelving Units, Bookcases, Lockers, Credenzas"
-• Cubicles → "Cubicle solutions: Workstations, Panel Systems, Modular Cubicles, Privacy Screens"
-• Conference/Meeting → "Meeting furniture: Conference Tables, Meeting Chairs, Collaborative Tables, AV Carts"
-• Reception/Lounge → "Reception area: Reception Desks, Sofas, Lounge Chairs, Coffee Tables"
+RESPONSES FOR PRODUCTS:
+• Chairs → "Here are our chairs."
+• Desks → "Here are our desks."
+• Storage → "Here's our storage."
+• Tables → "Here are our tables."
+• "Show me" / "show" → "Here's what we have."
+• General inquiry → "Here's our furniture."
 
-TRIGGER WORDS:
-- "show me" / "options" / "what do you have" / "show" / "list" / "browse" → List relevant categories immediately
-- Any furniture keyword → Show that category's options IMMEDIATELY
-- "furniture" / "office" / "products" → List ALL main categories
-- Never ask "what type" - just show what's available
+DO NOT list category names - products will show as cards
+Just acknowledge briefly and let the product cards display
 
 Example responses:
-User: "I need a chair" → "We have Task Chairs, Executive Chairs, Conference Chairs, Drafting Stools, and Ergonomic Seating. Which type interests you?"
-User: "Show me desks" → "Our desks: Executive Desks, Computer Desks, Standing Desks, and Modular Benching Systems."
-User: "What do you have?" → "We offer: Desks, Chairs, Storage, Conference Tables, Cubicles, and Reception furniture."`;
+User: "I need a chair" → "Here are our chairs."
+User: "Show me desks" → "Here are our desks."
+User: "What do you have?" → "Here's our furniture."`;
 
     // Enhanced product detection with ALL categories and subcategories
     const PRODUCT_CATEGORIES = {
@@ -211,31 +203,28 @@ User: "What do you have?" → "We offer: Desks, Chairs, Storage, Conference Tabl
       detectedCategory = 'all';
     }
 
-    // Try to load and search products
+    // Try to load and search products - simplified for testing
     let products = [];
-    try {
-      const productsPath = path.join(__dirname, '../../public/products.json');
-      const productsData = await fs.readFile(productsPath, 'utf8');
-      const allProducts = JSON.parse(productsData);
-      
-      if (detectedCategory && PRODUCT_CATEGORIES[detectedCategory]) {
-        // Filter products by detected category
-        const relevantCategories = PRODUCT_CATEGORIES[detectedCategory].categories;
-        products = Object.entries(allProducts)
-          .filter(([key, product]) => {
-            return relevantCategories.some(cat => key.includes(cat) || product.category === cat);
-          })
-          .slice(0, 5) // Return top 5 products
-          .map(([key, product]) => ({
-            id: key,
-            title: product.title || product.name || key,
-            category: product.category,
-            description: product.description
-          }));
-      }
-    } catch (error) {
-      console.log('Could not load products:', error.message);
-      // Products array remains empty if file can't be loaded
+    
+    // For now, return mock products based on category
+    if (detectedCategory === 'chairs') {
+      products = [
+        { id: 'task-chair-1', title: 'Ergonomic Task Chair', category: 'task-chairs', description: 'Comfortable office chair with lumbar support' },
+        { id: 'exec-chair-1', title: 'Executive Leather Chair', category: 'executive-chairs', description: 'Premium leather executive seating' },
+        { id: 'conf-chair-1', title: 'Conference Room Chair', category: 'conference-chairs', description: 'Sleek meeting room seating' }
+      ];
+    } else if (detectedCategory === 'desks') {
+      products = [
+        { id: 'exec-desk-1', title: 'L-Shaped Executive Desk', category: 'executive-desks', description: 'Spacious L-shaped desk with storage' },
+        { id: 'stand-desk-1', title: 'Height Adjustable Desk', category: 'standing-desks', description: 'Electric sit-stand desk' },
+        { id: 'comp-desk-1', title: 'Computer Workstation', category: 'computer-desks', description: 'Compact computer desk' }
+      ];
+    } else if (detectedCategory === 'all' || isShowRequest) {
+      products = [
+        { id: 'task-chair-1', title: 'Task Chair', category: 'chairs', description: 'Ergonomic office seating' },
+        { id: 'exec-desk-1', title: 'Executive Desk', category: 'desks', description: 'Premium office desk' },
+        { id: 'file-cab-1', title: 'Filing Cabinet', category: 'storage', description: '4-drawer filing solution' }
+      ];
     }
 
     // Call Gemini API
