@@ -5,7 +5,17 @@ export async function getCategoryVisibility() {
     // Try to fetch from published file
     const response = await fetch('/category-visibility.json', { cache: 'no-store' })
     if (response.ok) {
-      return await response.json()
+      const data = await response.json()
+      
+      // Handle new format that includes categoryNames
+      if (data.categoryNames) {
+        // Extract just the visibility settings
+        const { categoryNames, lastUpdated, ...visibilitySettings } = data
+        return visibilitySettings
+      }
+      
+      // Old format - return as is
+      return data
     }
   } catch (e) {
     console.log('No visibility settings found, using defaults')
