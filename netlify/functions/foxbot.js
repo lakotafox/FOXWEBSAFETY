@@ -42,8 +42,11 @@ exports.handler = async (event, context) => {
     // Get API key from environment
     const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
     
+    console.log('API Key check:', GEMINI_API_KEY ? 'Found' : 'Missing');
+    
     // Check if API key is configured
     if (!GEMINI_API_KEY || GEMINI_API_KEY === 'your_gemini_api_key_here') {
+      console.error('GEMINI_API_KEY not configured or invalid');
       return {
         statusCode: 200,
         headers,
@@ -56,8 +59,8 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Gemini API configuration
-    const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+    // Gemini API configuration - using gemini-pro model
+    const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
     
     // System prompt for FOXBOT
     const SYSTEM_PROMPT = `You are FOXBOT, the AI assistant for FoxBuilt Office Furniture.
@@ -132,8 +135,9 @@ When answering:
     });
 
     if (!geminiResponse.ok) {
-      console.error('Gemini API error:', geminiResponse.status);
-      throw new Error(`Gemini API error: ${geminiResponse.status}`);
+      const errorText = await geminiResponse.text();
+      console.error('Gemini API error:', geminiResponse.status, errorText);
+      throw new Error(`Gemini API error: ${geminiResponse.status} - ${errorText}`);
     }
 
     const data = await geminiResponse.json();
