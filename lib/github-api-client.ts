@@ -19,19 +19,27 @@ export async function updateGitHubFile(
     let contentBase64: string
     
     if (typeof content === 'string') {
-      // Check if it's already base64 encoded
-      try {
-        // If we can decode it and it looks like JSON, it's already base64
-        const decoded = atob(content)
-        if (decoded.startsWith('{') || decoded.startsWith('[')) {
-          contentBase64 = content
-        } else {
-          // It's a raw string, encode it
+      // For image uploads, the content is already base64
+      if (path.includes('/images/') && (path.endsWith('.jpg') || path.endsWith('.jpeg') || 
+          path.endsWith('.png') || path.endsWith('.gif') || path.endsWith('.webp'))) {
+        // Image content is already base64, use as-is
+        contentBase64 = content
+      } else {
+        // For non-image files, check if it's already base64 encoded
+        try {
+          // Try to decode it to check if it's valid base64
+          const decoded = atob(content)
+          // If decode succeeded and it looks like JSON, it's already base64
+          if (decoded.startsWith('{') || decoded.startsWith('[')) {
+            contentBase64 = content
+          } else {
+            // It's a raw string, encode it
+            contentBase64 = btoa(content)
+          }
+        } catch {
+          // Not valid base64, encode it
           contentBase64 = btoa(content)
         }
-      } catch {
-        // Not base64, encode it
-        contentBase64 = btoa(content)
       }
     } else {
       // It's an object, stringify and encode
