@@ -13,6 +13,18 @@ exports.handler = async (event, context) => {
     console.log('GitHub update request for path:', path);
     console.log('Content length:', content ? content.length : 0);
     console.log('Is image?', path.includes('/images/'));
+    
+    // Validate base64 for images
+    if (path.includes('/images/')) {
+      try {
+        // Test if content is valid base64
+        const testDecode = Buffer.from(content, 'base64');
+        console.log('Image decoded size:', testDecode.length);
+        console.log('First bytes:', testDecode.slice(0, 10).toString('hex'));
+      } catch (e) {
+        console.error('Invalid base64 for image:', e.message);
+      }
+    }
 
     if (!path || !content || !message) {
       return {
@@ -58,6 +70,9 @@ exports.handler = async (event, context) => {
     }
 
     // Create or update the file
+    // IMPORTANT: GitHub API requires content to be base64 encoded WITHOUT newlines
+    const cleanContent = content.replace(/\n/g, '').replace(/\r/g, '');
+    
     const updateResponse = await fetch(
       `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/public/${path}`,
       {
@@ -69,7 +84,7 @@ exports.handler = async (event, context) => {
         },
         body: JSON.stringify({
           message,
-          content,
+          content: cleanContent,
           sha: sha,
           branch: 'main'
         }),
@@ -79,11 +94,14 @@ exports.handler = async (event, context) => {
     if (!updateResponse.ok) {
       const error = await updateResponse.text();
       console.error('GitHub API error:', error);
+      console.error('Status:', updateResponse.status);
+      console.error('Path:', path);
+      console.error('Content length:', cleanContent.length);
       return {
         statusCode: updateResponse.status,
         body: JSON.stringify({ 
           success: false,
-          error: 'Failed to update file on GitHub' 
+          error: `Failed to update file on GitHub: ${updateResponse.status}` 
         })
       };
     }
