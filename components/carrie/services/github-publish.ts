@@ -1,3 +1,5 @@
+import { imageStore } from './local-image-store'
+
 interface PublishOptions {
   products: any
   gallery: string[]
@@ -24,6 +26,45 @@ export async function publishToGitHub({
     const REPO = 'FOXSITE'
     const PRODUCTS_PATH = 'public/main-products.json'
     const CONTENT_PATH = 'public/content.json'
+    
+    // First, upload any pending images
+    const pendingImages = imageStore.getPendingImages()
+    if (pendingImages.length > 0) {
+      showMessage(`📤 Uploading ${pendingImages.length} images...`, 10000)
+      
+      for (const image of pendingImages) {
+        try {
+          const imageResponse = await fetch(
+            `https://api.github.com/repos/${OWNER}/${REPO}/contents/${image.path}`,
+            {
+              method: 'PUT',
+              headers: {
+                'Authorization': `token ${GITHUB_TOKEN}`,
+                'Accept': 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                message: `Add image: ${image.fileName}`,
+                content: image.base64Content,
+                branch: 'main'
+              })
+            }
+          )
+          
+          if (!imageResponse.ok) {
+            const error = await imageResponse.json()
+            console.error(`Failed to upload ${image.fileName}:`, error)
+            showMessage(`⚠️ Failed to upload ${image.fileName}`, 3000)
+          }
+        } catch (err) {
+          console.error(`Error uploading ${image.fileName}:`, err)
+        }
+      }
+      
+      // Clear pending images after upload
+      imageStore.clearPendingImages()
+      showMessage("✅ Images uploaded, publishing data...", 5000)
+    }
     
     // First, get the current content.json file to get its SHA
     const currentContentResponse = await fetch(

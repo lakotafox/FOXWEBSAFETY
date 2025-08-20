@@ -1,4 +1,5 @@
 import { GITHUB_CONFIG } from '../constants/editor-constants'
+import { imageStore } from './local-image-store'
 
 interface UploadCallbacks {
   showMessage: (message: string, duration?: number) => void
@@ -42,40 +43,13 @@ export const processProductImageUpload = async (
       // Remove the data:image/jpeg;base64, prefix
       const base64Content = base64Data.split(',')[1]
       
-      // Upload to GitHub
-      const response = await fetch(
-        `https://api.github.com/repos/${GITHUB_CONFIG.OWNER}/${GITHUB_CONFIG.REPO}/contents/${PATH}`,
-        {
-          method: 'PUT',
-          headers: {
-            'Authorization': `token ${GITHUB_CONFIG.TOKEN}`,
-            'Accept': 'application/vnd.github.v3+json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            message: `Add product image: ${fileName}`,
-            content: base64Content,
-            branch: 'main'
-          })
-        }
-      )
+      // Store image locally instead of uploading immediately
+      imageStore.addPendingImage(fileName, base64Content)
       
-      if (response.ok) {
-        // Upload successful - image will show after build
-        clearTimeout(uploadTimeout)
-        setActiveUploads(count => count - 1)
-      } else {
-        const error = await response.json()
-        console.error('GitHub upload error:', error)
-        if (response.status === 401) {
-          showMessage("❌ GitHub token expired - Tell Khabe: 'GitHub 401 error'", 5000)
-          alert("ERROR: GitHub token expired (401)\n\nTell Khabe: 'GitHub 401 error - need new token'\n\nHe'll fix it free!")
-        } else {
-          showMessage(`❌ Error: ${error.message || response.status}`, 5000)
-        }
-        clearTimeout(uploadTimeout)
-        setActiveUploads(count => count - 1)
-      }
+      // Mark as successful without uploading
+      showMessage("✅ Image ready to publish", 2000)
+      clearTimeout(uploadTimeout)
+      setActiveUploads(count => count - 1)
     }
     
     reader.onerror = () => {
@@ -120,45 +94,16 @@ export const processGalleryImageUpload = async (
         const base64Data = reader.result as string
         const base64Content = base64Data.split(',')[1]
         
-        // Upload to GitHub
-        const response = await fetch(
-          `https://api.github.com/repos/${GITHUB_CONFIG.OWNER}/${GITHUB_CONFIG.REPO}/contents/${PATH}`,
-          {
-            method: 'PUT',
-            headers: {
-              'Authorization': `token ${GITHUB_CONFIG.TOKEN}`,
-              'Accept': 'application/vnd.github.v3+json',
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              message: `Add gallery image: ${fileName}`,
-              content: base64Content,
-              branch: 'main'
-            })
-          }
-        )
+        // Store image locally instead of uploading immediately
+        imageStore.addPendingImage(fileName, base64Content)
         
-        if (!response.ok) {
-          const error = await response.json()
-          if (response.status === 401) {
-            showMessage("❌ GitHub token expired - Tell Khabe: 'GitHub 401 error'", 5000)
-            alert("ERROR: GitHub token expired (401)\n\nTell Khabe: 'GitHub 401 error - need new token'\n\nHe'll fix it free!")
-          } else if (response.status === 404) {
-            showMessage(`❌ GitHub repo not found or no access - check token permissions`, 5000)
-          } else {
-            showMessage(`❌ Error: ${error.message || response.status}`, 5000)
-          }
-          clearTimeout(uploadTimeout)
-          setActiveUploads(count => count - 1)
-          return
-        }
-        
-        // Upload successful - image will show after build
+        // Mark as successful without uploading
+        showMessage("✅ Gallery image ready to publish", 2000)
         clearTimeout(uploadTimeout)
         setActiveUploads(count => count - 1)
       } catch (uploadError) {
-        console.error('Error during upload:', uploadError)
-        showMessage("❌ Upload error - check console", 5000)
+        console.error('Error storing image:', uploadError)
+        showMessage("❌ Error storing image", 3000)
         clearTimeout(uploadTimeout)
         setActiveUploads(count => count - 1)
       }
