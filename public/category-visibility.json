@@ -1,6 +1,12 @@
 {
   "showSearchBar": true,
   "showFoxbot": true,
+  "showDesksWorkstations": true,
+  "showCubicles": true,
+  "showSeating": true,
+  "showStorage": true,
+  "showConferenceMeeting": true,
+  "showReceptionLounge": true,
   "executive-desks": true,
   "computer-desks": true,
   "standing-desks": true,

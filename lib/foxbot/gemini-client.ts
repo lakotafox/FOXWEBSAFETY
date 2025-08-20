@@ -11,7 +11,7 @@ export async function sendMessageToGemini(message: string): Promise<GeminiRespon
   try {
     console.log('Sending message to Gemini:', message)
     
-    const response = await fetch('/api/foxbot/gemini', {
+    const response = await fetch('/.netlify/functions/foxbot', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

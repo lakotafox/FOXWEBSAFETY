@@ -8,3 +8,7 @@
 # Optional: Set Node version
 [build.environment]
   NODE_VERSION = "18"
+
+# Enable Netlify Functions
+[functions]
+  directory = "netlify/functions"
