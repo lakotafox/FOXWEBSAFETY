@@ -49,7 +49,8 @@ export function useProductsUpload(showSaveMessage: (msg: string, duration?: numb
           showSaveMessage("✅ Image uploaded!", 3000)
         } else {
           console.error('Upload failed:', result.error)
-          showSaveMessage("❌ Upload failed", 5000)
+          console.error('Full result:', result)
+          showSaveMessage(`❌ Upload failed: ${result.error || 'Unknown error'}`, 5000)
         }
         
         setActiveUploads(count => count - 1)

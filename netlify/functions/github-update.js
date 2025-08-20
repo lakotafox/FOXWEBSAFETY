@@ -11,6 +11,8 @@ exports.handler = async (event, context) => {
     const { path, content, message } = JSON.parse(event.body);
     
     console.log('GitHub update request for path:', path);
+    console.log('Content length:', content ? content.length : 0);
+    console.log('Is image?', path.includes('/images/'));
 
     if (!path || !content || !message) {
       return {
