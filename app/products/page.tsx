@@ -174,8 +174,9 @@ function ProductsPageContent() {
   }, [searchParams])
 
 
-  // Get current products using kebab-case key directly
-  const currentProducts = productsByCategory[categoryParam] || []
+  // Get current products - convert kebab-case to camelCase to match the data structure
+  const productKey = categoryParam.replace(/-([a-z])/g, (g) => g[1].toUpperCase())
+  const currentProducts = productsByCategory[productKey] || productsByCategory[categoryParam] || []
   
   // Get glow color based on category
   const getGlowColor = () => {
