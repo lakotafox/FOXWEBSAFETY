@@ -86,14 +86,29 @@ export default function CategoryVisibilityEditor() {
         const response = await fetch('/category-visibility.json', { cache: 'no-store' })
         if (response.ok) {
           const data = await response.json()
-          setVisibility(data)
-          // Check for search bar setting
-          if (data.showSearchBar !== undefined) {
-            setShowSearchBar(data.showSearchBar)
-          }
-          // Check for FOXBOT setting
-          if (data.showFoxbot !== undefined) {
-            setShowFoxbot(data.showFoxbot)
+          
+          // Handle both old and new format
+          if (data.categoryNames) {
+            // New combined format
+            setCategoryNames(data.categoryNames)
+            // Remove categoryNames from visibility data
+            const { categoryNames, lastUpdated, ...visibilityData } = data
+            setVisibility(visibilityData)
+            if (data.showSearchBar !== undefined) {
+              setShowSearchBar(data.showSearchBar)
+            }
+            if (data.showFoxbot !== undefined) {
+              setShowFoxbot(data.showFoxbot)
+            }
+          } else {
+            // Old format - just visibility
+            setVisibility(data)
+            if (data.showSearchBar !== undefined) {
+              setShowSearchBar(data.showSearchBar)
+            }
+            if (data.showFoxbot !== undefined) {
+              setShowFoxbot(data.showFoxbot)
+            }
           }
         } else {
           // Fallback to localStorage
@@ -282,77 +297,62 @@ export default function CategoryVisibilityEditor() {
     }
     
     try {
-      // Use the same GitHub API approach as products editor - simple file updates
+      // Use the same GitHub API approach as products editor
       const GITHUB_TOKEN = process.env.NEXT_PUBLIC_GITHUB_TOKEN || 'SET_IN_NETLIFY_ENV'
       const OWNER = 'lakotafox'
       const REPO = 'FOXSITE'
       
-      // Helper function to update a file on GitHub
-      const updateGitHubFile = async (path: string, content: any, message: string) => {
-        // Get current file SHA
-        let sha = ''
-        try {
-          const currentFileResponse = await fetch(
-            `https://api.github.com/repos/${OWNER}/${REPO}/contents/public/${path}`,
-            {
-              headers: {
-                'Authorization': `token ${GITHUB_TOKEN}`,
-                'Accept': 'application/vnd.github.v3+json'
-              }
-            }
-          )
-          
-          if (currentFileResponse.ok) {
-            const currentFile = await currentFileResponse.json()
-            sha = currentFile.sha
-          }
-        } catch (e) {
-          console.log(`File ${path} doesn't exist yet, will create`)
-        }
-        
-        // Encode content to base64
-        const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2))))
-        
-        // Update file on GitHub
-        const updateResponse = await fetch(
-          `https://api.github.com/repos/${OWNER}/${REPO}/contents/public/${path}`,
+      // Only update category-visibility.json (single file, single commit)
+      // Store names in the same file to avoid multiple commits
+      const allSettings = {
+        ...visibilitySettingsToPublish,
+        categoryNames: categoryNames,
+        lastUpdated: new Date().toISOString()
+      }
+      
+      // Get current file SHA
+      let sha = ''
+      try {
+        const currentResponse = await fetch(
+          `https://api.github.com/repos/${OWNER}/${REPO}/contents/public/category-visibility.json`,
           {
-            method: 'PUT',
             headers: {
               'Authorization': `token ${GITHUB_TOKEN}`,
-              'Accept': 'application/vnd.github.v3+json',
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              message,
-              content: contentBase64,
-              sha: sha || undefined
-            })
+              'Accept': 'application/vnd.github.v3+json'
+            }
           }
         )
         
-        return updateResponse.ok
+        if (currentResponse.ok) {
+          const currentFile = await currentResponse.json()
+          sha = currentFile.sha
+        }
+      } catch (e) {
+        console.log('Visibility file does not exist yet')
       }
       
-      // Publish visibility settings first
-      const visibilitySuccess = await updateGitHubFile(
-        'category-visibility.json',
-        visibilitySettingsToPublish,
-        'Update category visibility settings'
+      // Encode content to base64
+      const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(allSettings, null, 2))))
+      
+      // Update file on GitHub (single commit)
+      const updateResponse = await fetch(
+        `https://api.github.com/repos/${OWNER}/${REPO}/contents/public/category-visibility.json`,
+        {
+          method: 'PUT',
+          headers: {
+            'Authorization': `token ${GITHUB_TOKEN}`,
+            'Accept': 'application/vnd.github.v3+json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            message: `Update category visibility and names - ${new Date().toLocaleString()}`,
+            content: contentBase64,
+            sha: sha || undefined
+          })
+        }
       )
       
-      if (!visibilitySuccess) {
-        throw new Error('Failed to publish visibility settings')
-      }
-      
-      // Then publish category names (separate commit, but quick succession)
-      const namesSuccess = await updateGitHubFile(
-        'category-names.json',
-        categoryNames,
-        'Update category names'
-      )
-      
-      const success = visibilitySuccess && namesSuccess
+      const success = updateResponse.ok
 
       if (success) {
         // Clear localStorage after successful publish
