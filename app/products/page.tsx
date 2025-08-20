@@ -137,7 +137,7 @@ function ProductsPageContent() {
         const defaultProducts = {
           [categoryParam]: Array.from({ length: 9 }, (_, i) => ({
             id: i + 1,
-            title: `${categoryNames?.subcategories?.[categoryParam] || getCategoryDefaultName(categoryParam)} ${i + 1}`,
+            title: `${getCategoryDefaultName(categoryParam)} ${i + 1}`,
             image: defaultImages[i] || '/images/showroom-1.jpg',
             description: '',
             features: ['Premium Quality', 'Professional Grade', 'Warranty Included'],
@@ -146,7 +146,7 @@ function ProductsPageContent() {
         }
         
         setProductsByCategory(defaultProducts)
-        setPageName(categoryNames?.subcategories?.[categoryParam] || getCategoryDefaultName(categoryParam))
+        setPageName(getCategoryDefaultName(categoryParam))
       }
     }
     loadProducts()
