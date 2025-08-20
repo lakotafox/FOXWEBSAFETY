@@ -1,0 +1,149 @@
+{
+  "products": {
+    "modularBenching": [
+      {
+        "id": 1,
+        "title": "Steelcase Migration SE",
+        "image": "/images/showroom-1.jpg",
+        "description": "",
+        "features": [
+          "Premium Quality",
+          "Professional Grade",
+          "Warranty Included"
+        ],
+        "price": ""
+      },
+      {
+        "id": 2,
+        "title": "Herman Miller Layout Studio",
+        "image": "/images/product-2-1755727141522.jpeg",
+        "description": "",
+        "features": [
+          "Premium Quality",
+          "Professional Grade",
+          "Warranty Included"
+        ],
+        "price": "",
+        "imageCrop": {
+          "scale": 1.4282462475762734,
+          "x": 50,
+          "y": 50
+        }
+      },
+      {
+        "id": 3,
+        "title": "Haworth Compose Beam",
+        "image": "/images/reception tan.jpg",
+        "description": "",
+        "features": [
+          "Premium Quality",
+          "Professional Grade",
+          "Warranty Included"
+        ],
+        "price": ""
+      },
+      {
+        "id": 4,
+        "title": "Knoll Antenna Workspaces",
+        "image": "/images/small desk.jpg",
+        "description": "",
+        "features": [
+          "Premium Quality",
+          "Professional Grade",
+          "Warranty Included"
+        ],
+        "price": ""
+      },
+      {
+        "id": 5,
+        "title": "HON Coordinate Benching",
+        "image": "/images/showfacinggarage.jpg",
+        "description": "",
+        "features": [
+          "Premium Quality",
+          "Professional Grade",
+          "Warranty Included"
+        ],
+        "price": ""
+      },
+      {
+        "id": 6,
+        "title": "Teknion Navigate Bench",
+        "image": "/images/Showroomwglassboard.jpg",
+        "description": "",
+        "features": [
+          "Premium Quality",
+          "Professional Grade",
+          "Warranty Included"
+        ],
+        "price": ""
+      },
+      {
+        "id": 7,
+        "title": "Global Bridges II",
+        "image": "/images/conference-room.jpg",
+        "description": "",
+        "features": [
+          "Premium Quality",
+          "Professional Grade",
+          "Warranty Included"
+        ],
+        "price": ""
+      },
+      {
+        "id": 8,
+        "title": "AIS Matrix Benching",
+        "image": "/images/desk grey L showroom.jpg",
+        "description": "",
+        "features": [
+          "Premium Quality",
+          "Professional Grade",
+          "Warranty Included"
+        ],
+        "price": "",
+        "imageCrop": {
+          "scale": 3.045213915504014,
+          "x": 44,
+          "y": 28
+        }
+      },
+      {
+        "id": 9,
+        "title": "Allsteel Stride Benching",
+        "image": "/images/reception-area.jpg",
+        "description": "",
+        "features": [
+          "Premium Quality",
+          "Professional Grade",
+          "Warranty Included"
+        ],
+        "price": ""
+      }
+    ]
+  },
+  "productsCrops": {
+    "/images/product-2-1754595166035.jpg": {
+      "scale": 1,
+      "x": 50,
+      "y": 50
+    },
+    "/images/desk grey L showroom.jpg": {
+      "scale": 3.045213915504014,
+      "x": 44,
+      "y": 28
+    },
+    "/images/product-2-1755726302771.jpeg": {
+      "scale": 1.567464314649637,
+      "x": 50,
+      "y": 50
+    },
+    "/images/product-2-1755727141522.jpeg": {
+      "scale": 1.4282462475762734,
+      "x": 50,
+      "y": 50
+    }
+  },
+  "pageName": "Modular Benching Systems",
+  "lastUpdated": "2025-08-20T21:59:34.236Z",
+  "updatedBy": "Kyle"
+}
