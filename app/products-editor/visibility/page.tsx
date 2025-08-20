@@ -65,6 +65,12 @@ export default function CategoryVisibilityEditor() {
   const [allCategories, setAllCategories] = useState(defaultCategories)
   const [showSearchBar, setShowSearchBar] = useState(true)
   const [showFoxbot, setShowFoxbot] = useState(true)
+  const [showDesksWorkstations, setShowDesksWorkstations] = useState(true)
+  const [showCubicles, setShowCubicles] = useState(true)
+  const [showSeating, setShowSeating] = useState(true)
+  const [showStorage, setShowStorage] = useState(true)
+  const [showConferenceMeeting, setShowConferenceMeeting] = useState(true)
+  const [showReceptionLounge, setShowReceptionLounge] = useState(true)
   const [categoryNames, setCategoryNames] = useState<CategoryNames>({
     groups: {
       'desks-workstations': 'Desks & Workstations',
@@ -101,6 +107,13 @@ export default function CategoryVisibilityEditor() {
             if (data.showFoxbot !== undefined) {
               setShowFoxbot(data.showFoxbot)
             }
+            // Load group visibility settings
+            if (data.showDesksWorkstations !== undefined) setShowDesksWorkstations(data.showDesksWorkstations)
+            if (data.showCubicles !== undefined) setShowCubicles(data.showCubicles)
+            if (data.showSeating !== undefined) setShowSeating(data.showSeating)
+            if (data.showStorage !== undefined) setShowStorage(data.showStorage)
+            if (data.showConferenceMeeting !== undefined) setShowConferenceMeeting(data.showConferenceMeeting)
+            if (data.showReceptionLounge !== undefined) setShowReceptionLounge(data.showReceptionLounge)
           } else {
             // Old format - just visibility
             setVisibility(data)
@@ -110,6 +123,13 @@ export default function CategoryVisibilityEditor() {
             if (data.showFoxbot !== undefined) {
               setShowFoxbot(data.showFoxbot)
             }
+            // Load group visibility settings
+            if (data.showDesksWorkstations !== undefined) setShowDesksWorkstations(data.showDesksWorkstations)
+            if (data.showCubicles !== undefined) setShowCubicles(data.showCubicles)
+            if (data.showSeating !== undefined) setShowSeating(data.showSeating)
+            if (data.showStorage !== undefined) setShowStorage(data.showStorage)
+            if (data.showConferenceMeeting !== undefined) setShowConferenceMeeting(data.showConferenceMeeting)
+            if (data.showReceptionLounge !== undefined) setShowReceptionLounge(data.showReceptionLounge)
           }
         } else {
           // Fallback to localStorage
@@ -290,11 +310,17 @@ export default function CategoryVisibilityEditor() {
     setShowPublishLoadingOverlay(true)
     setPublishMessage('Checking for recent commits...')
     
-    // Include search bar and FOXBOT settings with category visibility
+    // Include all visibility settings
     const visibilitySettingsToPublish = {
       ...visibility,
       showSearchBar: showSearchBar,
-      showFoxbot: showFoxbot
+      showFoxbot: showFoxbot,
+      showDesksWorkstations: showDesksWorkstations,
+      showCubicles: showCubicles,
+      showSeating: showSeating,
+      showStorage: showStorage,
+      showConferenceMeeting: showConferenceMeeting,
+      showReceptionLounge: showReceptionLounge
     }
     
     try {
@@ -506,6 +532,104 @@ export default function CategoryVisibilityEditor() {
                   <EyeOff className="w-6 h-6" />
                 )}
               </button>
+            </div>
+          </div>
+
+          {/* Main Category Dropdown Visibility */}
+          <div className="mb-8 bg-slate-900 rounded-lg p-6">
+            <h2 className="text-xl font-black text-white mb-4">MAIN NAVIGATION DROPDOWNS</h2>
+            <p className="text-yellow-500 text-sm mb-6 font-bold">Control which main dropdown menus appear in the navigation bar</p>
+            
+            <div className="space-y-4">
+              {/* Desks & Workstations */}
+              <div className="flex items-center justify-between p-3 bg-slate-800 rounded-lg">
+                <span className="text-white font-bold">Desks & Workstations Dropdown</span>
+                <button
+                  onClick={() => setShowDesksWorkstations(!showDesksWorkstations)}
+                  className={`p-2 rounded-lg transition-all ${
+                    showDesksWorkstations
+                      ? 'bg-green-600 hover:bg-green-700 text-white'
+                      : 'bg-red-600 hover:bg-red-700 text-white'
+                  }`}
+                >
+                  {showDesksWorkstations ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
+                </button>
+              </div>
+
+              {/* Cubicles */}
+              <div className="flex items-center justify-between p-3 bg-slate-800 rounded-lg">
+                <span className="text-white font-bold">Cubicles Dropdown</span>
+                <button
+                  onClick={() => setShowCubicles(!showCubicles)}
+                  className={`p-2 rounded-lg transition-all ${
+                    showCubicles
+                      ? 'bg-green-600 hover:bg-green-700 text-white'
+                      : 'bg-red-600 hover:bg-red-700 text-white'
+                  }`}
+                >
+                  {showCubicles ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
+                </button>
+              </div>
+
+              {/* Seating */}
+              <div className="flex items-center justify-between p-3 bg-slate-800 rounded-lg">
+                <span className="text-white font-bold">Seating Dropdown</span>
+                <button
+                  onClick={() => setShowSeating(!showSeating)}
+                  className={`p-2 rounded-lg transition-all ${
+                    showSeating
+                      ? 'bg-green-600 hover:bg-green-700 text-white'
+                      : 'bg-red-600 hover:bg-red-700 text-white'
+                  }`}
+                >
+                  {showSeating ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
+                </button>
+              </div>
+
+              {/* Storage */}
+              <div className="flex items-center justify-between p-3 bg-slate-800 rounded-lg">
+                <span className="text-white font-bold">Storage Dropdown</span>
+                <button
+                  onClick={() => setShowStorage(!showStorage)}
+                  className={`p-2 rounded-lg transition-all ${
+                    showStorage
+                      ? 'bg-green-600 hover:bg-green-700 text-white'
+                      : 'bg-red-600 hover:bg-red-700 text-white'
+                  }`}
+                >
+                  {showStorage ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
+                </button>
+              </div>
+
+              {/* Conference & Meeting */}
+              <div className="flex items-center justify-between p-3 bg-slate-800 rounded-lg">
+                <span className="text-white font-bold">Conference & Meeting Dropdown</span>
+                <button
+                  onClick={() => setShowConferenceMeeting(!showConferenceMeeting)}
+                  className={`p-2 rounded-lg transition-all ${
+                    showConferenceMeeting
+                      ? 'bg-green-600 hover:bg-green-700 text-white'
+                      : 'bg-red-600 hover:bg-red-700 text-white'
+                  }`}
+                >
+                  {showConferenceMeeting ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
+                </button>
+              </div>
+
+              {/* Reception & Lounge */}
+              <div className="flex items-center justify-between p-3 bg-slate-800 rounded-lg">
+                <span className="text-white font-bold">Reception & Lounge Dropdown</span>
+                <button
+                  onClick={() => setShowReceptionLounge(!showReceptionLounge)}
+                  className={`p-2 rounded-lg transition-all ${
+                    showReceptionLounge
+                      ? 'bg-green-600 hover:bg-green-700 text-white'
+                      : 'bg-red-600 hover:bg-red-700 text-white'
+                  }`}
+                >
+                  {showReceptionLounge ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
+                </button>
+              </div>
             </div>
           </div>
 
