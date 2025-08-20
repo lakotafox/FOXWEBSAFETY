@@ -1,6 +1,9 @@
 // Netlify Function for FOXBOT
 // This replaces the Next.js API route and works with static export
 
+const fs = require('fs').promises;
+const path = require('path');
+
 exports.handler = async (event, context) => {
   // Handle CORS
   const headers = {
@@ -64,32 +67,167 @@ exports.handler = async (event, context) => {
     
     // System prompt for FOXBOT
     const SYSTEM_PROMPT = `You are FOXBOT, the AI assistant for FoxBuilt Office Furniture.
+
+CRITICAL RULES:
+- Keep responses to 1-2 sentences MAX
+- When users mention ANY furniture type, IMMEDIATELY list available options
+- NO follow-up questions unless absolutely necessary
+- Be direct and action-oriented
+
+PRODUCT CATEGORIES TO SHOW:
+• Chairs/Seating → "We have: Task Chairs, Executive Chairs, Conference Chairs, Drafting Stools, Ergonomic Seating"
+• Desks → "Available desks: Executive Desks, Computer Desks, Standing Desks, Modular Benching Systems"
+• Tables → "Our tables: Conference Tables, Collaborative Tables, Coffee Tables, Side Tables"
+• Storage → "Storage options: Filing Cabinets, Shelving Units, Bookcases, Lockers, Credenzas"
+• Cubicles → "Cubicle solutions: Workstations, Panel Systems, Modular Cubicles, Privacy Screens"
+• Conference/Meeting → "Meeting furniture: Conference Tables, Meeting Chairs, Collaborative Tables, AV Carts"
+• Reception/Lounge → "Reception area: Reception Desks, Sofas, Lounge Chairs, Coffee Tables"
+
+TRIGGER WORDS:
+- "show me" / "options" / "what do you have" / "show" / "list" / "browse" → List relevant categories immediately
+- Any furniture keyword → Show that category's options IMMEDIATELY
+- "furniture" / "office" / "products" → List ALL main categories
+- Never ask "what type" - just show what's available
+
+Example responses:
+User: "I need a chair" → "We have Task Chairs, Executive Chairs, Conference Chairs, Drafting Stools, and Ergonomic Seating. Which type interests you?"
+User: "Show me desks" → "Our desks: Executive Desks, Computer Desks, Standing Desks, and Modular Benching Systems."
+User: "What do you have?" → "We offer: Desks, Chairs, Storage, Conference Tables, Cubicles, and Reception furniture."`;
+
+    // Enhanced product detection with ALL categories and subcategories
+    const PRODUCT_CATEGORIES = {
+      chairs: {
+        keywords: [
+          'chair', 'chairs', 'seating', 'seat', 'stool', 'ergonomic',
+          // Subcategory names
+          'task chair', 'task chairs', 'task',
+          'executive chair', 'executive chairs', 'executive seating',
+          'conference chair', 'conference chairs', 'meeting chair',
+          'drafting stool', 'drafting stools', 'drafting',
+          'ergonomic seating', 'ergonomic chair'
+        ],
+        categories: ['task-chairs', 'executive-chairs', 'conference-chairs', 'drafting-stools', 'ergonomic-seating'],
+        response: "Task Chairs, Executive Chairs, Conference Chairs, Drafting Stools, Ergonomic Seating"
+      },
+      desks: {
+        keywords: [
+          'desk', 'desks', 'workstation', 'workstations', 'benching',
+          // Subcategory names
+          'executive desk', 'executive desks',
+          'computer desk', 'computer desks', 
+          'standing desk', 'standing desks', 'sit stand', 'height adjustable',
+          'modular benching', 'benching system', 'benching systems'
+        ],
+        categories: ['executive-desks', 'computer-desks', 'standing-desks', 'modular-benching'],
+        response: "Executive Desks, Computer Desks, Standing Desks, Modular Benching Systems"
+      },
+      storage: {
+        keywords: [
+          'storage', 'cabinet', 'cabinets', 'shelving', 'shelf',
+          // Subcategory names
+          'filing cabinet', 'filing cabinets', 'file cabinet', 'file cabinets',
+          'shelving unit', 'shelving units', 'shelves',
+          'bookcase', 'bookcases', 'book shelf', 'bookshelves',
+          'locker', 'lockers', 'personal storage',
+          'credenza', 'credenzas', 'sideboard'
+        ],
+        categories: ['filing-cabinets', 'shelving-units', 'bookcases', 'lockers', 'credenzas'],
+        response: "Filing Cabinets, Shelving Units, Bookcases, Lockers, Credenzas"
+      },
+      tables: {
+        keywords: [
+          'table', 'tables',
+          // Subcategory names
+          'conference table', 'conference tables', 'boardroom table', 'meeting table',
+          'collaborative table', 'collaborative tables', 'collaboration',
+          'coffee table', 'coffee tables', 'accent table',
+          'side table', 'side tables', 'end table', 'occasional table'
+        ],
+        categories: ['conference-tables', 'collaborative-tables', 'coffee-tables', 'side-tables'],
+        response: "Conference Tables, Collaborative Tables, Coffee Tables, Side Tables"
+      },
+      cubicles: {
+        keywords: [
+          'cubicle', 'cubicles', 'cube', 'cubes', 'partition', 'partitions',
+          // Subcategory names
+          'cubicle workstation', 'cubicle workstations',
+          'panel system', 'panel systems', 'panels',
+          'modular cubicle', 'modular cubicles',
+          'privacy screen', 'privacy screens', 'divider', 'dividers'
+        ],
+        categories: ['cubicle-workstations', 'panel-systems', 'modular-cubicles', 'privacy-screens'],
+        response: "Cubicle Workstations, Panel Systems, Modular Cubicles, Privacy Screens"
+      },
+      conference: {
+        keywords: [
+          'conference', 'meeting', 'boardroom', 'training',
+          // Subcategory items
+          'conference furniture', 'meeting room', 'meeting furniture',
+          'av cart', 'av carts', 'media cart', 'presentation'
+        ],
+        categories: ['conference-tables', 'meeting-chairs', 'collaborative-tables', 'av-carts'],
+        response: "Conference Tables, Meeting Room Chairs, Collaborative Tables, AV Carts"
+      },
+      reception: {
+        keywords: [
+          'reception', 'lounge', 'lobby', 'waiting', 'front desk',
+          // Subcategory names
+          'reception desk', 'reception desks', 'front desk',
+          'sofa', 'sofas', 'couch', 'couches', 'loveseat',
+          'lounge chair', 'lounge chairs', 'accent chair', 'guest chair',
+          'coffee table', 'waiting room', 'lobby furniture'
+        ],
+        categories: ['reception-desks', 'sofas', 'lounge-chairs', 'coffee-tables', 'side-tables'],
+        response: "Reception Desks, Sofas, Lounge Chairs, Coffee Tables, Side Tables"
+      }
+    };
+
+    // Detect which product category user is asking about
+    let detectedCategory = null;
+    const lowerMessage = message.toLowerCase();
     
-Your personality:
-- Professional yet friendly
-- Knowledgeable about office furniture
-- Helpful and solution-oriented
-- Concise but informative
+    // Check for "show me" type requests
+    const showTriggers = ['show me', 'show', 'options', 'what do you have', 'list', 'browse', 'display', 'view'];
+    const isShowRequest = showTriggers.some(trigger => lowerMessage.includes(trigger));
+    
+    for (const [category, data] of Object.entries(PRODUCT_CATEGORIES)) {
+      if (data.keywords.some(keyword => lowerMessage.includes(keyword))) {
+        detectedCategory = category;
+        break;
+      }
+    }
+    
+    // If user just asks to see products without specifying, show all categories
+    if (isShowRequest && !detectedCategory) {
+      detectedCategory = 'all';
+    }
 
-About FoxBuilt:
-- Premium office furniture supplier
-- Located in Utah
-- Specializes in desks, chairs, storage, and complete office solutions
-- Offers both new and refurbished furniture
-- Known for quality and customer service
-
-When answering:
-1. Be helpful and specific about furniture recommendations
-2. Mention product categories when relevant
-3. Keep responses concise (2-3 sentences ideal)
-4. Be enthusiastic about helping customers find the right furniture
-5. If unsure, suggest contacting the team or visiting the showroom`;
-
-    // Detect if user is asking about products
-    const productKeywords = ['desk', 'chair', 'table', 'storage', 'cabinet', 'furniture', 'office', 'cubicle', 'standing', 'seating'];
-    const shouldSearchProducts = productKeywords.some(keyword => 
-      message.toLowerCase().includes(keyword)
-    ) && !message.toLowerCase().includes('stop');
+    // Try to load and search products
+    let products = [];
+    try {
+      const productsPath = path.join(__dirname, '../../public/products.json');
+      const productsData = await fs.readFile(productsPath, 'utf8');
+      const allProducts = JSON.parse(productsData);
+      
+      if (detectedCategory && PRODUCT_CATEGORIES[detectedCategory]) {
+        // Filter products by detected category
+        const relevantCategories = PRODUCT_CATEGORIES[detectedCategory].categories;
+        products = Object.entries(allProducts)
+          .filter(([key, product]) => {
+            return relevantCategories.some(cat => key.includes(cat) || product.category === cat);
+          })
+          .slice(0, 5) // Return top 5 products
+          .map(([key, product]) => ({
+            id: key,
+            title: product.title || product.name || key,
+            category: product.category,
+            description: product.description
+          }));
+      }
+    } catch (error) {
+      console.log('Could not load products:', error.message);
+      // Products array remains empty if file can't be loaded
+    }
 
     // Call Gemini API
     const geminiResponse = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
@@ -143,10 +281,6 @@ When answering:
     const data = await geminiResponse.json();
     const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text || 
       "I'm having trouble understanding. Could you tell me what type of furniture you're looking for?";
-
-    // For now, return empty products array
-    // In production, you'd search your products database here
-    const products = [];
 
     return {
       statusCode: 200,
