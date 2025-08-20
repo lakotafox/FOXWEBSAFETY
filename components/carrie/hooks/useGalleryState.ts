@@ -1,28 +1,27 @@
 'use client'
 
 import { useState } from 'react'
-import { DEFAULT_GALLERY_IMAGES, DEFAULT_MOBILE_GALLERY_IMAGES } from '@/components/carrie/constants/editor-constants'
+import { DEFAULT_GALLERY_IMAGES } from '@/components/carrie/constants/editor-constants'
 
 export const useGalleryState = () => {
   const [galleryImages, setGalleryImages] = useState(DEFAULT_GALLERY_IMAGES)
   const [pendingGalleryImages, setPendingGalleryImages] = useState(DEFAULT_GALLERY_IMAGES)
-  const [mobileGalleryImages, setMobileGalleryImages] = useState(DEFAULT_MOBILE_GALLERY_IMAGES)
-  const [pendingMobileGalleryImages, setPendingMobileGalleryImages] = useState(DEFAULT_MOBILE_GALLERY_IMAGES)
-  const [galleryViewMode, setGalleryViewMode] = useState<'desktop' | 'mobile'>('desktop')
   const [isGalleryUserControlled, setIsGalleryUserControlled] = useState(false)
   const [galleryTempPreviews, setGalleryTempPreviews] = useState<{[key: string]: string}>({})
 
+  // For backward compatibility, map mobile functions to regular gallery
   return {
     galleryImages,
     setGalleryImages,
     pendingGalleryImages,
     setPendingGalleryImages,
-    mobileGalleryImages,
-    setMobileGalleryImages,
-    pendingMobileGalleryImages,
-    setPendingMobileGalleryImages,
-    galleryViewMode,
-    setGalleryViewMode,
+    // Map mobile to same as desktop for backward compatibility
+    mobileGalleryImages: galleryImages,
+    setMobileGalleryImages: setGalleryImages,
+    pendingMobileGalleryImages: pendingGalleryImages,
+    setPendingMobileGalleryImages: setPendingGalleryImages,
+    galleryViewMode: 'desktop' as const,
+    setGalleryViewMode: () => {}, // No-op since we only have one gallery now
     isGalleryUserControlled,
     setIsGalleryUserControlled,
     galleryTempPreviews,

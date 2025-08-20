@@ -127,7 +127,7 @@ export const useCarrieEditor = () => {
     const result = await publishToGitHub({
       products: featuredProducts,
       gallery: pendingGalleryImages,
-      mobileGallery: pendingMobileGalleryImages,
+      mobileGallery: pendingGalleryImages, // Same gallery for both
       cropSettings,
       showMessage
     })
@@ -136,11 +136,8 @@ export const useCarrieEditor = () => {
       // Also save to localStorage as backup
       saveMainProducts(featuredProducts)
       localStorage.setItem('foxbuilt-gallery', JSON.stringify(pendingGalleryImages))
-      localStorage.setItem('foxbuilt-mobile-gallery', JSON.stringify(pendingMobileGalleryImages))
       setGalleryImages(pendingGalleryImages)
       setPendingGalleryImages(pendingGalleryImages)
-      setMobileGalleryImages(pendingMobileGalleryImages)
-      setPendingMobileGalleryImages(pendingMobileGalleryImages)
       
       showMessage("✅ Published successfully!")
       
@@ -198,30 +195,7 @@ export const useCarrieEditor = () => {
 
   // Check if mobile and load saved data on mount
   useEffect(() => {
-    // Load from localStorage only - no automatic draft loading
-    const savedGallery = localStorage.getItem('foxbuilt-gallery')
-    if (savedGallery) {
-      try {
-        const images = JSON.parse(savedGallery)
-        setGalleryImages(images)
-        setPendingGalleryImages(images)
-      } catch (e) {
-        console.error('Error loading gallery images:', e)
-      }
-    }
-    
-    const savedMobileGallery = localStorage.getItem('foxbuilt-mobile-gallery')
-    if (savedMobileGallery) {
-      try {
-        const images = JSON.parse(savedMobileGallery)
-        setMobileGalleryImages(images)
-        setPendingMobileGalleryImages(images)
-      } catch (e) {
-        console.error('Error loading mobile gallery images:', e)
-      }
-    }
-    
-    // First try to load from main-products.json (where this editor publishes to)
+    // Load products from main-products.json (where this editor publishes to)
     fetch('/main-products.json')
       .then(res => res.json())
       .then(data => {
@@ -245,43 +219,42 @@ export const useCarrieEditor = () => {
         }
       })
       .catch(err => {
-        console.log('Could not load products.json, trying content.json:', err)
-        // Fallback to content.json if products.json is not available
-        fetch('/content.json')
-          .then(res => res.json())
-          .then(data => {
-            if (data.products) {
-              setFeaturedProducts(data.products)
-              saveMainProducts(data.products)
-              
-              // Load crop settings from products
-              const crops: {[key: string]: {scale: number, x: number, y: number}} = {}
-              Object.keys(data.products).forEach(category => {
-                data.products[category].forEach((product: any) => {
-                  if (product.imageCrop && product.image) {
-                    crops[product.image] = product.imageCrop
-                  }
-                })
-              })
-              setCropSettings(crops)
-            }
-            if (data.gallery) {
-              setGalleryImages(data.gallery)
-              setPendingGalleryImages(data.gallery)
-              localStorage.setItem('foxbuilt-gallery', JSON.stringify(data.gallery))
-            }
-            if (data.mobileGallery) {
-              setMobileGalleryImages(data.mobileGallery)
-              setPendingMobileGalleryImages(data.mobileGallery)
-              localStorage.setItem('foxbuilt-mobile-gallery', JSON.stringify(data.mobileGallery))
-            }
-            
-            // Load gallery crops if available
-            if (data.galleryCrops) {
-              setCropSettings(prev => ({...prev, ...data.galleryCrops}))
-            }
-          })
-          .catch(err => console.log('Could not load content.json:', err))
+        console.log('Could not load main-products.json:', err)
+      })
+    
+    // Always load gallery from content.json (where gallery data is actually stored)
+    fetch('/content.json')
+      .then(res => res.json())
+      .then(data => {
+        if (data.gallery && data.gallery.length > 0) {
+          setGalleryImages(data.gallery)
+          setPendingGalleryImages(data.gallery)
+          localStorage.setItem('foxbuilt-gallery', JSON.stringify(data.gallery))
+        } else if (data.mobileGallery && data.mobileGallery.length > 0) {
+          // Fallback to mobileGallery if gallery is empty
+          setGalleryImages(data.mobileGallery)
+          setPendingGalleryImages(data.mobileGallery)
+          localStorage.setItem('foxbuilt-gallery', JSON.stringify(data.mobileGallery))
+        }
+        
+        // Load gallery crops if available
+        if (data.galleryCrops) {
+          setCropSettings(prev => ({...prev, ...data.galleryCrops}))
+        }
+      })
+      .catch(err => {
+        console.log('Could not load content.json, using localStorage:', err)
+        // Fall back to localStorage if content.json fails
+        const savedGallery = localStorage.getItem('foxbuilt-gallery')
+        if (savedGallery) {
+          try {
+            const images = JSON.parse(savedGallery)
+            setGalleryImages(images)
+            setPendingGalleryImages(images)
+          } catch (e) {
+            console.error('Error loading gallery images:', e)
+          }
+        }
       })
   }, [])
 

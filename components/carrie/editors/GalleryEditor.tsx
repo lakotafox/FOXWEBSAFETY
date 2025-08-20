@@ -1,18 +1,18 @@
 'use client'
 
 import Image from 'next/image'
-import { X, Edit2, Monitor, Smartphone } from 'lucide-react'
+import { X, Edit2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 interface GalleryEditorProps {
   show: boolean
   onClose: () => void
   galleryImages: string[]
-  mobileGalleryImages: string[]
+  mobileGalleryImages?: string[] // Optional for backward compatibility
   onImageUpload: (index: number, file: File, isMobile?: boolean) => void
   getImageUrl: (image: string, isGallery?: boolean) => string
-  viewMode: 'desktop' | 'mobile'
-  onViewModeChange: (mode: 'desktop' | 'mobile') => void
+  viewMode?: 'desktop' | 'mobile' // Optional for backward compatibility
+  onViewModeChange?: (mode: 'desktop' | 'mobile') => void // Optional for backward compatibility
 }
 
 export default function GalleryEditor({ 
@@ -25,7 +25,7 @@ export default function GalleryEditor({
   viewMode,
   onViewModeChange
 }: GalleryEditorProps) {
-  const currentImages = viewMode === 'desktop' ? galleryImages : mobileGalleryImages
+  const currentImages = galleryImages // Always use galleryImages
   
   if (!show) return null
 
@@ -44,29 +44,9 @@ export default function GalleryEditor({
           </Button>
         </div>
         
-        {/* View Mode Toggle */}
-        <div className="flex justify-center mb-6">
-          <div className="bg-gray-100 p-1 rounded-lg flex gap-1">
-            <Button
-              onClick={() => onViewModeChange('desktop')}
-              className={`px-4 py-2 ${viewMode === 'desktop' ? 'bg-black text-white hover:bg-gray-800' : 'bg-transparent hover:bg-gray-200'}`}
-              variant="ghost"
-              size="sm"
-            >
-              <Monitor className="w-4 h-4 mr-2" />
-              Desktop Images
-            </Button>
-            <Button
-              onClick={() => onViewModeChange('mobile')}
-              className={`px-4 py-2 ${viewMode === 'mobile' ? 'bg-black text-white hover:bg-gray-800' : 'bg-transparent hover:bg-gray-200'}`}
-              variant="ghost"
-              size="sm"
-            >
-              <Smartphone className="w-4 h-4 mr-2" />
-              Mobile Images
-            </Button>
-          </div>
-        </div>
+        <p className="text-center text-gray-600 mb-4">
+          These images will be displayed on all devices
+        </p>
         
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           {currentImages.map((image, index) => (
@@ -95,7 +75,7 @@ export default function GalleryEditor({
                     accept="image/*"
                     onChange={(e) => {
                       const file = e.target.files?.[0]
-                      if (file) onImageUpload(index, file, viewMode === 'mobile')
+                      if (file) onImageUpload(index, file, false) // Always false since we only have one gallery
                     }}
                   />
                 </label>

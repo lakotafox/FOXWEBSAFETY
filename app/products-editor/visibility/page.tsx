@@ -130,20 +130,36 @@ export default function CategoryVisibilityEditor() {
     // Load category names
     const loadCategoryNames = async () => {
       try {
-        // Load custom category names if they exist
-        const response = await fetch('/category-names.json', { cache: 'no-store' })
-        if (response.ok) {
-          const names = await response.json()
+        // First check localStorage for draft changes
+        const savedNames = localStorage.getItem('foxbuilt-category-names')
+        if (savedNames) {
+          const names = JSON.parse(savedNames)
           setCategoryNames(names)
           
           // Update allCategories with custom names
           setAllCategories(prev => prev.map(cat => ({
             ...cat,
             name: names.subcategories?.[cat.id] || cat.name,
-            group: Object.values(categoryNames.groups).find((_, index) => 
-              Object.keys(categoryNames.groups)[index] === groupIdMap[cat.group]
+            group: Object.values(names.groups).find((_, index) => 
+              Object.keys(names.groups)[index] === groupIdMap[cat.group]
             ) || cat.group
           })))
+        } else {
+          // Fallback to fetch from published file
+          const response = await fetch('/category-names.json', { cache: 'no-store' })
+          if (response.ok) {
+            const names = await response.json()
+            setCategoryNames(names)
+            
+            // Update allCategories with custom names
+            setAllCategories(prev => prev.map(cat => ({
+              ...cat,
+              name: names.subcategories?.[cat.id] || cat.name,
+              group: Object.values(names.groups).find((_, index) => 
+                Object.keys(names.groups)[index] === groupIdMap[cat.group]
+              ) || cat.group
+            })))
+          }
         }
         
         // Also check for executive-desks custom name from products.json
@@ -171,9 +187,16 @@ export default function CategoryVisibilityEditor() {
   }, [])
 
   const toggleCategory = (categoryId: string) => {
-    setVisibility(prev => ({
-      ...prev,
-      [categoryId]: !prev[categoryId]
+    const newVisibility = {
+      ...visibility,
+      [categoryId]: !visibility[categoryId]
+    }
+    setVisibility(newVisibility)
+    // Save to localStorage immediately for local persistence
+    localStorage.setItem('foxbuilt-category-visibility', JSON.stringify({
+      ...newVisibility,
+      showSearchBar,
+      showFoxbot
     }))
   }
 
@@ -186,6 +209,12 @@ export default function CategoryVisibilityEditor() {
       newVisibility[cat.id] = !allVisible
     })
     setVisibility(newVisibility)
+    // Save to localStorage immediately for local persistence
+    localStorage.setItem('foxbuilt-category-visibility', JSON.stringify({
+      ...newVisibility,
+      showSearchBar,
+      showFoxbot
+    }))
   }
 
 
@@ -195,14 +224,17 @@ export default function CategoryVisibilityEditor() {
   }
 
   const saveEdit = (id: string, type: 'group' | 'subcategory') => {
+    let newCategoryNames = categoryNames
+    
     if (type === 'group') {
-      setCategoryNames(prev => ({
-        ...prev,
+      newCategoryNames = {
+        ...categoryNames,
         groups: {
-          ...prev.groups,
+          ...categoryNames.groups,
           [id]: tempValue
         }
-      }))
+      }
+      setCategoryNames(newCategoryNames)
       // Update allCategories to reflect the new group name
       const groupId = id
       setAllCategories(prev => prev.map(cat => {
@@ -212,18 +244,23 @@ export default function CategoryVisibilityEditor() {
         return cat
       }))
     } else {
-      setCategoryNames(prev => ({
-        ...prev,
+      newCategoryNames = {
+        ...categoryNames,
         subcategories: {
-          ...prev.subcategories,
+          ...categoryNames.subcategories,
           [id]: tempValue
         }
-      }))
+      }
+      setCategoryNames(newCategoryNames)
       // Update allCategories to reflect the new subcategory name
       setAllCategories(prev => prev.map(cat => 
         cat.id === id ? { ...cat, name: tempValue } : cat
       ))
     }
+    
+    // Save category names to localStorage
+    localStorage.setItem('foxbuilt-category-names', JSON.stringify(newCategoryNames))
+    
     setEditingId(null)
     setTempValue('')
   }
@@ -250,73 +287,218 @@ export default function CategoryVisibilityEditor() {
       const OWNER = 'lakotafox'
       const REPO = 'FOXSITE'
       
-      // Helper function to update a file on GitHub
-      const updateGitHubFile = async (path: string, content: any, message: string) => {
-        // Get current file SHA
-        let sha = ''
-        try {
-          const currentFileResponse = await fetch(
-            `https://api.github.com/repos/${OWNER}/${REPO}/contents/public/${path}`,
-            {
-              headers: {
-                'Authorization': `token ${GITHUB_TOKEN}`,
-                'Accept': 'application/vnd.github.v3+json'
-              }
-            }
-          )
-          
-          if (currentFileResponse.ok) {
-            const currentFile = await currentFileResponse.json()
-            sha = currentFile.sha
-          }
-        } catch (e) {
-          console.log(`File ${path} doesn't exist yet, will create`)
-        }
-        
-        // Encode content to base64
-        const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2))))
-        
-        // Update file on GitHub
-        const updateResponse = await fetch(
-          `https://api.github.com/repos/${OWNER}/${REPO}/contents/public/${path}`,
+      // Get both files' SHAs first
+      const visibilityPath = 'public/category-visibility.json'
+      const namesPath = 'public/category-names.json'
+      
+      let visibilitySha = ''
+      let namesSha = ''
+      
+      // Get visibility file SHA
+      try {
+        const visResponse = await fetch(
+          `https://api.github.com/repos/${OWNER}/${REPO}/contents/${visibilityPath}`,
           {
-            method: 'PUT',
             headers: {
               'Authorization': `token ${GITHUB_TOKEN}`,
-              'Accept': 'application/vnd.github.v3+json',
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              message,
-              content: contentBase64,
-              sha: sha || undefined
-            })
+              'Accept': 'application/vnd.github.v3+json'
+            }
           }
         )
-        
-        return updateResponse.ok
+        if (visResponse.ok) {
+          const visFile = await visResponse.json()
+          visibilitySha = visFile.sha
+        }
+      } catch (e) {
+        console.log('Visibility file does not exist yet')
       }
       
-      // Publish visibility settings
-      const visibilitySuccess = await updateGitHubFile(
-        'category-visibility.json',
-        visibilitySettingsToPublish,
-        'Update category visibility settings'
+      // Get names file SHA
+      try {
+        const namesResponse = await fetch(
+          `https://api.github.com/repos/${OWNER}/${REPO}/contents/${namesPath}`,
+          {
+            headers: {
+              'Authorization': `token ${GITHUB_TOKEN}`,
+              'Accept': 'application/vnd.github.v3+json'
+            }
+          }
+        )
+        if (namesResponse.ok) {
+          const namesFile = await namesResponse.json()
+          namesSha = namesFile.sha
+        }
+      } catch (e) {
+        console.log('Names file does not exist yet')
+      }
+      
+      // Update both files in a single commit using the trees API
+      // First create blobs for both files
+      const visibilityBlob = await fetch(
+        `https://api.github.com/repos/${OWNER}/${REPO}/git/blobs`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `token ${GITHUB_TOKEN}`,
+            'Accept': 'application/vnd.github.v3+json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            content: JSON.stringify(visibilitySettingsToPublish, null, 2),
+            encoding: 'utf-8'
+          })
+        }
       )
       
-      // Publish category names
-      const namesSuccess = await updateGitHubFile(
-        'category-names.json',
-        categoryNames,
-        'Update category names'
+      const namesBlob = await fetch(
+        `https://api.github.com/repos/${OWNER}/${REPO}/git/blobs`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `token ${GITHUB_TOKEN}`,
+            'Accept': 'application/vnd.github.v3+json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            content: JSON.stringify(categoryNames, null, 2),
+            encoding: 'utf-8'
+          })
+        }
       )
+      
+      if (!visibilityBlob.ok || !namesBlob.ok) {
+        throw new Error('Failed to create blobs')
+      }
+      
+      const visBlobData = await visibilityBlob.json()
+      const namesBlobData = await namesBlob.json()
+      
+      // Get the current commit SHA
+      const refResponse = await fetch(
+        `https://api.github.com/repos/${OWNER}/${REPO}/git/ref/heads/main`,
+        {
+          headers: {
+            'Authorization': `token ${GITHUB_TOKEN}`,
+            'Accept': 'application/vnd.github.v3+json'
+          }
+        }
+      )
+      
+      if (!refResponse.ok) {
+        throw new Error('Failed to get current ref')
+      }
+      
+      const refData = await refResponse.json()
+      const currentCommitSha = refData.object.sha
+      
+      // Get the tree of the current commit
+      const commitResponse = await fetch(
+        `https://api.github.com/repos/${OWNER}/${REPO}/git/commits/${currentCommitSha}`,
+        {
+          headers: {
+            'Authorization': `token ${GITHUB_TOKEN}`,
+            'Accept': 'application/vnd.github.v3+json'
+          }
+        }
+      )
+      
+      if (!commitResponse.ok) {
+        throw new Error('Failed to get current commit')
+      }
+      
+      const commitData = await commitResponse.json()
+      const baseTreeSha = commitData.tree.sha
+      
+      // Create a new tree with both files
+      const treeResponse = await fetch(
+        `https://api.github.com/repos/${OWNER}/${REPO}/git/trees`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `token ${GITHUB_TOKEN}`,
+            'Accept': 'application/vnd.github.v3+json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            base_tree: baseTreeSha,
+            tree: [
+              {
+                path: visibilityPath,
+                mode: '100644',
+                type: 'blob',
+                sha: visBlobData.sha
+              },
+              {
+                path: namesPath,
+                mode: '100644',
+                type: 'blob',
+                sha: namesBlobData.sha
+              }
+            ]
+          })
+        }
+      )
+      
+      if (!treeResponse.ok) {
+        throw new Error('Failed to create tree')
+      }
+      
+      const treeData = await treeResponse.json()
+      
+      // Create a new commit
+      const newCommitResponse = await fetch(
+        `https://api.github.com/repos/${OWNER}/${REPO}/git/commits`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `token ${GITHUB_TOKEN}`,
+            'Accept': 'application/vnd.github.v3+json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            message: `Update category visibility and names - ${new Date().toLocaleString()}`,
+            tree: treeData.sha,
+            parents: [currentCommitSha]
+          })
+        }
+      )
+      
+      if (!newCommitResponse.ok) {
+        throw new Error('Failed to create commit')
+      }
+      
+      const newCommitData = await newCommitResponse.json()
+      
+      // Update the reference to point to the new commit
+      const updateRefResponse = await fetch(
+        `https://api.github.com/repos/${OWNER}/${REPO}/git/refs/heads/main`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Authorization': `token ${GITHUB_TOKEN}`,
+            'Accept': 'application/vnd.github.v3+json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            sha: newCommitData.sha
+          })
+        }
+      )
+      
+      const success = updateRefResponse.ok
 
-      if (visibilitySuccess && namesSuccess) {
-        setPublishMessage('Settings published successfully!')
+      if (success) {
+        // Clear localStorage after successful publish
+        localStorage.removeItem('foxbuilt-category-visibility')
+        localStorage.removeItem('foxbuilt-category-names')
+        
+        setPublishMessage('✅ Settings published successfully!')
+        setSaveMessage('✅ Published to live site!')
         setTimeout(() => {
           setShowPublishLoadingOverlay(false)
           setPublishMessage('')
-        }, 2000)
+          setSaveMessage('')
+        }, 3000)
       } else {
         throw new Error('Failed to publish')
       }
@@ -389,7 +571,16 @@ export default function CategoryVisibilityEditor() {
                 <p className="text-yellow-500 text-sm mt-1 font-bold">Show or hide the search bar in the navigation header</p>
               </div>
               <button
-                onClick={() => setShowSearchBar(!showSearchBar)}
+                onClick={() => {
+                  const newValue = !showSearchBar
+                  setShowSearchBar(newValue)
+                  // Save to localStorage immediately
+                  localStorage.setItem('foxbuilt-category-visibility', JSON.stringify({
+                    ...visibility,
+                    showSearchBar: newValue,
+                    showFoxbot
+                  }))
+                }}
                 className={`p-3 rounded-lg transition-all ${
                   showSearchBar
                     ? 'bg-green-600 hover:bg-green-700 text-white'
@@ -414,7 +605,16 @@ export default function CategoryVisibilityEditor() {
                 <p className="text-yellow-500 text-sm mt-1 font-bold">Show or hide the FOXBOT AI chat assistant in navigation</p>
               </div>
               <button
-                onClick={() => setShowFoxbot(!showFoxbot)}
+                onClick={() => {
+                  const newValue = !showFoxbot
+                  setShowFoxbot(newValue)
+                  // Save to localStorage immediately
+                  localStorage.setItem('foxbuilt-category-visibility', JSON.stringify({
+                    ...visibility,
+                    showSearchBar,
+                    showFoxbot: newValue
+                  }))
+                }}
                 className={`p-3 rounded-lg transition-all ${
                   showFoxbot
                     ? 'bg-green-600 hover:bg-green-700 text-white'

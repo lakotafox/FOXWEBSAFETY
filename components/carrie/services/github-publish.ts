@@ -13,6 +13,8 @@ export async function publishToGitHub({
   cropSettings, 
   showMessage 
 }: PublishOptions) {
+  // Use same gallery for both mobile and desktop
+  const galleryToUse = gallery || mobileGallery || []
   showMessage("🚀 Publishing live site...", 30000) // 30 seconds for publish
   
   try {
@@ -70,8 +72,8 @@ export async function publishToGitHub({
     // Prepare the content for content.json (includes gallery)
     const content = {
       products: convertedProducts,
-      gallery: gallery,
-      mobileGallery: mobileGallery || gallery, // fallback to desktop gallery if no mobile gallery
+      gallery: galleryToUse,
+      mobileGallery: galleryToUse, // Same gallery for both
       galleryCrops: cropSettings,
       lastUpdated: new Date().toISOString(),
       updatedBy: "Kyle"
