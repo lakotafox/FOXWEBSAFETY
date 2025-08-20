@@ -112,7 +112,7 @@ export function useProductsPublish() {
         
         showSaveMessage("✅ Published successfully!")
         
-        // Show publish loading overlay for 1 minute
+        // Show publish loading overlay for 3 minutes
         setTimeout(() => {
           setSaveMessage("")
           setShowPublishLoadingOverlay(true)
@@ -126,12 +126,12 @@ export function useProductsPublish() {
             setPublishMessage(constructionMessages[messageIndex])
           }, 4000)
           
-          // Hide overlay after 60 seconds
+          // Hide overlay after 180 seconds
           setTimeout(() => {
             clearInterval(messageInterval)
             setShowPublishLoadingOverlay(false)
             setPublishMessage("")
-          }, 60000)
+          }, 180000) // 3 minutes
         }, 2000)
         
         // Clear temp previews
@@ -139,16 +139,65 @@ export function useProductsPublish() {
       } else {
         const error = await updateResponse.json()
         console.error('GitHub update error:', error)
-        if (updateResponse.status === 401) {
-          showSaveMessage("❌ GitHub token expired - Tell Khabe: 'GitHub 401 error'", 5000)
-          alert("ERROR: GitHub token expired (401)\n\nTell Khabe: 'GitHub 401 error - need new token'\n\nHe'll fix it free!")
-        } else {
-          showSaveMessage("❌ Failed to publish. Try again or contact support.")
-        }
+        
+        // Keep animation playing forever on error
+        setShowPublishLoadingOverlay(true)
+        
+        // Start with "That's okay because..." then rotate other messages
+        setPublishMessage("That's okay because...")
+        
+        const errorMessages = [
+          "No worry, mon just a little error jam.",
+          "We be dancin' through the bug, brother.",
+          "Fox still vibin', cause peoples still buyin'.",
+          "Don't ya know da music fix what code can't bro.",
+          "Island time, slow down enjoy the chime.",
+          "Good vibes always override when system offline",
+          "Brotheration mend this code with time"
+        ]
+        
+        let messageIndex = 0
+        
+        // After 4 seconds, start rotating the other messages
+        setTimeout(() => {
+          const messageInterval = setInterval(() => {
+            setPublishMessage(errorMessages[messageIndex])
+            messageIndex = (messageIndex + 1) % errorMessages.length
+          }, 8000) // Rotate every 8 seconds (twice as slow)
+        }, 4000)
+        
+        // Don't hide overlay on error - let it loop forever
       }
     } catch (error) {
       console.error('Error publishing:', error)
-      showSaveMessage("❌ Error publishing changes")
+      
+      // Keep animation playing forever on error
+      setShowPublishLoadingOverlay(true)
+      
+      // Start with "That's okay because..." then rotate other messages
+      setPublishMessage("That's okay because...")
+      
+      const errorMessages = [
+        "No worry, mon just a little error jam.",
+        "We be dancin' through the bug, brother.",
+        "Fox still vibin', cause peoples still buyin'.",
+        "Don't ya know da music fix what code can't bro.",
+        "Island time, slow down enjoy the chime.",
+        "Good vibes always override when system offline",
+        "Brotheration mend this code with time"
+      ]
+      
+      let messageIndex = 0
+      
+      // After 4 seconds, start rotating the other messages
+      setTimeout(() => {
+        const messageInterval = setInterval(() => {
+          setPublishMessage(errorMessages[messageIndex])
+          messageIndex = (messageIndex + 1) % errorMessages.length
+        }, 8000) // Rotate every 8 seconds (twice as slow)
+      }, 4000)
+      
+      // Don't hide overlay on error - let it loop forever
     }
   }
 

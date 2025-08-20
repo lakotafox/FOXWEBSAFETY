@@ -60,7 +60,7 @@ export default function HelpModal({ show, onClose }: HelpModalProps) {
                 <span className="text-2xl">2️⃣:</span> Click the <strong>"Publish"</strong> button at the top
               </p>
               <p className="text-lg text-center">
-                <span className="text-2xl">3️⃣:</span> Wait <strong>60 seconds</strong> for changes to build and go live
+                <span className="text-2xl">3️⃣:</span> Wait <strong>3 minutes</strong> for changes to build and go live
               </p>
               <p className="text-lg text-center">
                 <span className="text-2xl">4️⃣:</span> Your updates will be available!

@@ -427,20 +427,42 @@ export default function CategoryVisibilityEditor() {
           setPublishMessage(CONSTRUCTION_MESSAGES[messageIndex])
         }, 4000) // Change message every 4 seconds
         
-        // Hide overlay after 60 seconds (same as other editors)
+        // Hide overlay after 180 seconds (same as other editors)
         setTimeout(() => {
           clearInterval(messageInterval)
           setShowPublishLoadingOverlay(false)
           setPublishMessage("")
           setSaveMessage('')
-        }, 60000) // 1 minute
+        }, 180000) // 3 minutes
       }, 2000)
     } catch (error) {
-      setPublishMessage('Failed to publish. Please try again.')
+      // Keep animation playing forever on error
+      setShowPublishLoadingOverlay(true)
+      
+      // Start with "That's okay because..." then rotate other messages
+      setPublishMessage("That's okay because...")
+      
+      const errorMessages = [
+        "No worry, mon just a little error jam.",
+        "We be dancin' through the bug, brother.",
+        "Fox still vibin', cause peoples still buyin'.",
+        "Don't ya know da music fix what code can't bro.",
+        "Island time, slow down enjoy the chime.",
+        "Good vibes always override when system offline",
+        "Brotheration mend this code with time"
+      ]
+      
+      let messageIndex = 0
+      
+      // After 4 seconds, start rotating the other messages
       setTimeout(() => {
-        setShowPublishLoadingOverlay(false)
-        setPublishMessage('')
-      }, 3000)
+        const messageInterval = setInterval(() => {
+          setPublishMessage(errorMessages[messageIndex])
+          messageIndex = (messageIndex + 1) % errorMessages.length
+        }, 8000) // Change message every 8 seconds (twice as slow)
+      }, 4000)
+      
+      // Don't hide overlay on error - let it loop forever
     }
   }
 
