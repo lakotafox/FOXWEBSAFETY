@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Eye, EyeOff, Save, ArrowLeft, Edit2 } from 'lucide-react'
 import LoadingOverlay from '@/components/ui/LoadingOverlay'
+import { waitForClearWindow } from '@/lib/github-utils'
 
 interface CategoryVisibility {
   [key: string]: boolean
@@ -287,7 +288,7 @@ export default function CategoryVisibilityEditor() {
 
   const publishToGitHub = async () => {
     setShowPublishLoadingOverlay(true)
-    setPublishMessage('Publishing settings to GitHub...')
+    setPublishMessage('Checking for recent commits...')
     
     // Include search bar and FOXBOT settings with category visibility
     const visibilitySettingsToPublish = {
@@ -301,6 +302,10 @@ export default function CategoryVisibilityEditor() {
       const GITHUB_TOKEN = process.env.NEXT_PUBLIC_GITHUB_TOKEN || 'SET_IN_NETLIFY_ENV'
       const OWNER = 'lakotafox'
       const REPO = 'FOXSITE'
+      
+      // Check for recent commits and wait if needed
+      await waitForClearWindow(GITHUB_TOKEN, setPublishMessage)
+      setPublishMessage('Publishing settings to GitHub...')
       
       // Only update category-visibility.json (single file, single commit)
       // Store names in the same file to avoid multiple commits
@@ -347,28 +352,34 @@ export default function CategoryVisibilityEditor() {
           body: JSON.stringify({
             message: `Update category visibility and names - ${new Date().toLocaleString()}`,
             content: contentBase64,
-            sha: sha || undefined
+            sha: sha || undefined,
+            branch: 'main'
           })
         }
       )
       
-      const success = updateResponse.ok
-
-      if (success) {
-        // Clear localStorage after successful publish
-        localStorage.removeItem('foxbuilt-category-visibility')
-        localStorage.removeItem('foxbuilt-category-names')
-        
-        setPublishMessage('✅ Settings published successfully!')
-        setSaveMessage('✅ Published to live site!')
-        setTimeout(() => {
-          setShowPublishLoadingOverlay(false)
-          setPublishMessage('')
-          setSaveMessage('')
-        }, 3000)
-      } else {
-        throw new Error('Failed to publish')
+      if (!updateResponse.ok) {
+        const errorData = await updateResponse.json()
+        console.error('GitHub API Error:', errorData)
+        throw new Error(errorData.message || 'Failed to publish')
       }
+
+      // Success
+      // Clear localStorage after successful publish
+      localStorage.removeItem('foxbuilt-category-visibility')
+      localStorage.removeItem('foxbuilt-category-names')
+      
+      setPublishMessage('✅ Settings published successfully!')
+      setSaveMessage('✅ Published to live site!')
+      
+      // Wait to ensure GitHub processes the commit
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      
+      setTimeout(() => {
+        setShowPublishLoadingOverlay(false)
+        setPublishMessage('')
+        setSaveMessage('')
+      }, 3000)
     } catch (error) {
       setPublishMessage('Failed to publish. Please try again.')
       setTimeout(() => {
