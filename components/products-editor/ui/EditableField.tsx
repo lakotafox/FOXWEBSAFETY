@@ -56,7 +56,7 @@ export default function EditableField({
         onChange={(e) => onChange(e.target.value)}
         onBlur={onEndEdit}
         onKeyPress={handleKeyPress}
-        className={className.input || "w-full p-1 border rounded"}
+        className={className.input || "w-full p-1 border rounded bg-white text-black"}
         placeholder={placeholder}
         autoFocus
       />

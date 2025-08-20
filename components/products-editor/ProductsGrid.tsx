@@ -138,7 +138,7 @@ export default function ProductsGrid({
                     type="text"
                     className={{
                       display: "cursor-pointer hover:text-red-600",
-                      input: "text-xl font-black tracking-wide w-full p-1 border rounded"
+                      input: "text-xl font-black tracking-wide w-full p-1 border rounded bg-transparent text-white"
                     }}
                   />
                 </h2>
@@ -154,7 +154,7 @@ export default function ProductsGrid({
                       type="textarea"
                       className={{
                         display: "cursor-pointer hover:text-red-600",
-                        input: "text-slate-600 font-semibold w-full p-1 border rounded"
+                        input: "font-semibold w-full p-1 border rounded bg-transparent text-white"
                       }}
                       rows={2}
                     />
@@ -185,7 +185,7 @@ export default function ProductsGrid({
                           type="text"
                           className={{
                             display: "cursor-pointer hover:text-red-600 flex-1",
-                            input: "flex-1 p-1 border-b border-gray-300"
+                            input: "flex-1 p-1 border-b border-gray-300 bg-transparent text-white"
                           }}
                         />
                       </li>

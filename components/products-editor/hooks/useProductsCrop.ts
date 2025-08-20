@@ -61,10 +61,10 @@ export function useProductsCrop() {
   const handleScroll = (e: React.WheelEvent, imagePath: string) => {
     if (editingCrop === imagePath) {
       e.preventDefault()
-      const delta = e.deltaY > 0 ? 0.9 : 1.1
+      const delta = e.deltaY > 0 ? 0.98 : 1.02 // Much slower zoom for fine control
       setCropSettings(prev => {
         const current = prev[imagePath] || { scale: 1, x: 50, y: 50 }
-        const newScale = Math.max(0.17, Math.min(9, current.scale * delta))
+        const newScale = Math.max(0.1, Math.min(10, current.scale * delta))
         const newSettings = {
           ...prev,
           [imagePath]: { ...current, scale: newScale }
@@ -94,7 +94,7 @@ export function useProductsCrop() {
       
       if (pressedArrows.length !== 1) return
       
-      const moveAmount = 2
+      const moveAmount = 0.5 // percentage to move per key press - much more precise
       const currentCrop = cropSettings[editingCrop] || { scale: 1, x: 50, y: 50 }
       
       switch(e.key) {
@@ -157,8 +157,8 @@ export function useProductsCrop() {
       e.preventDefault()
       
       const currentCrop = cropSettings[editingCrop] || { scale: 1, x: 50, y: 50 }
-      const delta = e.deltaY > 0 ? 0.9 : 1.1
-      const newScale = Math.max(0.17, Math.min(9, currentCrop.scale * delta))
+      const delta = e.deltaY > 0 ? 0.98 : 1.02 // Much slower zoom for fine control
+      const newScale = Math.max(0.1, Math.min(10, currentCrop.scale * delta))
       
       setCropSettings(prev => {
         const newSettings = {
