@@ -67,29 +67,28 @@ exports.handler = async (event, context) => {
 
 CRITICAL RULES:
 - Keep responses to 1 sentence MAX
-- DO NOT list categories - the frontend will show product cards
-- Just acknowledge and let products display
-- Be extremely brief
+- NEVER make up contact info, phone numbers, or email addresses
+- NEVER say "555" phone numbers or fake emails
+- For contact requests say: "Use the contact buttons below to reach our team."
 
-PRICE INQUIRIES (cheap/budget/cost):
-Say ONLY: "Items start around $50. Catalog book items are 60% off list."
-NO MORE TEXT - let product cards show
+SPECIFIC RESPONSES (USE EXACTLY):
+• "show"/"show me" → "Here's what we have."
+• "chair"/"chairs" → "Here are our chairs."
+• "desk"/"desks" → "Here are our desks."
+• "catalog"/"catalogue" → "The catalog book is on the homepage."
+• "contact"/"human"/"help"/"call" → "Use the contact buttons below to reach our team."
+• "price"/"cost"/"cheap" → "Items start around $50. Catalog book items are 60% off list."
 
-RESPONSES FOR PRODUCTS:
-• Chairs → "Here are our chairs."
-• Desks → "Here are our desks."
-• Storage → "Here's our storage."
-• Tables → "Here are our tables."
-• "Show me" / "show" → "Here's what we have."
-• General inquiry → "Here's our furniture."
-
-DO NOT list category names - products will show as cards
-Just acknowledge briefly and let the product cards display
+NEVER:
+- List category names (Desks, Chairs, Storage, etc.)
+- Make up phone numbers or emails
+- Give long explanations
+- Ask follow-up questions
 
 Example responses:
-User: "I need a chair" → "Here are our chairs."
-User: "Show me desks" → "Here are our desks."
-User: "What do you have?" → "Here's our furniture."`;
+User: "show me" → "Here's what we have."
+User: "contact humans" → "Use the contact buttons below to reach our team."
+User: "show me the catalog" → "The catalog book is on the homepage."`;
 
     // Enhanced product detection with ALL categories and subcategories
     const PRODUCT_CATEGORIES = {
@@ -191,6 +190,14 @@ User: "What do you have?" → "Here's our furniture."`;
     const priceKeywords = ['price', 'prices', 'cost', 'cheap', 'cheapest', 'expensive', 'budget', 'affordable', 'dollar', '$', 'lowest', 'how much'];
     const isPriceInquiry = priceKeywords.some(keyword => lowerMessage.includes(keyword));
     
+    // Check for contact requests
+    const contactKeywords = ['contact', 'call', 'phone', 'email', 'human', 'help', 'reach', 'talk', 'speak'];
+    const isContactRequest = contactKeywords.some(keyword => lowerMessage.includes(keyword));
+    
+    // Check for catalog requests
+    const catalogKeywords = ['catalog', 'catalogue', 'booklet', 'brochure', 'pdf'];
+    const isCatalogRequest = catalogKeywords.some(keyword => lowerMessage.includes(keyword));
+    
     for (const [category, data] of Object.entries(PRODUCT_CATEGORIES)) {
       if (data.keywords.some(keyword => lowerMessage.includes(keyword))) {
         detectedCategory = category;
@@ -287,8 +294,8 @@ User: "What do you have?" → "Here's our furniture."`;
         response: responseText,
         products: products,
         source: 'gemini',
-        showCatalogButton: isPriceInquiry,  // Shows "View Catalog Book" button
-        showContactButtons: isPriceInquiry  // Shows contact buttons
+        showCatalogButton: isPriceInquiry || isCatalogRequest,  // Shows "View Catalog Book" button
+        showContactButtons: isPriceInquiry || isContactRequest  // Shows contact buttons
       })
     };
 
