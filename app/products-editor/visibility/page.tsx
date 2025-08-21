@@ -380,15 +380,14 @@ export default function CategoryVisibilityEditor() {
           setPublishMessage(CONSTRUCTION_MESSAGES[messageIndex])
         }, 4000) // Change message every 4 seconds
         
-        // Show success screen after 10 seconds (for testing)
+        // Show success screen after 3 minutes
         setTimeout(() => {
-          console.log('10 SECONDS - Switching to success screen')
           clearInterval(messageInterval)
           setShowPublishLoadingOverlay(false)
           setShowSuccessScreen(true)
           setPublishMessage("success")
           setSaveMessage('')
-        }, 10000) // 10 seconds for testing
+        }, 180000) // 3 minutes
       }, 2000)
     } catch (error) {
       // Keep animation playing forever on error
@@ -440,30 +439,6 @@ export default function CategoryVisibilityEditor() {
         type="success"
         publishMessage="success"
       />
-      
-      {/* Debug buttons - remove after testing */}
-      <div className="fixed bottom-4 right-4 z-[9999] flex flex-col gap-2">
-        <button
-          onClick={() => {
-            console.log('Manual trigger: showing success screen')
-            setShowPublishLoadingOverlay(false)
-            setShowSuccessScreen(true)
-          }}
-          className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-bold shadow-lg text-xl"
-        >
-          🎯 TEST SUCCESS SCREEN
-        </button>
-        <button
-          onClick={() => {
-            console.log('Hiding all overlays')
-            setShowPublishLoadingOverlay(false)
-            setShowSuccessScreen(false)
-          }}
-          className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg font-bold shadow-lg text-xl"
-        >
-          ❌ HIDE ALL OVERLAYS
-        </button>
-      </div>
 
       {/* Header */}
       <div className="bg-yellow-500 py-4 px-4 fixed top-0 left-0 right-0 z-40 shadow-lg">

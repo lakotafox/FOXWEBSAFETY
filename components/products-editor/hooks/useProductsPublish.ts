@@ -69,8 +69,6 @@ export function useProductsPublish() {
       )
       
       // Always show publish animation regardless of result
-      console.log('Publish result:', result.success ? 'SUCCESS' : 'ERROR')
-      
       if (result.success) {
         // Save to localStorage as backup
         saveProductsPageItems(convertedProducts)
@@ -86,7 +84,6 @@ export function useProductsPublish() {
       setTimeout(() => {
         setSaveMessage("")
         setShowPublishLoadingOverlay(true)
-        console.log('Starting publish animation at', new Date().toLocaleTimeString())
         
         // Start rotating messages
         let messageIndex = 0
@@ -95,22 +92,16 @@ export function useProductsPublish() {
         const messageInterval = setInterval(() => {
           messageIndex = (messageIndex + 1) % constructionMessages.length
           setPublishMessage(constructionMessages[messageIndex])
-          console.log('Message update:', constructionMessages[messageIndex])
         }, 4000)
         
-        // Show success screen after 10 seconds
-        const successTimer = setTimeout(() => {
-          console.log('10 SECONDS ELAPSED - Switching to success screen at', new Date().toLocaleTimeString())
+        // Show success screen after 3 minutes
+        setTimeout(() => {
           clearInterval(messageInterval)
           // Hide the publish overlay and show success screen
           setShowPublishLoadingOverlay(false)
           setShowSuccessScreen(true)
           setPublishMessage("success")
-          console.log('Success screen activated - overlay hidden, success shown')
-        }, 10000)
-        
-        // Store timer reference for debugging
-        console.log('Success timer set for 10 seconds, timer ID:', successTimer)
+        }, 180000) // 3 minutes
       }, 2000)
         
         // Clear temp previews

@@ -84,32 +84,6 @@ function ProductsEditorContent() {
         onPublish={handlePublish}
       />
       
-      {/* Debug buttons - remove after testing */}
-      <div className="fixed bottom-4 right-4 z-[9999] flex flex-col gap-2">
-        <button
-          onClick={() => {
-            console.log('Manual trigger: showing success screen')
-            setShowPublishLoadingOverlay(false)
-            setShowSuccessScreen(true)
-          }}
-          className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-bold shadow-lg text-xl"
-          style={{ position: 'relative', zIndex: 9999 }}
-        >
-          🎯 TEST SUCCESS SCREEN
-        </button>
-        <button
-          onClick={() => {
-            console.log('Hiding all overlays')
-            setShowPublishLoadingOverlay(false)
-            setShowSuccessScreen(false)
-          }}
-          className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg font-bold shadow-lg text-xl"
-          style={{ position: 'relative', zIndex: 9999 }}
-        >
-          ❌ HIDE ALL OVERLAYS
-        </button>
-      </div>
-      
       {/* Save message */}
       <SaveMessage show={!!saveMessage} message={saveMessage} />
 
