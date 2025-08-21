@@ -25,16 +25,18 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Upload to Cloudinary
-    const formData = new FormData();
-    formData.append('file', image);
-    formData.append('upload_preset', uploadPreset);
-    
+    // Upload to Cloudinary using JSON (FormData not available in Node.js)
     const response = await fetch(
       `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
       {
         method: 'POST',
-        body: formData
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          file: image,  // base64 data URI
+          upload_preset: uploadPreset
+        })
       }
     );
 
