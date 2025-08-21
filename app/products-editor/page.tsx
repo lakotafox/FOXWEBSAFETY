@@ -11,6 +11,7 @@ import WelcomeMessage from '@/components/products-editor/ui/WelcomeMessage'
 import HelpModal from '@/components/ui/HelpModal'
 import YellowHeader from '@/components/products-editor/ui/YellowHeader'
 import SaveMessage from '@/components/products-editor/ui/SaveMessage'
+import CloudinarySettings from '@/components/products-editor/ui/CloudinarySettings'
 import '@/components/ui/MagicBento.css'
 
 function ProductsEditorContent() {
@@ -132,6 +133,9 @@ function ProductsEditorContent() {
         show={showHelp}
         onClose={() => setShowHelp(false)}
       />
+      
+      {/* Cloudinary Settings */}
+      <CloudinarySettings />
     </div>
   )
 }

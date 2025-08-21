@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { updateGitHubFile } from '@/lib/github-api-client'
+import { getCloudinaryConfig } from '@/lib/cloudinary-config'
 
 interface UploadQueueItem {
   productId: number
@@ -16,10 +16,10 @@ export function useProductsUpload(showSaveMessage: (msg: string, duration?: numb
   const [loadingStartTime, setLoadingStartTime] = useState<number | null>(null)
   const [tempPreviews, setTempPreviews] = useState<{[key: string]: string}>({})
 
-  // Process image upload using API route
+  // Process image upload using Cloudinary
   const processImageUpload = async (productId: number, file: File, fileName: string) => {
     setActiveUploads(count => count + 1)
-    showSaveMessage("📤 Uploading image...")
+    showSaveMessage("📤 Uploading image to Cloudinary...")
     
     const uploadTimeout = setTimeout(() => {
       console.error('Upload timeout after 30 seconds')
@@ -28,29 +28,58 @@ export function useProductsUpload(showSaveMessage: (msg: string, duration?: numb
     }, 30000)
     
     try {
+      // Get Cloudinary config
+      const config = getCloudinaryConfig()
+      
+      if (!config.cloudName || !config.uploadPreset) {
+        showSaveMessage("❌ Please configure Cloudinary settings first", 5000)
+        clearTimeout(uploadTimeout)
+        setActiveUploads(count => count - 1)
+        return null
+      }
+      
       // Convert file to base64
       const reader = new FileReader()
       reader.readAsDataURL(file)
       
       reader.onload = async () => {
         const base64Data = reader.result as string
-        const base64Content = base64Data.split(',')[1]
         
-        // Upload using API route
-        const result = await updateGitHubFile(
-          `images/${fileName}`,
-          base64Content,
-          `Upload product image ${fileName}`
-        )
+        // Upload to Cloudinary via our API route
+        const response = await fetch('/api/cloudinary', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            image: base64Data,
+            cloudName: config.cloudName,
+            uploadPreset: config.uploadPreset
+          })
+        })
         
         clearTimeout(uploadTimeout)
         
-        if (result.success) {
-          showSaveMessage("✅ Image uploaded!", 3000)
+        if (response.ok) {
+          const result = await response.json()
+          if (result.success) {
+            showSaveMessage("✅ Image uploaded to Cloudinary!", 3000)
+            
+            // Update temp previews with the Cloudinary URL
+            setTempPreviews(prev => ({
+              ...prev,
+              [`/images/${fileName}`]: result.url
+            }))
+            
+            // Return the Cloudinary URL for saving
+            return result.url
+          } else {
+            console.error('Upload failed:', result.error)
+            showSaveMessage(`❌ Upload failed: ${result.error}`, 5000)
+          }
         } else {
-          console.error('Upload failed:', result.error)
-          console.error('Full result:', result)
-          showSaveMessage(`❌ Upload failed: ${result.error || 'Unknown error'}`, 5000)
+          console.error('Upload failed with status:', response.status)
+          showSaveMessage("❌ Upload failed", 5000)
         }
         
         setActiveUploads(count => count - 1)
@@ -68,6 +97,8 @@ export function useProductsUpload(showSaveMessage: (msg: string, duration?: numb
       clearTimeout(uploadTimeout)
       setActiveUploads(count => count - 1)
     }
+    
+    return null
   }
 
   // Process upload queue
@@ -116,22 +147,32 @@ export function useProductsUpload(showSaveMessage: (msg: string, duration?: numb
     // Create temporary preview immediately
     const reader = new FileReader()
     reader.onload = (e) => {
+      const tempUrl = e.target?.result as string
       setTempPreviews(prev => ({
         ...prev,
-        [`/images/${fileName}`]: e.target?.result as string
+        [`cloudinary-pending-${fileName}`]: tempUrl
       }))
     }
     reader.readAsDataURL(file)
     
     setUploadQueue(prev => [...prev, { productId, file, fileName }])
     
-    return `/images/${fileName}`
+    // Return a temporary identifier that will be replaced with Cloudinary URL
+    return `cloudinary-pending-${fileName}`
   }
 
   const getImageUrl = (imagePath: string) => {
     // Check if we have a temporary preview for this image
     if (tempPreviews[imagePath]) {
       return tempPreviews[imagePath]
+    }
+    // Check if it's a Cloudinary URL
+    if (imagePath && (imagePath.includes('cloudinary.com') || imagePath.includes('res.cloudinary.com'))) {
+      return imagePath
+    }
+    // Check if it's a pending upload
+    if (imagePath && imagePath.startsWith('cloudinary-pending-')) {
+      return tempPreviews[imagePath] || '/placeholder.svg'
     }
     // The images should be served from the public folder
     return imagePath
