@@ -13,6 +13,7 @@ interface LoadingOverlayProps {
 let globalAudioRef: HTMLAudioElement | null = null
 let isMusicPlaying = false
 let currentSongIndex = 0
+let globalFadeInterval: NodeJS.Timeout | null = null
 
 // Playlist of all Brotheration Records songs
 const MUSIC_PLAYLIST = [
@@ -166,18 +167,27 @@ export default function LoadingOverlay({
         isMusicPlaying = true
         setShowMusicButton(true)
         
+        // Clear any existing fade interval
+        if (globalFadeInterval) {
+          clearInterval(globalFadeInterval)
+          globalFadeInterval = null
+        }
+        
         // Fade in volume over 10 seconds with exponential curve for smoother fade
         let currentVolume = 0
         let fadeStep = 0
         const totalSteps = 200
         const targetVolume = volume / 100 // Use the volume state
-        const fadeInterval = setInterval(() => {
+        globalFadeInterval = setInterval(() => {
           fadeStep++
           // Use exponential curve for more natural volume fade
           currentVolume = Math.pow(fadeStep / totalSteps, 3) * targetVolume
           if (fadeStep >= totalSteps) {
             currentVolume = targetVolume
-            clearInterval(fadeInterval)
+            if (globalFadeInterval) {
+              clearInterval(globalFadeInterval)
+              globalFadeInterval = null
+            }
           }
           if (globalAudioRef) {
             globalAudioRef.volume = currentVolume
@@ -321,7 +331,11 @@ export default function LoadingOverlay({
         <div className="fixed top-8 right-8">
           <button
             onClick={() => {
-              // Mute music when opening game page
+              // Stop fade-in and mute music when opening game page
+              if (globalFadeInterval) {
+                clearInterval(globalFadeInterval)
+                globalFadeInterval = null
+              }
               if (globalAudioRef) {
                 globalAudioRef.volume = 0
                 setVolume(0)
