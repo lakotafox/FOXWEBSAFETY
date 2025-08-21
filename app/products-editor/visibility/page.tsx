@@ -62,6 +62,7 @@ export default function CategoryVisibilityEditor() {
   const [saveMessage, setSaveMessage] = useState('')
   const [showPublishLoadingOverlay, setShowPublishLoadingOverlay] = useState(false)
   const [publishMessage, setPublishMessage] = useState('')
+  const [showSuccessScreen, setShowSuccessScreen] = useState(false)
   const [allCategories, setAllCategories] = useState(defaultCategories)
   const [showSearchBar, setShowSearchBar] = useState(true)
   const [showFoxbot, setShowFoxbot] = useState(true)
@@ -379,13 +380,15 @@ export default function CategoryVisibilityEditor() {
           setPublishMessage(CONSTRUCTION_MESSAGES[messageIndex])
         }, 4000) // Change message every 4 seconds
         
-        // Hide overlay after 180 seconds (same as other editors)
+        // Show success screen after 10 seconds (for testing)
         setTimeout(() => {
+          console.log('10 SECONDS - Switching to success screen')
           clearInterval(messageInterval)
           setShowPublishLoadingOverlay(false)
-          setPublishMessage("")
+          setShowSuccessScreen(true)
+          setPublishMessage("success")
           setSaveMessage('')
-        }, 180000) // 3 minutes
+        }, 10000) // 10 seconds for testing
       }, 2000)
     } catch (error) {
       // Keep animation playing forever on error
@@ -432,6 +435,35 @@ export default function CategoryVisibilityEditor() {
         type="publish" 
         publishMessage={publishMessage}
       />
+      <LoadingOverlay 
+        show={showSuccessScreen} 
+        type="success"
+        publishMessage="success"
+      />
+      
+      {/* Debug buttons - remove after testing */}
+      <div className="fixed bottom-4 right-4 z-[9999] flex flex-col gap-2">
+        <button
+          onClick={() => {
+            console.log('Manual trigger: showing success screen')
+            setShowPublishLoadingOverlay(false)
+            setShowSuccessScreen(true)
+          }}
+          className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-bold shadow-lg text-xl"
+        >
+          🎯 TEST SUCCESS SCREEN
+        </button>
+        <button
+          onClick={() => {
+            console.log('Hiding all overlays')
+            setShowPublishLoadingOverlay(false)
+            setShowSuccessScreen(false)
+          }}
+          className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg font-bold shadow-lg text-xl"
+        >
+          ❌ HIDE ALL OVERLAYS
+        </button>
+      </div>
 
       {/* Header */}
       <div className="bg-yellow-500 py-4 px-4 fixed top-0 left-0 right-0 z-40 shadow-lg">
