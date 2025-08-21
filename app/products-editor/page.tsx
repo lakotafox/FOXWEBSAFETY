@@ -84,17 +84,16 @@ function ProductsEditorContent() {
       />
       
       {/* Debug button - remove after testing */}
-      {process.env.NODE_ENV === 'development' && (
-        <button
-          onClick={() => {
-            console.log('Manual trigger: showing success screen')
-            setShowSuccessScreen(true)
-          }}
-          className="fixed bottom-4 right-4 z-50 bg-green-500 text-white px-4 py-2 rounded"
-        >
-          Test Success Screen
-        </button>
-      )}
+      <button
+        onClick={() => {
+          console.log('Manual trigger: showing success screen')
+          setShowPublishLoadingOverlay(false)
+          setShowSuccessScreen(true)
+        }}
+        className="fixed bottom-4 right-4 z-[200] bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-bold shadow-lg"
+      >
+        TEST SUCCESS SCREEN
+      </button>
       
       {/* Save message */}
       <SaveMessage show={!!saveMessage} message={saveMessage} />
