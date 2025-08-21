@@ -65,7 +65,7 @@ function ProductsEditorContent() {
       />
       <LoadingOverlay 
         show={showPublishLoadingOverlay} 
-        type="publish" 
+        type={publishMessage === 'success' ? 'success' : 'publish'} 
         publishMessage={publishMessage}
         onPlayGame={() => window.open('/games', '_blank')}
       />

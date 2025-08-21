@@ -87,11 +87,11 @@ export function useProductsPublish() {
             setPublishMessage(constructionMessages[messageIndex])
           }, 4000)
           
-          // Hide overlay after 180 seconds
+          // Show success screen after 180 seconds
           setTimeout(() => {
             clearInterval(messageInterval)
-            setShowPublishLoadingOverlay(false)
-            setPublishMessage("")
+            // Don't hide overlay, just change type to success
+            setPublishMessage("success")
           }, 180000) // 3 minutes
         }, 2000)
         
