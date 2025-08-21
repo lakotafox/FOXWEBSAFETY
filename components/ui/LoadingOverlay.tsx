@@ -82,6 +82,20 @@ export default function LoadingOverlay({
   const toggleVolumeSlider = () => {
     setShowVolumeSlider(!showVolumeSlider)
   }
+  
+  const toggleMusic = () => {
+    if (globalAudioRef) {
+      if (isMusicPlaying) {
+        globalAudioRef.pause()
+        isMusicPlaying = false
+      } else {
+        globalAudioRef.play().catch(() => {
+          console.log('Audio play failed')
+        })
+        isMusicPlaying = true
+      }
+    }
+  }
 
   const [showErrorHeader, setShowErrorHeader] = useState(false)
   const [showRotatingMessages, setShowRotatingMessages] = useState(false)
