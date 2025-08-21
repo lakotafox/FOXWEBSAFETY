@@ -16,16 +16,16 @@ export function useProductsUpload(showSaveMessage: (msg: string, duration?: numb
   const [loadingStartTime, setLoadingStartTime] = useState<number | null>(null)
   const [tempPreviews, setTempPreviews] = useState<{[key: string]: string}>({})
 
-  // Process image upload using Cloudinary
+  // Process image upload directly to Cloudinary
   const processImageUpload = async (productId: number, file: File, fileName: string) => {
     setActiveUploads(count => count + 1)
     showSaveMessage("📤 Uploading image to Cloudinary...")
     
     const uploadTimeout = setTimeout(() => {
-      console.error('Upload timeout after 30 seconds')
+      console.error('Upload timeout after 60 seconds')
       showSaveMessage("❌ Upload timeout - please try again", 5000)
       setActiveUploads(count => count - 1)
-    }, 30000)
+    }, 60000) // Increased to 60 seconds for large files
     
     try {
       // Get Cloudinary config
@@ -38,77 +38,54 @@ export function useProductsUpload(showSaveMessage: (msg: string, duration?: numb
         return null
       }
       
-      // Convert file to base64
-      const reader = new FileReader()
-      reader.readAsDataURL(file)
+      // Create FormData for direct upload to Cloudinary
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('upload_preset', config.uploadPreset)
       
-      reader.onload = async () => {
-        try {
-          const base64Data = reader.result as string
-          
-          // Upload to Cloudinary via Netlify Function
-          console.log('Uploading to Cloudinary with config:', config)
-          const response = await fetch('/.netlify/functions/cloudinary-upload', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              image: base64Data,
-              cloudName: config.cloudName,
-              uploadPreset: config.uploadPreset
-            })
-          })
-          
-          clearTimeout(uploadTimeout)
-          
-          if (response.ok) {
-            const result = await response.json()
-            if (result.success) {
-              showSaveMessage("✅ Image uploaded to Cloudinary!", 3000)
-              
-              // Update temp previews with the Cloudinary URL
-              setTempPreviews(prev => ({
-                ...prev,
-                [`cloudinary-pending-${fileName}`]: result.url
-              }))
-              
-              // Call the callback to update the product with the Cloudinary URL
-              if (onUploadComplete) {
-                onUploadComplete(productId, result.url)
-              }
-              
-              // Return the Cloudinary URL for saving
-              return result.url
-            } else {
-              console.error('Upload failed:', result.error)
-              showSaveMessage(`❌ Upload failed: ${result.error}`, 5000)
-            }
-          } else {
-            const errorText = await response.text()
-            console.error('Upload failed with status:', response.status, 'Error:', errorText)
-            showSaveMessage(`❌ Upload failed: ${response.status}`, 5000)
-          }
-        } catch (error) {
-          console.error('Upload error in onload:', error)
-          showSaveMessage("❌ Upload error", 5000)
-          clearTimeout(uploadTimeout)
-        } finally {
-          // ALWAYS decrement activeUploads, no matter what happens
-          setActiveUploads(count => count - 1)
+      console.log('Uploading directly to Cloudinary:', config.cloudName)
+      console.log('File size:', file.size, 'bytes')
+      
+      // Upload directly to Cloudinary
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${config.cloudName}/image/upload`,
+        {
+          method: 'POST',
+          body: formData
         }
-      }
+      )
       
-      reader.onerror = () => {
-        console.error('FileReader error')
-        showSaveMessage("❌ Error reading image", 3000)
-        clearTimeout(uploadTimeout)
-        setActiveUploads(count => count - 1)
+      clearTimeout(uploadTimeout)
+      
+      if (response.ok) {
+        const result = await response.json()
+        console.log('Upload successful:', result.secure_url)
+        showSaveMessage("✅ Image uploaded to Cloudinary!", 3000)
+        
+        // Update temp previews with the Cloudinary URL
+        setTempPreviews(prev => ({
+          ...prev,
+          [`cloudinary-pending-${fileName}`]: result.secure_url
+        }))
+        
+        // Call the callback to update the product with the Cloudinary URL
+        if (onUploadComplete) {
+          onUploadComplete(productId, result.secure_url)
+        }
+        
+        // Return the Cloudinary URL for saving
+        return result.secure_url
+      } else {
+        const errorText = await response.text()
+        console.error('Cloudinary upload failed:', errorText)
+        showSaveMessage("❌ Upload failed", 5000)
       }
     } catch (error) {
       console.error('Upload error:', error)
       showSaveMessage("❌ Error uploading image", 3000)
       clearTimeout(uploadTimeout)
+    } finally {
+      // ALWAYS decrement activeUploads, no matter what happens
       setActiveUploads(count => count - 1)
     }
     
@@ -197,6 +174,7 @@ export function useProductsUpload(showSaveMessage: (msg: string, duration?: numb
     activeUploads,
     showLoadingOverlay,
     tempPreviews,
+    setTempPreviews,
     addToUploadQueue,
     getImageUrl
   }
