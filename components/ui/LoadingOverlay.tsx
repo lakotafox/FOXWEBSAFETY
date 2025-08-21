@@ -346,8 +346,9 @@ export default function LoadingOverlay({
 
   // Success screen after publish completes
   if (type === 'success') {
+    console.log('Showing success screen')
     return (
-      <div className="fixed inset-0 bg-black/95 z-[100] flex flex-col items-center justify-center pointer-events-auto" style={{ pointerEvents: 'all' }}>
+      <div className="fixed inset-0 bg-black/95 z-[9999] flex flex-col items-center justify-center pointer-events-auto" style={{ pointerEvents: 'all', zIndex: 9999 }}>
         {/* Music controls in top left corner - same as publish */}
         <div className="fixed top-8 left-8 text-white bg-black/50 p-6 rounded-lg backdrop-blur-sm">
           {/* Song title */}

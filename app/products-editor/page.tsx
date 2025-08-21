@@ -69,6 +69,8 @@ function ProductsEditorContent() {
         publishMessage={publishMessage}
         onPlayGame={() => window.open('/games', '_blank')}
       />
+      {/* Debug: Show publish message value */}
+      {publishMessage === 'success' && console.log('PublishMessage is success, overlay should show success screen')}
       
       {/* Yellow Header */}
       <YellowHeader 
