@@ -187,6 +187,55 @@ export default function LoadingOverlay({
     }
   }, [show, type, publishMessage])
   
+  // Play success chime when success screen shows
+  useEffect(() => {
+    if (type === 'success' && show) {
+      console.log('Playing success chime...')
+      
+      // Pause the music temporarily
+      const wasMusicPlaying = isMusicPlaying
+      if (globalAudioRef && isMusicPlaying) {
+        globalAudioRef.pause()
+      }
+      
+      // Play success chime 3 times
+      const chime = new Audio('/success-chime.mp3')
+      chime.volume = 0.8  // Set volume to 80%
+      let chimeCount = 0
+      
+      const playChime = () => {
+        chimeCount++
+        console.log(`Playing chime ${chimeCount}/3`)
+        chime.currentTime = 0
+        chime.play().catch(e => console.log('Chime play failed:', e))
+        
+        if (chimeCount < 3) {
+          // Wait for chime to finish then play again
+          chime.onended = () => {
+            setTimeout(playChime, 200) // Small delay between chimes
+          }
+        } else {
+          // After 3 chimes, resume music if it was playing
+          chime.onended = () => {
+            console.log('Chimes complete, resuming music')
+            if (globalAudioRef && wasMusicPlaying) {
+              globalAudioRef.play().catch(e => console.log('Music resume failed:', e))
+            }
+          }
+        }
+      }
+      
+      // Start playing the chimes
+      playChime()
+      
+      // Cleanup
+      return () => {
+        chime.pause()
+        chime.onended = null
+      }
+    }
+  }, [type, show])
+  
   const stopMusic = () => {
     if (globalAudioRef) {
       globalAudioRef.pause()
@@ -272,11 +321,10 @@ export default function LoadingOverlay({
         <div className="fixed top-8 right-8">
           <button
             onClick={() => {
-              // Stop music before opening game page
+              // Mute music when opening game page
               if (globalAudioRef) {
-                globalAudioRef.pause()
-                globalAudioRef.currentTime = 0
-                isMusicPlaying = false
+                globalAudioRef.volume = 0
+                setVolume(0)
               }
               if (onPlayGame) {
                 onPlayGame()
@@ -388,21 +436,35 @@ export default function LoadingOverlay({
               </svg>
             </button>
             
-            <button
-              onClick={toggleMusic}
-              className={`${isMusicPlaying ? 'text-green-500' : 'text-white'} hover:text-red-500 transition-colors hover:scale-110`}
-              title={isMusicPlaying ? "Mute" : "Unmute"}
-            >
-              {isMusicPlaying ? (
+            <div className="relative">
+              <button
+                onClick={toggleVolumeSlider}
+                className="text-white hover:text-red-500 transition-colors hover:scale-110"
+                title="Volume Control"
+              >
                 <svg className="w-12 h-12" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
                 </svg>
-              ) : (
-                <svg className="w-12 h-12" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
-                </svg>
+              </button>
+              
+              {/* Volume slider dropdown */}
+              {showVolumeSlider && (
+                <div className="absolute top-14 left-1/2 transform -translate-x-1/2 bg-black/80 p-4 rounded-lg backdrop-blur-sm">
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={volume}
+                    onChange={(e) => handleVolumeChange(Number(e.target.value))}
+                    className="w-32 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
+                    style={{
+                      background: `linear-gradient(to right, #ef4444 0%, #ef4444 ${volume}%, #374151 ${volume}%, #374151 100%)`
+                    }}
+                  />
+                  <div className="text-center mt-2 text-white text-sm">{volume}%</div>
+                </div>
               )}
-            </button>
+            </div>
             
             <button
               onClick={playNextSong}
@@ -413,39 +475,6 @@ export default function LoadingOverlay({
                 <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
               </svg>
             </button>
-            
-            {/* Volume control */}
-            <div className="relative">
-              <button
-                onClick={() => setShowVolumeSlider(!showVolumeSlider)}
-                className="text-white hover:text-red-500 transition-colors hover:scale-110"
-                title="Volume"
-              >
-                <svg className="w-12 h-12" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
-                </svg>
-              </button>
-              
-              {showVolumeSlider && (
-                <div className="absolute bottom-full mb-2 bg-black/80 rounded-lg p-3">
-                  <input
-                    type="range"
-                    min="0"
-                    max="100"
-                    value={volume}
-                    onChange={(e) => {
-                      const newVolume = parseInt(e.target.value)
-                      setVolume(newVolume)
-                      if (globalAudioRef) {
-                        globalAudioRef.volume = newVolume / 100
-                      }
-                    }}
-                    className="w-32"
-                  />
-                  <div className="text-center text-sm mt-1">{volume}%</div>
-                </div>
-              )}
-            </div>
           </div>
         </div>
 
