@@ -43,48 +43,55 @@ export function useProductsUpload(showSaveMessage: (msg: string, duration?: numb
       reader.readAsDataURL(file)
       
       reader.onload = async () => {
-        const base64Data = reader.result as string
-        
-        // Upload to Cloudinary via Netlify Function
-        console.log('Uploading to Cloudinary with config:', config)
-        const response = await fetch('/.netlify/functions/cloudinary-upload', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            image: base64Data,
-            cloudName: config.cloudName,
-            uploadPreset: config.uploadPreset
+        try {
+          const base64Data = reader.result as string
+          
+          // Upload to Cloudinary via Netlify Function
+          console.log('Uploading to Cloudinary with config:', config)
+          const response = await fetch('/.netlify/functions/cloudinary-upload', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              image: base64Data,
+              cloudName: config.cloudName,
+              uploadPreset: config.uploadPreset
+            })
           })
-        })
-        
-        clearTimeout(uploadTimeout)
-        
-        if (response.ok) {
-          const result = await response.json()
-          if (result.success) {
-            showSaveMessage("✅ Image uploaded to Cloudinary!", 3000)
-            
-            // Update temp previews with the Cloudinary URL
-            setTempPreviews(prev => ({
-              ...prev,
-              [`/images/${fileName}`]: result.url
-            }))
-            
-            // Return the Cloudinary URL for saving
-            return result.url
+          
+          clearTimeout(uploadTimeout)
+          
+          if (response.ok) {
+            const result = await response.json()
+            if (result.success) {
+              showSaveMessage("✅ Image uploaded to Cloudinary!", 3000)
+              
+              // Update temp previews with the Cloudinary URL
+              setTempPreviews(prev => ({
+                ...prev,
+                [`cloudinary-pending-${fileName}`]: result.url
+              }))
+              
+              // Return the Cloudinary URL for saving
+              return result.url
+            } else {
+              console.error('Upload failed:', result.error)
+              showSaveMessage(`❌ Upload failed: ${result.error}`, 5000)
+            }
           } else {
-            console.error('Upload failed:', result.error)
-            showSaveMessage(`❌ Upload failed: ${result.error}`, 5000)
+            const errorText = await response.text()
+            console.error('Upload failed with status:', response.status, 'Error:', errorText)
+            showSaveMessage(`❌ Upload failed: ${response.status}`, 5000)
           }
-        } else {
-          const errorText = await response.text()
-          console.error('Upload failed with status:', response.status, 'Error:', errorText)
-          showSaveMessage(`❌ Upload failed: ${response.status}`, 5000)
+        } catch (error) {
+          console.error('Upload error in onload:', error)
+          showSaveMessage("❌ Upload error", 5000)
+          clearTimeout(uploadTimeout)
+        } finally {
+          // ALWAYS decrement activeUploads, no matter what happens
+          setActiveUploads(count => count - 1)
         }
-        
-        setActiveUploads(count => count - 1)
       }
       
       reader.onerror = () => {
