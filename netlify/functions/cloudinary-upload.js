@@ -30,7 +30,6 @@ exports.handler = async (event, context) => {
     const params = new URLSearchParams();
     params.append('file', image);
     params.append('upload_preset', uploadPreset);
-    params.append('folder', 'foxbuilt');
     
     console.log('Sending to Cloudinary...');
     
