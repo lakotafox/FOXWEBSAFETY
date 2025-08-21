@@ -1,22 +1,9 @@
-// Cloudinary configuration
-// These will be stored in localStorage for user configuration
+// Cloudinary configuration - hard-coded for FOXBUILT
 export const getCloudinaryConfig = () => {
-  // Only access localStorage on client side
-  if (typeof window !== 'undefined') {
-    const savedConfig = localStorage.getItem('cloudinary-config')
-    if (savedConfig) {
-      try {
-        return JSON.parse(savedConfig)
-      } catch (e) {
-        console.error('Error parsing cloudinary config:', e)
-      }
-    }
-  }
-  
-  // Fallback to environment variables or defaults
+  // Hard-coded configuration for immediate use
   return {
-    cloudName: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || '',
-    uploadPreset: process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || ''
+    cloudName: 'dltlrgaay',
+    uploadPreset: 'foxbuilt-uploads'
   }
 }
 
