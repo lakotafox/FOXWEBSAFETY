@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { getCategoryNames } from '@/lib/category-names'
+import CloudinarySettings from '@/components/products-editor/ui/CloudinarySettings'
 
 const defaultCategories = [
   // Desks & Workstations
@@ -138,6 +139,11 @@ export default function ProductsEditorSelect() {
         >
           ← Back to Home
         </button>
+      </div>
+      
+      {/* Cloudinary Settings - Center of page */}
+      <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50">
+        <CloudinarySettings />
       </div>
     </div>
   )

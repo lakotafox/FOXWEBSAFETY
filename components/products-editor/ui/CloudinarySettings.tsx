@@ -30,7 +30,7 @@ export default function CloudinarySettings() {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className={`fixed bottom-4 left-4 z-50 px-4 py-2 rounded-lg font-bold transition-all ${
+        className={`px-6 py-3 rounded-lg font-bold text-lg transition-all shadow-xl ${
           isConfigured 
             ? 'bg-green-600 hover:bg-green-700 text-white' 
             : 'bg-yellow-500 hover:bg-yellow-600 text-black animate-pulse'
