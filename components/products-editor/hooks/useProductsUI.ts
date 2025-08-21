@@ -8,6 +8,7 @@ export function useProductsUI() {
   const [showHelp, setShowHelp] = useState(false)
   const [showPublishLoadingOverlay, setShowPublishLoadingOverlay] = useState(false)
   const [publishMessage, setPublishMessage] = useState("")
+  const [showSuccessScreen, setShowSuccessScreen] = useState(false)
   const [showWelcomeMessage, setShowWelcomeMessage] = useState(false)
   const [editingId, setEditingId] = useState<number | null>(null)
   const [isAuthenticated, setIsAuthenticated] = useState(true)
@@ -42,6 +43,8 @@ export function useProductsUI() {
     setShowPublishLoadingOverlay,
     publishMessage,
     setPublishMessage,
+    showSuccessScreen,
+    setShowSuccessScreen,
     showWelcomeMessage,
     setShowWelcomeMessage,
     editingId,

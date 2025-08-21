@@ -182,6 +182,9 @@ export default function LoadingOverlay({
     }
   }
   
+  // Debug logging
+  console.log('LoadingOverlay - show:', show, 'type:', type, 'publishMessage:', publishMessage)
+  
   if (!show) return null
 
   if (type === 'publish') {

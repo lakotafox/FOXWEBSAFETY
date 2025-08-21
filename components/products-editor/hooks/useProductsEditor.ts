@@ -53,6 +53,7 @@ export function useProductsEditor(category?: string) {
       setSaveMessage: uiState.setSaveMessage,
       setShowPublishLoadingOverlay: uiState.setShowPublishLoadingOverlay,
       setPublishMessage: uiState.setPublishMessage,
+      setShowSuccessScreen: uiState.setShowSuccessScreen,
       setTempPreviews: uploadState.setTempPreviews
     })
   }

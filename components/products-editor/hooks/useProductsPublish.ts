@@ -14,6 +14,7 @@ interface PublishOptions {
   setSaveMessage: (msg: string) => void
   setShowPublishLoadingOverlay: (show: boolean) => void
   setPublishMessage: (msg: string) => void
+  setShowSuccessScreen: (show: boolean) => void
   setTempPreviews: (previews: any) => void
 }
 
@@ -32,6 +33,7 @@ export function useProductsPublish() {
       setSaveMessage,
       setShowPublishLoadingOverlay,
       setPublishMessage,
+      setShowSuccessScreen,
       setTempPreviews
     } = options
 
@@ -77,6 +79,7 @@ export function useProductsPublish() {
         setTimeout(() => {
           setSaveMessage("")
           setShowPublishLoadingOverlay(true)
+          console.log('Starting publish animation')
           
           // Start rotating messages
           let messageIndex = 0
@@ -89,11 +92,13 @@ export function useProductsPublish() {
           
           // Show success screen after 10 seconds (for testing - change back to 180000 for 3 minutes)
           setTimeout(() => {
+            console.log('Switching to success screen...')
             clearInterval(messageInterval)
-            // Keep overlay showing and set message to "success"
+            // Hide the publish overlay and show success screen
+            setShowPublishLoadingOverlay(false)
+            setShowSuccessScreen(true)
             setPublishMessage("success")
-            // Make sure overlay stays visible
-            setShowPublishLoadingOverlay(true)
+            console.log('Success screen should now be visible')
           }, 10000) // 10 seconds for testing
         }, 2000)
         

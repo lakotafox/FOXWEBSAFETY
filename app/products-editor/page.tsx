@@ -30,6 +30,7 @@ function ProductsEditorContent() {
     showHelp,
     showPublishLoadingOverlay,
     publishMessage,
+    showSuccessScreen,
     showWelcomeMessage,
     showLoadingOverlay,
     productCategory,
@@ -42,6 +43,7 @@ function ProductsEditorContent() {
     // Setters
     setShowHelp,
     setShowWelcomeMessage,
+    setShowSuccessScreen,
     setProductCategory,
     setEditingId,
     setEditingCrop,
@@ -65,17 +67,34 @@ function ProductsEditorContent() {
       />
       <LoadingOverlay 
         show={showPublishLoadingOverlay} 
-        type={publishMessage === 'success' ? 'success' : 'publish'} 
+        type="publish"
         publishMessage={publishMessage}
         onPlayGame={() => window.open('/games', '_blank')}
       />
-      {/* Debug: Show publish message value */}
-      {publishMessage === 'success' && console.log('PublishMessage is success, overlay should show success screen')}
+      <LoadingOverlay 
+        show={showSuccessScreen} 
+        type="success"
+        publishMessage="success"
+        onPlayGame={() => window.open('/games', '_blank')}
+      />
       
       {/* Yellow Header */}
       <YellowHeader 
         onPublish={handlePublish}
       />
+      
+      {/* Debug button - remove after testing */}
+      {process.env.NODE_ENV === 'development' && (
+        <button
+          onClick={() => {
+            console.log('Manual trigger: showing success screen')
+            setShowSuccessScreen(true)
+          }}
+          className="fixed bottom-4 right-4 z-50 bg-green-500 text-white px-4 py-2 rounded"
+        >
+          Test Success Screen
+        </button>
+      )}
       
       {/* Save message */}
       <SaveMessage show={!!saveMessage} message={saveMessage} />
