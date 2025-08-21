@@ -45,9 +45,9 @@ export function useProductsUpload(showSaveMessage: (msg: string, duration?: numb
       reader.onload = async () => {
         const base64Data = reader.result as string
         
-        // Upload to Cloudinary via our API route
+        // Upload to Cloudinary via Netlify Function
         console.log('Uploading to Cloudinary with config:', config)
-        const response = await fetch('/api/cloudinary', {
+        const response = await fetch('/.netlify/functions/cloudinary-upload', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
