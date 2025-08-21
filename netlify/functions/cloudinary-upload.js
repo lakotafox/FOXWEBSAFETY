@@ -27,8 +27,24 @@ exports.handler = async (event, context) => {
 
     // Simple approach: Use fetch with form-encoded data
     // Cloudinary accepts base64 data URIs directly
+    // But we need to ensure the image has the proper data URI format
+    let fileData = image;
+    
+    // If image is just base64 without the data URI prefix, add it
+    if (!image.startsWith('data:')) {
+      // Guess the type based on common patterns
+      if (image.charAt(0) === '/' && image.charAt(1) === '9') {
+        fileData = `data:image/jpeg;base64,${image}`;
+      } else if (image.startsWith('iVBOR')) {
+        fileData = `data:image/png;base64,${image}`;
+      } else {
+        // Default to jpeg
+        fileData = `data:image/jpeg;base64,${image}`;
+      }
+    }
+    
     const params = new URLSearchParams();
-    params.append('file', image);
+    params.append('file', fileData);
     params.append('upload_preset', uploadPreset);
     
     console.log('Sending to Cloudinary...');
