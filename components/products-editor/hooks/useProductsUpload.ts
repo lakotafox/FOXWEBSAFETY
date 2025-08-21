@@ -46,6 +46,7 @@ export function useProductsUpload(showSaveMessage: (msg: string, duration?: numb
         const base64Data = reader.result as string
         
         // Upload to Cloudinary via our API route
+        console.log('Uploading to Cloudinary with config:', config)
         const response = await fetch('/api/cloudinary', {
           method: 'POST',
           headers: {
@@ -78,8 +79,9 @@ export function useProductsUpload(showSaveMessage: (msg: string, duration?: numb
             showSaveMessage(`❌ Upload failed: ${result.error}`, 5000)
           }
         } else {
-          console.error('Upload failed with status:', response.status)
-          showSaveMessage("❌ Upload failed", 5000)
+          const errorText = await response.text()
+          console.error('Upload failed with status:', response.status, 'Error:', errorText)
+          showSaveMessage(`❌ Upload failed: ${response.status}`, 5000)
         }
         
         setActiveUploads(count => count - 1)
