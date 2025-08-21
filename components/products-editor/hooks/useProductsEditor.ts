@@ -11,7 +11,13 @@ export function useProductsEditor(category?: string) {
   const uiState = useProductsUI()
   const dataState = useProductsData(category)
   const cropState = useProductsCrop()
-  const uploadState = useProductsUpload(uiState.showSaveMessage)
+  const uploadState = useProductsUpload(
+    uiState.showSaveMessage,
+    (productId: number, cloudinaryUrl: string) => {
+      // Update the product with the actual Cloudinary URL after upload
+      dataState.updateProduct(productId, 'image', cloudinaryUrl)
+    }
+  )
   const publishState = useProductsPublish()
 
   // Handle image upload

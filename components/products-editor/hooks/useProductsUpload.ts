@@ -9,7 +9,7 @@ interface UploadQueueItem {
   fileName: string
 }
 
-export function useProductsUpload(showSaveMessage: (msg: string, duration?: number) => void) {
+export function useProductsUpload(showSaveMessage: (msg: string, duration?: number) => void, onUploadComplete?: (productId: number, cloudinaryUrl: string) => void) {
   const [uploadQueue, setUploadQueue] = useState<UploadQueueItem[]>([])
   const [activeUploads, setActiveUploads] = useState(0)
   const [showLoadingOverlay, setShowLoadingOverlay] = useState(false)
@@ -72,6 +72,11 @@ export function useProductsUpload(showSaveMessage: (msg: string, duration?: numb
                 ...prev,
                 [`cloudinary-pending-${fileName}`]: result.url
               }))
+              
+              // Call the callback to update the product with the Cloudinary URL
+              if (onUploadComplete) {
+                onUploadComplete(productId, result.url)
+              }
               
               // Return the Cloudinary URL for saving
               return result.url
