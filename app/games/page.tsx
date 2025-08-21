@@ -28,7 +28,7 @@ export default function GamesPage() {
     // Play Atari sound when games page loads
     if (gameMode === 'select') {
       const audio = new Audio('/sounds/Atari.mp3')
-      audio.loop = true
+      audio.loop = false  // Play only once
       audio.play().catch(e => console.log('Atari audio failed:', e))
       audioRef.current = audio
     } else {
