@@ -25,35 +25,39 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Create URLSearchParams for form data (works in Node.js)
-    const formData = new URLSearchParams();
-    formData.append('file', image);
-    formData.append('upload_preset', uploadPreset);
+    // Simple approach: Use fetch with form-encoded data
+    // Cloudinary accepts base64 data URIs directly
+    const params = new URLSearchParams();
+    params.append('file', image);
+    params.append('upload_preset', uploadPreset);
+    params.append('folder', 'foxbuilt');
+    
+    console.log('Sending to Cloudinary...');
     
     const response = await fetch(
       `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
       {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: formData.toString()
+        body: params
       }
     );
 
+    const responseText = await response.text();
+    console.log('Cloudinary response status:', response.status);
+    
     if (!response.ok) {
-      const error = await response.text();
-      console.error('Cloudinary API error:', error);
+      console.error('Cloudinary API error:', responseText);
       return {
-        statusCode: response.status,
+        statusCode: 400,
         body: JSON.stringify({ 
           success: false, 
-          error: 'Cloudinary upload failed' 
+          error: 'Cloudinary upload failed',
+          details: responseText
         })
       };
     }
 
-    const data = await response.json();
+    const data = JSON.parse(responseText);
     console.log('Cloudinary upload successful:', data.secure_url);
     
     return {
