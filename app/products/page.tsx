@@ -189,6 +189,18 @@ function ProductsPageContent() {
   // Helper function to get displayable image URL
   const getImageUrl = (imagePath: string) => {
     if (!imagePath) return "/placeholder.svg"
+    
+    // Check if it's a Cloudinary URL
+    if (imagePath.includes('cloudinary.com') || imagePath.includes('res.cloudinary.com')) {
+      return imagePath
+    }
+    
+    // Check if it's a pending upload (shouldn't happen on live site but handle it)
+    if (imagePath.startsWith('cloudinary-pending-')) {
+      return '/fox-loading.gif'
+    }
+    
+    // Regular image path
     return imagePath
   }
 
@@ -202,7 +214,7 @@ function ProductsPageContent() {
   // Get image URLs for the clicked category
   const getCategoryImageUrls = () => {
     const products = productsByCategory[clickedCategory as keyof typeof productsByCategory] || []
-    return products.map((product: any) => product.image)
+    return products.map((product: any) => getImageUrl(product.image))
   }
 
   return (
