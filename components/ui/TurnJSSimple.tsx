@@ -193,6 +193,7 @@ export default function TurnJSSimple() {
       let isDragging = false
       let soundPlayed = false
       let isInitialLoad = true  // Track if this is the initial cover load
+      let flipCount = 0  // Track number of flips to ensure we skip the initial one
 
       // Add event listeners
       pageFlip.on('flip', (e: any) => {
@@ -201,10 +202,15 @@ export default function TurnJSSimple() {
         const newPage = (e.data || 0) + 1  // This makes cover = page 1 internally
         const oldPage = currentPage  // Get the page we're coming FROM
         console.log(`Flipping from page ${oldPage} to page ${newPage}`)
+        
+        // Check if this is truly the initial load (first flip event)
+        flipCount++
+        const isFirstFlip = flipCount === 1
+        
         setCurrentPage(newPage)
         
-        // Sound logic based on transition
-        if (!isInitialLoad) {
+        // Sound logic based on transition - NEVER play sound on first flip
+        if (!isFirstFlip && !isInitialLoad) {
           // Cover sound ONLY for these specific transitions:
           // 1. Any page -> page 1 (closing book to cover)
           // 2. Page 1 -> page 2 (opening book from cover)
