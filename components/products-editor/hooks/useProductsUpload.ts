@@ -62,13 +62,14 @@ export function useProductsUpload(showSaveMessage: (msg: string, duration?: numb
         console.log('Upload successful:', result.secure_url)
         showSaveMessage("✅ Image uploaded to Cloudinary!", 3000)
         
-        // Update temp previews with the Cloudinary URL
+        // Update temp previews with the Cloudinary URL - keep both the pending key and actual URL
         setTempPreviews(prev => ({
           ...prev,
-          [`cloudinary-pending-${fileName}`]: result.secure_url
+          [`cloudinary-pending-${fileName}`]: result.secure_url,
+          [result.secure_url]: result.secure_url // Also store by actual URL
         }))
         
-        // Call the callback to update the product with the Cloudinary URL
+        // Call the callback to update the product with the actual Cloudinary URL (not the pending path)
         if (onUploadComplete) {
           onUploadComplete(productId, result.secure_url)
         }
@@ -161,9 +162,9 @@ export function useProductsUpload(showSaveMessage: (msg: string, duration?: numb
     if (imagePath && (imagePath.includes('cloudinary.com') || imagePath.includes('res.cloudinary.com'))) {
       return imagePath
     }
-    // Check if it's a pending upload
+    // Check if it's a pending upload - show fox loading if no preview available
     if (imagePath && imagePath.startsWith('cloudinary-pending-')) {
-      return tempPreviews[imagePath] || '/placeholder.svg'
+      return tempPreviews[imagePath] || '/fox-loading.gif'
     }
     // The images should be served from the public folder
     return imagePath

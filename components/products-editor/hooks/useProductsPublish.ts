@@ -104,8 +104,8 @@ export function useProductsPublish() {
         }, 180000) // 3 minutes
       }, 2000)
         
-        // Clear temp previews
-        setTempPreviews({})
+        // Don't clear temp previews - they're needed for displaying images
+        // setTempPreviews({})
       // Removed else block - error handling moved above
     } catch (error) {
       console.error('Error publishing:', error)

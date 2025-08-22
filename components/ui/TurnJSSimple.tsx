@@ -112,7 +112,11 @@ export default function TurnJSSimple() {
         console.log('PageFlip module loaded successfully')
       }).catch(err => {
         console.error('Failed to load PageFlip module:', err)
-        setLoadingError('Failed to load flipbook library')
+        setLoadingError(`Failed to load flipbook library: ${err.message || 'Unknown error'}`)
+        // Set ready anyway to show static fallback
+        setTimeout(() => {
+          setIsReady(true)
+        }, 2000)
       })
     }
   }, [])

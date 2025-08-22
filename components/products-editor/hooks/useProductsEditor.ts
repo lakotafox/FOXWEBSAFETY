@@ -41,7 +41,27 @@ export function useProductsEditor(category?: string) {
   }
 
   // Handle publish with all necessary parameters
-  const handlePublish = () => {
+  const handlePublish = async () => {
+    // Check if there are active uploads
+    if (uploadState.activeUploads > 0 || uploadState.uploadQueue.length > 0) {
+      uiState.showSaveMessage("⏳ Waiting for uploads to complete before publishing...", 5000)
+      
+      // Wait for uploads to complete
+      const waitForUploads = () => {
+        return new Promise((resolve) => {
+          const checkInterval = setInterval(() => {
+            if (uploadState.activeUploads === 0 && uploadState.uploadQueue.length === 0) {
+              clearInterval(checkInterval)
+              resolve(true)
+            }
+          }, 500)
+        })
+      }
+      
+      await waitForUploads()
+      uiState.showSaveMessage("✅ Uploads complete, now publishing...", 3000)
+    }
+    
     publishState.handlePublish({
       products: dataState.products,
       cropSettings: cropState.cropSettings,
