@@ -102,7 +102,24 @@ function ProductsPageContent() {
         const response = await fetch(`/products-${categoryParam}.json`, { cache: 'no-store' })
         if (response.ok) {
           const data = await response.json()
-          setProductsByCategory(data.products || {})
+          console.log(`Loaded products for ${categoryParam}:`, data)
+          
+          // Convert kebab-case to camelCase for the key
+          const camelCaseKey = categoryParam.replace(/-([a-z])/g, (g) => g[1].toUpperCase())
+          
+          // The products might be directly in data.products[camelCaseKey] or we need to restructure
+          if (data.products && typeof data.products === 'object') {
+            // Check if it's already categorized
+            const firstKey = Object.keys(data.products)[0]
+            if (firstKey && Array.isArray(data.products[firstKey])) {
+              // It's already categorized, use as is
+              setProductsByCategory(data.products)
+            } else {
+              // Might be a flat array, need to categorize it
+              setProductsByCategory({ [categoryParam]: data.products })
+            }
+          }
+          
           setCropSettings(data.productsCrops || {})
           if (data.pageName) {
             setPageName(data.pageName)
@@ -113,41 +130,13 @@ function ProductsPageContent() {
         console.log(`No products file for ${categoryParam}, trying default`)
       }
       
-      // Fallback to main products.json for executive-desks
-      if (categoryParam === 'executive-desks') {
-        const data = await getPublishedProductsPageItems()
-        setProductsByCategory(data.products)
-        setCropSettings(data.crops || {})
-        // Set page name from data or use default
-        setPageName(data.pageName || 'Executive Desks')
-      } else {
-        // No products available for this category yet - use default products
-        const defaultImages = [
-          '/images/showroom-1.jpg',
-          '/images/tanconf.jpg',
-          '/images/reception tan.jpg',
-          '/images/small desk.jpg',
-          '/images/showfacinggarage.jpg',
-          '/images/Showroomwglassboard.jpg',
-          '/images/conference-room.jpg',
-          '/images/desk grey L showroom.jpg',
-          '/images/reception-area.jpg'
-        ]
-        
-        const defaultProducts = {
-          [categoryParam]: Array.from({ length: 9 }, (_, i) => ({
-            id: i + 1,
-            title: `${getCategoryDefaultName(categoryParam)} ${i + 1}`,
-            image: defaultImages[i] || '/images/showroom-1.jpg',
-            description: '',
-            features: ['Premium Quality', 'Professional Grade', 'Warranty Included'],
-            price: ''
-          }))
-        }
-        
-        setProductsByCategory(defaultProducts)
-        setPageName(getCategoryDefaultName(categoryParam))
-      }
+      // Fallback to main products.json
+      const data = await getPublishedProductsPageItems()
+      console.log('Loaded fallback products data:', data)
+      setProductsByCategory(data.products || {})
+      setCropSettings(data.crops || {})
+      // Set page name from data or use default
+      setPageName(data.pageName || 'Executive Desks')
     }
     loadProducts()
   }, [categoryParam])
@@ -210,7 +199,15 @@ function ProductsPageContent() {
     console.log('Clicked image:', imageSrc)
     console.log('Category:', category)
     console.log('Index:', index)
-    console.log('Products in category:', productsByCategory[category as keyof typeof productsByCategory])
+    
+    // Try both kebab-case and camelCase keys
+    const camelCaseKey = category.replace(/-([a-z])/g, (g) => g[1].toUpperCase())
+    const products = productsByCategory[category as keyof typeof productsByCategory] || 
+                    productsByCategory[camelCaseKey as keyof typeof productsByCategory] || []
+    
+    console.log('Products in category:', products)
+    console.log('All categories available:', Object.keys(productsByCategory))
+    
     setClickedCategory(category)
     setClickedIndex(index)
     setShowFlyingPosters(true)
@@ -218,9 +215,16 @@ function ProductsPageContent() {
   
   // Get image URLs for the clicked category
   const getCategoryImageUrls = () => {
-    const products = productsByCategory[clickedCategory as keyof typeof productsByCategory] || []
+    // Try both kebab-case and camelCase keys
+    const camelCaseKey = clickedCategory.replace(/-([a-z])/g, (g) => g[1].toUpperCase())
+    const products = productsByCategory[clickedCategory as keyof typeof productsByCategory] || 
+                    productsByCategory[camelCaseKey as keyof typeof productsByCategory] || []
+    
     console.log('Getting URLs for category:', clickedCategory)
+    console.log('CamelCase key:', camelCaseKey)
+    console.log('All available categories:', Object.keys(productsByCategory))
     console.log('Raw products:', products)
+    
     const urls = products.map((product: any) => {
       const url = getImageUrl(product.image)
       console.log(`Product "${product.title}": ${product.image} -> ${url}`)
