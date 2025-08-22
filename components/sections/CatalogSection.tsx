@@ -14,7 +14,7 @@ const TurnJSSimple = dynamic(() => import('@/components/ui/TurnJSSimple'), {
 
 export default function CatalogSection() {
   return (
-    <section id="catalog" className="bg-slate-800 relative" style={{ zIndex: 30 }}>
+    <section id="catalog" className="bg-slate-800 relative pb-40 mb-20" style={{ zIndex: 30 }}>
       <div className="relative" style={{ height: '80vh', zIndex: 30 }}>
         <TurnJSSimple />
       </div>

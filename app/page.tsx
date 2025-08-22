@@ -8,8 +8,8 @@ import { getMainProducts, defaultMainProducts } from "@/lib/main-products-data"
 import FloatingActionButtons from "@/components/sections/FloatingActionButtons"
 import Header from "@/components/sections/Header"
 import HeroSection from "@/components/sections/HeroSection"
+import HeroLanding from "@/components/sections/HeroLanding"
 import InteractiveParticles from "@/components/sections/InteractiveParticles"
-import GallerySection from "@/components/sections/GallerySection"
 import FeaturedProducts from "@/components/sections/FeaturedProducts"
 import CatalogSection from "@/components/sections/CatalogSection"
 import AboutSection from "@/components/sections/AboutSection"
@@ -137,9 +137,8 @@ function FoxBuiltWebsiteContent() {
       <FloatingActionButtons />
       <Header showAddress={showAddress} setShowAddress={setShowAddress} />
       <div style={{ marginTop: isMobile ? '80px' : '90px' }}>
-        <GallerySection 
+        <HeroLanding 
           galleryImages={isMobile ? mobileGalleryImages : galleryImages}
-          galleryCrops={galleryCrops}
           getImageUrl={getImageUrl}
         />
         <FeaturedProducts 

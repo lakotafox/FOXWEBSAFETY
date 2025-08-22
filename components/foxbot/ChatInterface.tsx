@@ -1,9 +1,8 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { Send, Mic, MicOff, Volume2, VolumeX } from 'lucide-react'
+import { Send } from 'lucide-react'
 import MessageBubble from './MessageBubble'
-import VoiceControls from './VoiceControls'
 import TypingIndicator from './TypingIndicator'
 import ProductCard from './ProductCard'
 import { Message } from '@/lib/foxbot/conversation-engine-v2'
@@ -20,69 +19,19 @@ export default function ChatInterface() {
   ])
   const [inputValue, setInputValue] = useState('')
   const [isTyping, setIsTyping] = useState(false)
-  const [voiceEnabled, setVoiceEnabled] = useState(false)
-  const [speechEnabled, setSpeechEnabled] = useState(false)
-  const [isListening, setIsListening] = useState(false)
   const [ollamaAvailable, setOllamaAvailable] = useState(false)
   const [lastResponseOffline, setLastResponseOffline] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const recognitionRef = useRef<any>(null)
 
   useEffect(() => {
     scrollToBottom()
   }, [messages])
 
-  useEffect(() => {
-    if (typeof window !== 'undefined' && 'webkitSpeechRecognition' in window) {
-      const SpeechRecognition = (window as any).webkitSpeechRecognition
-      recognitionRef.current = new SpeechRecognition()
-      recognitionRef.current.continuous = false
-      recognitionRef.current.interimResults = false
-      recognitionRef.current.lang = 'en-US'
-
-      recognitionRef.current.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript
-        setInputValue(transcript)
-        setIsListening(false)
-      }
-
-      recognitionRef.current.onerror = () => {
-        setIsListening(false)
-      }
-
-      recognitionRef.current.onend = () => {
-        setIsListening(false)
-      }
-    }
-  }, [])
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
-  const speakText = (text: string) => {
-    if (!speechEnabled || typeof window === 'undefined' || !('speechSynthesis' in window)) return
-    
-    const cleanText = text.replace(/[*_~`]/g, '')
-    const utterance = new SpeechSynthesisUtterance(cleanText)
-    utterance.rate = 1.0
-    utterance.pitch = 1.0
-    utterance.volume = 1.0
-    
-    window.speechSynthesis.speak(utterance)
-  }
-
-  const toggleListening = () => {
-    if (!recognitionRef.current) return
-
-    if (isListening) {
-      recognitionRef.current.stop()
-      setIsListening(false)
-    } else {
-      recognitionRef.current.start()
-      setIsListening(true)
-    }
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -114,9 +63,6 @@ export default function ChatInterface() {
       setMessages(prev => [...prev, botMessage])
       setIsTyping(false)
 
-      if (speechEnabled) {
-        speakText(response.response)
-      }
 
       // Check if FOXBOT is offline and show buttons
       if (response.showOfflineButtons) {
@@ -205,26 +151,11 @@ export default function ChatInterface() {
 
       <div className="border-t border-yellow-500/30 bg-black/50 backdrop-blur p-4">
         <form onSubmit={handleSubmit} className="flex gap-2 max-w-4xl mx-auto">
-          <button
-            type="button"
-            onClick={toggleListening}
-            disabled={!voiceEnabled}
-            className={`p-3 rounded-lg transition-all ${
-              voiceEnabled
-                ? isListening
-                  ? 'bg-red-500 text-white animate-pulse'
-                  : 'bg-yellow-500 hover:bg-yellow-600 text-black'
-                : 'bg-gray-700 text-gray-500 cursor-not-allowed'
-            }`}
-          >
-            {isListening ? <Mic className="w-5 h-5" /> : <MicOff className="w-5 h-5" />}
-          </button>
-
           <input
             type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            placeholder="Type your message or click the mic to speak..."
+            placeholder="Type your message..."
             className="flex-1 bg-gray-800 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
           />
 
@@ -236,13 +167,6 @@ export default function ChatInterface() {
             <Send className="w-5 h-5" />
           </button>
         </form>
-
-        <VoiceControls
-          voiceEnabled={voiceEnabled}
-          setVoiceEnabled={setVoiceEnabled}
-          speechEnabled={speechEnabled}
-          setSpeechEnabled={setSpeechEnabled}
-        />
       </div>
     </div>
   )
