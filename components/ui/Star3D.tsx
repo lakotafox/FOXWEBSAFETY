@@ -22,8 +22,7 @@ export function Star3DCSS({
         height: size,
         display: 'inline-block',
         position: 'relative',
-        transformStyle: 'preserve-3d',
-        animation: 'rotateStar 4s linear infinite'
+        transformStyle: 'preserve-3d'
       }}
     >
       <svg
@@ -38,19 +37,6 @@ export function Star3DCSS({
       >
         <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
       </svg>
-      <style jsx>{`
-        @keyframes rotateStar {
-          from {
-            transform: rotateY(0deg) rotateX(15deg);
-          }
-          to {
-            transform: rotateY(360deg) rotateX(15deg);
-          }
-        }
-        .star-3d:hover {
-          animation-duration: 1s;
-        }
-      `}</style>
     </div>
   )
 }

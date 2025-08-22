@@ -428,7 +428,11 @@ export default function FlyingPosters({
                   fill
                   className="object-contain"
                   sizes="(max-width: 768px) 100vw, 450px"
+                  unoptimized
                   priority={Math.abs(style.zIndex - 100) < 10}
+                  onError={(e) => {
+                    console.error('Image failed to load:', item)
+                  }}
                   style={{
                     opacity: (!isMobileDevice && !shouldBeLit) ? 0.3 : 1,
                     filter: (!isMobileDevice && !shouldBeLit) ? 'brightness(0.4)' : 'none'
