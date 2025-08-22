@@ -27,6 +27,14 @@ export default function FlyingPosters({
   products,
   category
 }: FlyingPostersProps) {
+  console.log('FlyingPosters received items:', items)
+  
+  // Early return if no items
+  if (!items || items.length === 0) {
+    console.error('FlyingPosters: No items to display!')
+    return <div className="text-white text-center p-4">No images to display</div>
+  }
+  
   const [currentPosition, setCurrentPosition] = useState(initialIndex) // Start at the clicked image
   const [mobileFocalIndex, setMobileFocalIndex] = useState(initialIndex) // Track focal image for mobile - start at initialIndex
   const [isDragging, setIsDragging] = useState(false)
@@ -68,10 +76,17 @@ export default function FlyingPosters({
   
   // Detect image orientations
   useEffect(() => {
+    console.log('Detecting orientations for items:', items)
+    if (!items || items.length === 0) {
+      console.error('No items to display in carousel!')
+      return
+    }
+    
     const orientations: ('horizontal' | 'vertical' | 'unknown')[] = []
     let loadedCount = 0
     
     items.forEach((src, index) => {
+      console.log(`Loading image ${index}:`, src)
       const img = new window.Image()
       img.onload = () => {
         orientations[index] = img.width > img.height ? 'horizontal' : 'vertical'

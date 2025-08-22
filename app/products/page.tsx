@@ -206,6 +206,11 @@ function ProductsPageContent() {
 
   // Handle image click to open flying posters carousel
   const handleImageClick = (imageSrc: string, imageAlt: string, category: string, index: number) => {
+    console.log('=== CAROUSEL OPENED ===')
+    console.log('Clicked image:', imageSrc)
+    console.log('Category:', category)
+    console.log('Index:', index)
+    console.log('Products in category:', productsByCategory[category as keyof typeof productsByCategory])
     setClickedCategory(category)
     setClickedIndex(index)
     setShowFlyingPosters(true)
@@ -214,7 +219,15 @@ function ProductsPageContent() {
   // Get image URLs for the clicked category
   const getCategoryImageUrls = () => {
     const products = productsByCategory[clickedCategory as keyof typeof productsByCategory] || []
-    return products.map((product: any) => getImageUrl(product.image))
+    console.log('Getting URLs for category:', clickedCategory)
+    console.log('Raw products:', products)
+    const urls = products.map((product: any) => {
+      const url = getImageUrl(product.image)
+      console.log(`Product "${product.title}": ${product.image} -> ${url}`)
+      return url
+    })
+    console.log('Final carousel URLs:', urls)
+    return urls
   }
 
   return (
