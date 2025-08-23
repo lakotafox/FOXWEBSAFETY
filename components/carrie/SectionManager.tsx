@@ -8,7 +8,7 @@ import { useEditorContext } from './providers/EditorProvider'
 
 // Import all the section components
 import HeroSection from '@/components/carrie/sections/HeroSection'
-import GallerySection from '@/components/carrie/sections/GallerySection'
+// Gallery section removed - no longer on public page
 import FeaturedProducts from '@/components/carrie/sections/FeaturedProducts'
 
 export default function SectionManager() {
@@ -94,22 +94,7 @@ export default function SectionManager() {
 
       <HeroSection isEditMode={isEditMode} />
 
-      <GallerySection
-        isEditMode={isEditMode}
-        pendingGalleryImages={galleryViewMode === 'mobile' ? pendingMobileGalleryImages : pendingGalleryImages}
-        currentSlide={currentSlide}
-        cropSettings={cropSettings}
-        editingCrop={editingCrop}
-        onEditGallery={() => setShowGalleryEditor(true)}
-        onSetCurrentSlide={(index) => {
-          setIsGalleryUserControlled(true)
-          setCurrentSlide(index)
-        }}
-        onSetEditingCrop={setEditingCrop}
-        onNextSlide={nextSlide}
-        onPrevSlide={prevSlide}
-        getImageUrl={getImageUrl}
-      />
+      {/* Gallery Section removed - no longer on public page */}
 
       {/* Featured Products Section - EDITABLE */}
       <FeaturedProducts

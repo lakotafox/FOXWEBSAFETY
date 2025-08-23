@@ -209,8 +209,8 @@ export default function TurnJSSimple() {
         
         setCurrentPage(newPage)
         
-        // Sound logic based on transition - NEVER play sound on first flip
-        if (!isFirstFlip && !isInitialLoad) {
+        // Sound logic based on transition - NEVER play sound on first flip (page load)
+        if (!isFirstFlip) {
           // Cover sound ONLY for these specific transitions:
           // 1. Any page -> page 1 (closing book to cover)
           // 2. Page 1 -> page 2 (opening book from cover)

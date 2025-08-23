@@ -5,7 +5,7 @@ import LoadingOverlay from '@/components/ui/LoadingOverlay'
 import AdminControls from '@/components/carrie/ui/AdminControls'
 import HelpModal from '@/components/ui/HelpModal'
 import PublishConfirmation from '@/components/carrie/ui/PublishConfirmation'
-import GalleryEditor from '@/components/carrie/editors/GalleryEditor'
+// Gallery editor removed - no longer needed
 import AuthenticationWrapper from '@/components/carrie/AuthenticationWrapper'
 import SectionManager from '@/components/carrie/SectionManager'
 import { EditorProvider, useEditorContext } from '@/components/carrie/providers/EditorProvider'
@@ -55,19 +55,12 @@ function EditorContent() {
     showLoadingOverlay,
     showPublishLoadingOverlay,
     publishMessage,
-    showGalleryEditor,
-    setShowGalleryEditor,
-    pendingGalleryImages,
-    pendingMobileGalleryImages,
-    handleGalleryImageUpload,
-    getImageUrl,
-    galleryViewMode,
-    setGalleryViewMode,
     showPublishConfirm,
     setShowPublishConfirm,
     showHelp,
     setShowHelp,
-    saveAllChanges
+    saveAllChanges,
+    getImageUrl
   } = useEditorContext()
 
   return (
@@ -87,16 +80,7 @@ function EditorContent() {
       {/* Main site content with edit capability */}
       <SectionManager />
 
-      <GalleryEditor
-        show={showGalleryEditor}
-        onClose={() => setShowGalleryEditor(false)}
-        galleryImages={pendingGalleryImages}
-        mobileGalleryImages={pendingMobileGalleryImages}
-        onImageUpload={handleGalleryImageUpload}
-        getImageUrl={getImageUrl}
-        viewMode={galleryViewMode}
-        onViewModeChange={setGalleryViewMode}
-      />
+      {/* Gallery editor removed - no longer on public page */}
 
       <PublishConfirmation 
         show={showPublishConfirm} 
