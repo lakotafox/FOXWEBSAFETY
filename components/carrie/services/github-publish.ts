@@ -1,4 +1,3 @@
-import { imageStore } from './local-image-store'
 import { updateGitHubFile } from '@/lib/github-api-client'
 
 interface PublishOptions {
@@ -21,16 +20,8 @@ export async function publishToGitHub({
   showMessage("🚀 Publishing live site...", 30000) // 30 seconds for publish
   
   try {
-    // First, upload any pending images
-    const pendingImages = imageStore.getPendingImages()
-    if (pendingImages.length > 0) {
-      showMessage(`📤 Uploading ${pendingImages.length} images...`, 10000)
-      
-      // TODO: Convert image uploads to use API route as well
-      // For now, we'll skip image uploads to prevent token exposure
-      console.warn('Image uploads temporarily disabled - use direct file upload instead')
-      imageStore.clearPendingImages()
-    }
+    // Images are now uploaded to Cloudinary before publishing
+    // No need to upload to GitHub anymore
     
     // Add crop settings to products
     const convertedProducts = JSON.parse(JSON.stringify(products))

@@ -68,10 +68,29 @@ export const useCarrieEditor = () => {
     getRandomConstructionMessage
   } = uploadState
 
-  // Helper function to get displayable image URL
+  // Helper function to get displayable image URL - matches products editor
   const getImageUrl = (imagePath: string, isGallery: boolean = false) => {
+    if (!imagePath) return "/placeholder.svg"
+    
     const previewMap = isGallery ? galleryTempPreviews : tempPreviews
-    return imageState.getImageUrl(imagePath, previewMap)
+    
+    // Check if we have a temporary preview for this image
+    if (previewMap[imagePath]) {
+      return previewMap[imagePath]
+    }
+    
+    // Check if it's a Cloudinary URL
+    if (imagePath.includes('cloudinary.com') || imagePath.includes('res.cloudinary.com')) {
+      return imagePath
+    }
+    
+    // Check if it's a pending upload - show fox loading if no preview available
+    if (imagePath.startsWith('cloudinary-pending-')) {
+      return previewMap[imagePath] || '/fox-loading.gif'
+    }
+    
+    // Regular image path
+    return imagePath
   }
 
   // Gallery navigation functions
@@ -122,8 +141,25 @@ export const useCarrieEditor = () => {
     })
   }
 
-  // Save all changes (publish live)
+  // Save all changes (publish live) - matches products editor pattern
   const saveAllChanges = async () => {
+    // Check if there are active uploads
+    if (activeUploads > 0 || uploadQueue.length > 0) {
+      showMessage("⏳ Waiting for uploads to complete before publishing...", 5000)
+      
+      // Wait for uploads to complete
+      await new Promise((resolve) => {
+        const checkInterval = setInterval(() => {
+          if (activeUploads === 0 && uploadQueue.length === 0) {
+            clearInterval(checkInterval)
+            resolve(true)
+          }
+        }, 500)
+      })
+      
+      showMessage("✅ Uploads complete, now publishing...", 3000)
+    }
+    
     const result = await publishToGitHub({
       products: featuredProducts,
       gallery: pendingGalleryImages,
@@ -293,21 +329,57 @@ export const useCarrieEditor = () => {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
   
-  // Process upload queue
+  // Process upload queue for Cloudinary
   useEffect(() => {
-    if (uploadQueue.length > 0 && activeUploads < 1) { // Only 1 upload at a time
-      const nextUpload = uploadQueue[0]
-      setUploadQueue(queue => queue.slice(1))
+    if (uploadQueue.length > 0 && activeUploads === 0) {
+      const [nextUpload, ...remainingQueue] = uploadQueue
+      setUploadQueue(remainingQueue)
       
-      if (nextUpload.type === 'product') {
-        processProductImageUpload(nextUpload.category!, nextUpload.productId!, nextUpload.file, nextUpload.fileName!, {
+      if (!nextUpload.isGallery) {
+        // Product image upload
+        processProductImageUpload(nextUpload.category!, nextUpload.productId, nextUpload.file, nextUpload.fileName, {
           showMessage,
-          setActiveUploads
+          setActiveUploads,
+          setCropSettings,
+          setTempPreviews,
+          setGalleryTempPreviews,
+          setUploadQueue,
+          onUploadComplete: (category, productId, cloudinaryUrl) => {
+            // Update the product with the actual Cloudinary URL
+            updateProduct(category, productId, 'image', cloudinaryUrl)
+            // Also update temp previews to keep the URL accessible
+            setTempPreviews(prev => ({
+              ...prev,
+              [cloudinaryUrl]: cloudinaryUrl
+            }))
+          }
         })
       } else {
-        processGalleryImageUpload(nextUpload.index!, nextUpload.file, nextUpload.fileName!, {
+        // Gallery image upload
+        processGalleryImageUpload(nextUpload.index!, nextUpload.file, nextUpload.fileName, {
           showMessage,
-          setActiveUploads
+          setActiveUploads,
+          setCropSettings,
+          setTempPreviews,
+          setGalleryTempPreviews,
+          setUploadQueue,
+          onUploadComplete: (index, cloudinaryUrl) => {
+            // Update gallery with actual URL
+            if (galleryViewMode === 'mobile') {
+              const newImages = [...pendingMobileGalleryImages]
+              newImages[index] = cloudinaryUrl
+              setPendingMobileGalleryImages(newImages)
+            } else {
+              const newImages = [...pendingGalleryImages]
+              newImages[index] = cloudinaryUrl
+              setPendingGalleryImages(newImages)
+            }
+            // Update previews
+            setGalleryTempPreviews(prev => ({
+              ...prev,
+              [cloudinaryUrl]: cloudinaryUrl
+            }))
+          }
         })
       }
     }

@@ -1,5 +1,4 @@
-import { GITHUB_CONFIG } from '../constants/editor-constants'
-import { imageStore } from './local-image-store'
+import { getCloudinaryConfig } from '@/lib/cloudinary-config'
 
 interface UploadCallbacks {
   showMessage: (message: string, duration?: number) => void
@@ -9,203 +8,267 @@ interface UploadCallbacks {
   setCropSettings: (fn: (prev: any) => any) => void
   setTempPreviews?: (fn: (prev: any) => any) => void
   setGalleryTempPreviews?: (fn: (prev: any) => any) => void
+  setUploadQueue: (fn: (queue: any[]) => any[]) => void
 }
 
-// Process product image upload
+interface UploadQueueItem {
+  category?: string
+  productId: number
+  file: File
+  fileName: string
+  isGallery?: boolean
+  index?: number
+}
+
+// Process product image upload to Cloudinary
 export const processProductImageUpload = async (
   category: string, 
   productId: number, 
   file: File, 
   fileName: string,
-  callbacks: UploadCallbacks
+  callbacks: UploadCallbacks & {
+    onUploadComplete?: (category: string, productId: number, cloudinaryUrl: string) => void
+  }
 ) => {
-  const { showMessage, setActiveUploads } = callbacks
+  const { showMessage, setActiveUploads, onUploadComplete } = callbacks
   
   setActiveUploads(count => count + 1)
+  showMessage("📤 Uploading image to Cloudinary...")
   
-  // Set a timeout to prevent infinite loading
   const uploadTimeout = setTimeout(() => {
-    console.error('Product upload timeout after 30 seconds')
+    console.error('Upload timeout after 60 seconds')
     showMessage("❌ Upload timeout - please try again", 5000)
     setActiveUploads(count => count - 1)
-  }, 30000) // 30 second timeout
+  }, 60000)
   
   try {
-    // Use the pre-generated filename
-    const PATH = `public/images/${fileName}`
+    // Get Cloudinary config
+    const config = getCloudinaryConfig()
     
-    // Convert file to base64
-    const reader = new FileReader()
-    reader.readAsDataURL(file)
-    
-    reader.onload = async () => {
-      const base64Data = reader.result as string
-      // Remove the data:image/jpeg;base64, prefix
-      const base64Content = base64Data.split(',')[1]
-      
-      // Store image locally instead of uploading immediately
-      imageStore.addPendingImage(fileName, base64Content)
-      
-      // Mark as successful without uploading
-      showMessage("✅ Image ready to publish", 2000)
+    if (!config.cloudName || !config.uploadPreset) {
+      showMessage("❌ Please configure Cloudinary settings first", 5000)
       clearTimeout(uploadTimeout)
       setActiveUploads(count => count - 1)
+      return null
     }
     
-    reader.onerror = () => {
-      showMessage("❌ Error reading image file", 3000)
-      clearTimeout(uploadTimeout)
-      setActiveUploads(count => count - 1)
+    // Create FormData for direct upload to Cloudinary
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('upload_preset', config.uploadPreset)
+    
+    console.log('Uploading directly to Cloudinary:', config.cloudName)
+    console.log('File size:', file.size, 'bytes')
+    
+    // Upload directly to Cloudinary
+    const response = await fetch(
+      `https://api.cloudinary.com/v1_1/${config.cloudName}/image/upload`,
+      {
+        method: 'POST',
+        body: formData
+      }
+    )
+    
+    clearTimeout(uploadTimeout)
+    
+    if (response.ok) {
+      const result = await response.json()
+      console.log('Upload successful:', result.secure_url)
+      showMessage("✅ Image uploaded to Cloudinary!", 3000)
+      
+      // Call the callback to update the product with the Cloudinary URL
+      if (onUploadComplete) {
+        onUploadComplete(category, productId, result.secure_url)
+      }
+      
+      // Return the Cloudinary URL
+      return result.secure_url
+    } else {
+      const errorText = await response.text()
+      console.error('Cloudinary upload failed:', errorText)
+      showMessage("❌ Upload failed", 5000)
     }
   } catch (error) {
-    console.error('Image upload error:', error)
+    console.error('Upload error:', error)
     showMessage("❌ Error uploading image", 3000)
+    clearTimeout(uploadTimeout)
+  } finally {
     setActiveUploads(count => count - 1)
   }
+  
+  return null
 }
 
-// Process gallery image upload
+// Process gallery image upload to Cloudinary
 export const processGalleryImageUpload = async (
   index: number, 
   file: File, 
   fileName: string,
-  callbacks: UploadCallbacks
+  callbacks: UploadCallbacks & {
+    onUploadComplete?: (index: number, cloudinaryUrl: string) => void
+  }
 ) => {
-  const { showMessage, setActiveUploads } = callbacks
+  const { showMessage, setActiveUploads, onUploadComplete } = callbacks
   
   setActiveUploads(count => count + 1)
+  showMessage("📤 Uploading gallery image to Cloudinary...")
   
-  // Set a timeout to prevent infinite loading
   const uploadTimeout = setTimeout(() => {
     showMessage("❌ Upload timeout - please try again", 5000)
     setActiveUploads(count => count - 1)
-  }, 30000) // 30 second timeout
+  }, 60000)
   
   try {
-    // Use the pre-generated filename
-    const PATH = `public/images/${fileName}`
+    const config = getCloudinaryConfig()
     
-    // Convert file to base64
-    const reader = new FileReader()
-    reader.readAsDataURL(file)
-    
-    reader.onload = async () => {
-      try {
-        const base64Data = reader.result as string
-        const base64Content = base64Data.split(',')[1]
-        
-        // Store image locally instead of uploading immediately
-        imageStore.addPendingImage(fileName, base64Content)
-        
-        // Mark as successful without uploading
-        showMessage("✅ Gallery image ready to publish", 2000)
-        clearTimeout(uploadTimeout)
-        setActiveUploads(count => count - 1)
-      } catch (uploadError) {
-        console.error('Error storing image:', uploadError)
-        showMessage("❌ Error storing image", 3000)
-        clearTimeout(uploadTimeout)
-        setActiveUploads(count => count - 1)
-      }
-    }
-    
-    reader.onerror = () => {
-      console.error('FileReader error')
-      showMessage("❌ Error reading gallery image", 3000)
+    if (!config.cloudName || !config.uploadPreset) {
+      showMessage("❌ Please configure Cloudinary settings first", 5000)
       clearTimeout(uploadTimeout)
       setActiveUploads(count => count - 1)
+      return null
+    }
+    
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('upload_preset', config.uploadPreset)
+    
+    const response = await fetch(
+      `https://api.cloudinary.com/v1_1/${config.cloudName}/image/upload`,
+      {
+        method: 'POST',
+        body: formData
+      }
+    )
+    
+    clearTimeout(uploadTimeout)
+    
+    if (response.ok) {
+      const result = await response.json()
+      console.log('Gallery upload successful:', result.secure_url)
+      showMessage("✅ Gallery image uploaded!", 3000)
+      
+      if (onUploadComplete) {
+        onUploadComplete(index, result.secure_url)
+      }
+      
+      return result.secure_url
+    } else {
+      console.error('Gallery upload failed')
+      showMessage("❌ Upload failed", 5000)
     }
   } catch (error) {
     console.error('Gallery upload error:', error)
     showMessage("❌ Error uploading image", 3000)
+    clearTimeout(uploadTimeout)
+  } finally {
     setActiveUploads(count => count - 1)
   }
+  
+  return null
 }
 
-// Add image to upload queue
+// Handle image upload - matches products editor pattern
 export const handleImageUpload = (
   category: string, 
   productId: number, 
   file: File,
-  callbacks: UploadCallbacks & { 
-    setUploadQueue: (fn: (queue: any[]) => any[]) => void 
-  }
+  callbacks: UploadCallbacks
 ) => {
   const { updateProduct, setCropSettings, setTempPreviews, setUploadQueue } = callbacks
   
-  // Generate the filename immediately
+  // Generate unique filename with timestamp
   const timestamp = Date.now()
-  const fileName = `product-${productId}-${timestamp}.jpg`
-  const githubPath = `/images/${fileName}`
+  const fileExt = file.name.split('.').pop()
+  const fileName = `product-${productId}-${timestamp}.${fileExt}`
   
-  // Update to use GitHub path immediately
+  // Use cloudinary-pending format like products editor
+  const pendingPath = `cloudinary-pending-${fileName}`
+  
+  // Update product with pending path immediately
   if (updateProduct) {
-    updateProduct(category, productId, 'image', githubPath)
+    updateProduct(category, productId, 'image', pendingPath)
   }
   
-  // Reset crop settings for the new image (full image, no crop)
+  // Initialize crop settings for the new image
   setCropSettings(prev => ({
     ...prev,
-    [githubPath]: { scale: 1, x: 50, y: 50 }
+    [pendingPath]: { scale: 1, x: 50, y: 50 }
   }))
   
-  // Create a temporary preview URL
-  const reader = new FileReader()
-  reader.onload = (e) => {
-    if (e.target?.result && setTempPreviews) {
+  // Create temporary preview immediately
+  if (setTempPreviews) {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const tempUrl = e.target?.result as string
       setTempPreviews(prev => ({
         ...prev,
-        [githubPath]: e.target.result as string
+        [pendingPath]: tempUrl
       }))
     }
+    reader.readAsDataURL(file)
   }
-  reader.readAsDataURL(file)
   
-  // Add to queue with the filename
-  setUploadQueue(queue => [...queue, { type: 'product', file, category, productId, fileName }])
+  // Add to upload queue
+  setUploadQueue(prev => [...prev, { 
+    category,
+    productId, 
+    file, 
+    fileName,
+    isGallery: false
+  }])
+  
+  return pendingPath
 }
 
-// Add gallery image to upload queue
+// Handle gallery image upload
 export const handleGalleryImageUpload = (
   index: number, 
-  file: File,
-  pendingGalleryImages: string[],
-  callbacks: UploadCallbacks & { 
-    setUploadQueue: (fn: (queue: any[]) => any[]) => void 
+  file: File, 
+  currentImages: string[],
+  callbacks: UploadCallbacks & {
+    setPendingGalleryImages: (images: string[]) => void
   }
 ) => {
   const { setPendingGalleryImages, setCropSettings, setGalleryTempPreviews, setUploadQueue } = callbacks
   
-  // Generate the filename immediately
   const timestamp = Date.now()
-  const fileName = `gallery-${index}-${timestamp}.jpg`
-  const githubPath = `/images/${fileName}`
+  const fileExt = file.name.split('.').pop()
+  const fileName = `gallery-${index}-${timestamp}.${fileExt}`
   
-  // Update to use GitHub path immediately
-  if (setPendingGalleryImages) {
-    const newImages = [...pendingGalleryImages]
-    newImages[index] = githubPath
-    setPendingGalleryImages(newImages)
-  }
+  const pendingPath = `cloudinary-pending-${fileName}`
   
-  // Reset crop settings for the new image (full image, no crop)
+  // Update gallery images with pending path
+  const newImages = [...currentImages]
+  newImages[index] = pendingPath
+  setPendingGalleryImages(newImages)
+  
+  // Initialize crop settings
   setCropSettings(prev => ({
     ...prev,
-    [githubPath]: { scale: 1, x: 50, y: 50 }
+    [pendingPath]: { scale: 1, x: 50, y: 50 }
   }))
   
-  // Create a temporary preview URL
-  const reader = new FileReader()
-  reader.onload = (e) => {
-    if (e.target?.result && setGalleryTempPreviews) {
+  // Create temporary preview
+  if (setGalleryTempPreviews) {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const tempUrl = e.target?.result as string
       setGalleryTempPreviews(prev => ({
         ...prev,
-        [githubPath]: e.target.result as string
+        [pendingPath]: tempUrl
       }))
     }
+    reader.readAsDataURL(file)
   }
-  reader.readAsDataURL(file)
   
-  // Add to queue with the filename
-  setUploadQueue(queue => [...queue, { type: 'gallery', file, index, fileName }])
+  // Add to upload queue
+  setUploadQueue(prev => [...prev, { 
+    productId: index,
+    file, 
+    fileName,
+    isGallery: true,
+    index
+  }])
+  
+  return pendingPath
 }
